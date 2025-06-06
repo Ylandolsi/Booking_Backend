@@ -1,0 +1,54 @@
+# See https://aka.ms/gitignore for more .NET ignore advice
+
+## Build outputs
+**/bin/
+**/obj/
+**/publish/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/
+
+## Rider
+.idea/
+*.DotSettings.user
+
+## User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+## EF Migrations
+**/*.Snapshot.cs
+
+## Test results / coverage
+TestResults/
+*.TestResults.xml
+coverage/
+*.coverage
+*.coveragexml
+
+## Logs
+*.log
+
+## Docker
+docker-compose.override.yml
+**/.containers/
+
+## OS generated
+.DS_Store
+Thumbs.db
+
+## Seq (local data folder)
+seq-data/
+
+## Secrets
+appsettings.*.Secrets.json
+
+# End of .gitignore

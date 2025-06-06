@@ -1,0 +1,21 @@
+using Domain.Users.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+namespace Infrastructure.Users;
+
+internal sealed class LanguageConfiguration : IEntityTypeConfiguration<Language>
+{
+    public void Configure(EntityTypeBuilder<Language> builder)
+    {
+        builder.HasKey(l => l.Id);
+
+        builder.Property(l => l.Name)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.HasMany(l => l.UserLanguages)
+            .WithOne(ul => ul.Language)
+            .HasForeignKey(ul => ul.LanguageId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
