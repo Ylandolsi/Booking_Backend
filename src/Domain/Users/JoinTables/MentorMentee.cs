@@ -1,6 +1,6 @@
 namespace Domain.Users.JoinTables;
 using Domain.Users.Entities;
-public class UserMentor
+public class MentorMentee
 {
     public Guid MentorId { get; set; }
     public User Mentor { get; set; } = default!;

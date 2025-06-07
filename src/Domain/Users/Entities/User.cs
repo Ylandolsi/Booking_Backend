@@ -83,9 +83,9 @@ public sealed class User : Entity
     public ICollection<Education> Educations { get; private set; } = new List<Education>();
 
 
-    public ICollection<UserMentor> UserMentors { get; private set; } = new List<UserMentor>();
+    public ICollection<MentorMentee> UserMentors { get; private set; } = new List<MentorMentee>();
 
-    public ICollection<UserMentor> UserMentees { get; private set; } = new List<UserMentor>();
+    public ICollection<MentorMentee> UserMentees { get; private set; } = new List<MentorMentee>();
 
     public ICollection<UserSkill> UserSkills { get; private set; } = new HashSet<UserSkill>();
     public ICollection<UserLanguage> UserLanguages { get; private set; } = new List<UserLanguage>();

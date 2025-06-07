@@ -1,13 +1,24 @@
 ﻿using Domain.Todos;
 using Domain.Users;
+using Domain.Users.Entities;
+using Domain.Users.JoinTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Abstractions.Data;
 
 public interface IApplicationDbContext
 {
-    DbSet<User> Users { get; }
-    DbSet<TodoItem> TodoItems { get; }
-
+    // Users Modules : 
+    public DbSet<User> Users { get; set; }
+    public DbSet<Language> Languages { get; set; }
+    public DbSet<Skill> Skills { get; set; }
+    public DbSet<Education> Educations { get; set; }
+    public DbSet<Experience> Experiences { get; set; }
+    // join tables 
+    public DbSet<UserLanguage> UserLanguages { get; set; }
+    public DbSet<UserSkill> UserSkills { get; set; }
+    public DbSet<MentorMentee> UserMentors { get; set; }
+    
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
 }

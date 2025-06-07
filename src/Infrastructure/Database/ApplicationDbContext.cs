@@ -21,8 +21,7 @@ public sealed class ApplicationDbContext(
     // join tables 
     public DbSet<UserLanguage> UserLanguages { get; set; }
     public DbSet<UserSkill> UserSkills { get; set; }
-
-    public DbSet<UserMentor> UserMentors { get; set; }
+    public DbSet<MentorMentee> UserMentors { get; set; }
 
     // 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
