@@ -28,3 +28,14 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - 8081:80
+
+  # for local development : papercut sumulates an SMTP server ( without sending emails )
+  # we can view whats happening on port 8080
+  # for production u have to specify the real smtp server
+  papercut:
+    image: changemakerstudiosus/papercut-smtp:latest
+    container_name: papercut
+    ports:
+      - 8080:80
+      - 25:25
+      # 25 for local smtp server

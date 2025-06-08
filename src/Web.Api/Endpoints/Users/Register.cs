@@ -6,22 +6,28 @@ using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users;
 
-internal sealed class Register : IEndpoint
+internal sealed class Register() : IEndpoint
 {
-    public sealed record Request(string Email, string FirstName, string LastName, string Password);
 
-    public void MapEndpoint(IEndpointRouteBuilder app)
+    public sealed record Request(string FirstName, string LastName, string Email,  string Password ,
+                    string ProfilePictureSource , bool isMentor = false ) ;
+
+    public void MapEndpoint(IEndpointRouteBuilder app )
     {
         app.MapPost("users/register", async (
             Request request,
             ICommandHandler<RegisterUserCommand, Guid> handler,
             CancellationToken cancellationToken) =>
         {
+            
             var command = new RegisterUserCommand(
-                request.Email,
                 request.FirstName,
                 request.LastName,
-                request.Password);
+                request.Email,
+                request.Password,
+                request.ProfilePictureSource,
+                request.isMentor
+            );
 
             Result<Guid> result = await handler.Handle(command, cancellationToken);
 

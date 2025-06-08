@@ -20,7 +20,7 @@ public class Result
 
     public bool IsFailure => !IsSuccess;
 
-    public Error Error { get; }
+    public Error Error { get; } // could be Error or ValidationError 
 
     public static Result Success() => new(true, Error.None);
 

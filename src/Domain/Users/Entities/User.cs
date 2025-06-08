@@ -18,7 +18,6 @@ public sealed class User : Entity
 
 
     public static Result<User> Create(
-        Guid id,
         string firstName,
         string lastName,
         string emailValue,
@@ -31,39 +30,46 @@ public sealed class User : Entity
             return Result.Failure<User>(UserErrors.PasswordCannotBeEmpty);
         }
 
-        Name name;
+        List<Error> validationErrors = new List<Error>();
+        Name name = default!;
         try
         {
             name = new Name(firstName, lastName);
         }
         catch (ArgumentException ex)
         {
-            return Result.Failure<User>(Error.Problem("User.InvalidName", ex.Message));
+            validationErrors.Add(Error.Problem("User.InvalidName", ex.Message));
         }
 
-        EmailAdress emailAddress;
+        EmailAdress emailAddress = default!;
         try
         {
             emailAddress = new EmailAdress(emailValue);
         }
         catch (ArgumentException ex)
         {
-            return Result.Failure<User>(Error.Problem("User.InvalidEmail", ex.Message));
+            validationErrors.Add(Error.Problem("User.InvalidEmail", ex.Message));
         }
 
-        ProfilePicture profilePicture;
+        ProfilePicture profilePicture = default!;
         try
         {
             profilePicture = new ProfilePicture(profilePictureSource);
         }
         catch (ArgumentException ex)
         {
-            return Result.Failure<User>(Error.Problem("User.InvalidProfilePicture", ex.Message));
+            validationErrors.Add(Error.Problem("User.InvalidProfilePicture", ex.Message));
+        }
+
+        if (validationErrors.Any())
+        {
+
+            return Result.Failure<User>(new ValidationError(validationErrors.ToArray()!));
         }
 
         var user = new User
         {
-            Id = id == Guid.Empty ? Guid.NewGuid() : id,
+            Id =  Guid.NewGuid() ,
             Name = name,
             PasswordHash = passwordHash,
             ProfilePictureUrl = profilePicture,

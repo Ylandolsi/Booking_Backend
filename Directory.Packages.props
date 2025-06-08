@@ -7,11 +7,12 @@
     <!-- Static code analysis -->
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="10.9.0.115408" />
     <!-- Application -->
-    <PackageVersion Include="Scrutor" Version="6.0.1" />
+    <PackageVersion Include="Scrutor" Version="6.1.0" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
     <PackageVersion Include="Serilog" Version="4.2.0" />
+    <PackageVersion Include="FluentEmail.Smtp" Version="3.0.2"/>
     <!-- Infrastructure -->
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />

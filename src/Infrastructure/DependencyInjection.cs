@@ -83,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<IUserContext, UserContext>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
+        services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
 
         return services;
     }

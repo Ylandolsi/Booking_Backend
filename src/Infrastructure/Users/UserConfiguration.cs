@@ -1,4 +1,5 @@
 ﻿using Domain.Users.Entities;
+using Domain.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -32,6 +33,8 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasMaxLength(256)
                 .IsRequired();
         });
+
+        builder.ComplexProperty(u => u.Status, status => { }); 
 
 
         builder.HasMany(u => u.UserLanguages)

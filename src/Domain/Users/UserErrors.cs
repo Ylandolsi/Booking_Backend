@@ -25,6 +25,17 @@ public static class UserErrors
         "Users.PasswordCannotBeEmpty",
         "The password cannot be empty. Please provide a valid password.");
 
+
+    public static Error EmailVerificationFailed(string message) => Error.Failure(
+        "Users.EmailVerificationFailed",
+        $"Email verification failed: {message}");
+       
+    public static Error UserRegistrationFailed(string message) => Error.Failure(
+        "Users.UserRegistrationFailed",
+        $"User registration failed: {message}");
+
+    
+
     public static Error InvalideX(string x)
         => Error.Failure(
             $"Users.Invalide{x}",

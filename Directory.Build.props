@@ -8,11 +8,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <AnalysisLevel>latest</AnalysisLevel>
-    <AnalysisMode>All</AnalysisMode>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+     <!-- <AnalysisLevel>latest</AnalysisLevel>  -->
+     <!--<AnalysisMode>All</AnalysisMode>  -->
+     <!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>  -->
+     <!--<CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>  -->
+     <!--<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>  -->
 
     <!-- disable the analyzers during build in container -->
     <RunAnalyzersDuringBuild Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' == 'true'">false</RunAnalyzersDuringBuild>

@@ -2,41 +2,40 @@ using SharedKernel;
 
 namespace Domain.Users.ValueObjects;
 
-public class ProfilePicture
+public class ProfilePicture : ValueObject
 {
     const string DefaultProfilePictureUrl = "https://www.pngarts.com/files/10/Default-Profile-Picture-PNG-Download-Image.png";
     public string ProfilePictureLink { get; private set; }
 
-    public ProfilePicture(string pLink = "")
+    public ProfilePicture(string profilePictureLink = "")
     
     {
-        if (string.IsNullOrWhiteSpace(pLink))
+        if (string.IsNullOrWhiteSpace(profilePictureLink))
         {
-            ProfilePictureLink = DefaultProfilePictureUrl;
-            return;
+            profilePictureLink = DefaultProfilePictureUrl;
         }
 
-        if (!IsValidUrl(pLink) )
+        if (!IsValidUrl(profilePictureLink!) )
         {
-            throw new ArgumentException("Invalid profile picture URL", nameof(pLink) );
+            throw new ArgumentException("Invalid profile picture URL", nameof(profilePictureLink) );
         }
 
-        ProfilePictureLink = pLink ;
+        ProfilePictureLink = profilePictureLink ;
     }
 
 
-    public Result UpdateProfilePicture(string pLink)
+    public Result UpdateProfilePicture(string profilePictureLink)
     {
-        if (string.IsNullOrEmpty(pLink))
+        if (string.IsNullOrEmpty(profilePictureLink))
         {
             return Result.Failure(ProfilePictureErrors.InvalidProfilePictureUrl);
         }
-        if (!IsValidUrl(pLink))
+        if (!IsValidUrl(profilePictureLink))
         {
             return Result.Failure(ProfilePictureErrors.InvalidProfilePictureUrl);
         }
 
-        ProfilePictureLink = pLink;
+        ProfilePictureLink = profilePictureLink;
         return Result.Success();
     }
     
@@ -47,12 +46,16 @@ public class ProfilePicture
         return Result.Success();
     }
 
-    private static bool IsValidUrl(string pLink)
+    private static bool IsValidUrl(string profilePictureLink)
     {
-        return Uri.TryCreate(pLink, UriKind.Absolute, out var result)
+        return Uri.TryCreate(profilePictureLink, UriKind.Absolute, out var result)
                && (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
-
+    
+    protected override IEnumerable<Object> GetEqualityComponents()
+    {
+        yield return ProfilePictureLink;
+    }
 }
 
 
