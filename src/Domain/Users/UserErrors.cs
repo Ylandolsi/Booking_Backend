@@ -25,6 +25,17 @@ public static class UserErrors
         "Users.PasswordCannotBeEmpty",
         "The password cannot be empty. Please provide a valid password.");
 
+    public static readonly Error IncorrectPassword = Error.Failure(
+        "Users.IncorrectPassword",
+        "The provided password is incorrect. Please try again.");
+
+    public static readonly Error IncorrectEmailOrPassword = Error.Problem(
+        "Users.IncorrectEmailOrPassword",
+        "The provided email or password is incorrect. Please try again.");
+
+    public static readonly Error TokenGenerationFailed = Error.Failure(
+        "Users.TokenGenerationFailed",
+        "Failed to generate a token for the user. Please try again later.");
 
     public static Error EmailVerificationFailed(string message) => Error.Failure(
         "Users.EmailVerificationFailed",
@@ -37,7 +48,7 @@ public static class UserErrors
     
 
     public static Error InvalideX(string x)
-        => Error.Failure(
+        => Error.Problem(
             $"Users.Invalide{x}",
             $"The provided value for {x} is invalid. Please provide a valid {x}.");
     

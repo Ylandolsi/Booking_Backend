@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Behaviors;
 using Application.Abstractions.Messaging;
+using Application.Users.Shared;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SharedKernel;
@@ -39,7 +40,7 @@ public static class DependencyInjection
 
         // register all validators from the current assembly
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
-
+        
         return services;
     }
 }

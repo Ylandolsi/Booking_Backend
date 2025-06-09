@@ -7,6 +7,10 @@ using Scalar.AspNetCore;
 using Serilog;
 using Web.Api;
 using Web.Api.Extensions;
+using Hangfire;
+using Hangfire.PostgreSql;
+using Hangfire.Console;
+using Infrastructure.BackgroundJobs; 
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,11 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 builder.Services.AddEmailSender(builder.Configuration); 
+
+
+builder.Services.UseHangFire(builder.Configuration);
+
+
 
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
@@ -43,6 +52,8 @@ app.MapHealthChecks("health", new HealthCheckOptions
 {
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
+
+app.UseHangfireDashboard();
 
 app.UseRequestContextLogging();
 

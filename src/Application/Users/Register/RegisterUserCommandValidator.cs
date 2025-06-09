@@ -12,3 +12,5 @@ internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterU
         RuleFor(c => c.Password).NotEmpty().MinimumLength(8);
     }
 }
+
+

@@ -5,8 +5,7 @@ using Web.Api.Extensions;
 using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users;
-
-internal sealed class Register() : IEndpoint
+internal sealed class Register : IEndpoint
 {
 
     public sealed record Request(string FirstName, string LastName, string Email,  string Password ,

@@ -9,7 +9,7 @@ using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users;
 
-internal sealed class VerifyEmail : IEndpoint
+internal sealed class VerifyRegistration : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {

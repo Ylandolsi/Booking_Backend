@@ -21,8 +21,16 @@ internal sealed class TokenProvider(IConfiguration configuration) : ITokenProvid
         {
             Subject = new ClaimsIdentity(
             [
+                // dont add too claims 
+                // because it will increase the size of the token
+                // && 
+                // should be safe (not sensitive data)
+                // && 
+                // if one claims changes frequently , 
+                // the client would only get the updated information when the token is refreshed
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.EmailAddress.Email)
+                new Claim(JwtRegisteredClaimNames.Email, user.EmailAddress.Email),
+                new Claim("IsEmailVerified", user.EmailAddress.Verified.ToString())
             ]),
             Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
             SigningCredentials = credentials,

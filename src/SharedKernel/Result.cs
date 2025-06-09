@@ -51,10 +51,8 @@ public class Result<TValue> : Result
     // Instead of writing:
     // Result<string> result = Result.Success("hello");
 
-    // You can write:
     // Result<string> result = "hello";  // Implicit conversion
 
-    // Also works with null values:
     // Result<string> result = null;  // Becomes Failure with Error.NullValue
 
 
@@ -65,10 +63,3 @@ public class Result<TValue> : Result
         new(default, false, error);
 }
 
-/*
-public Result<User> GetUser()
-{
-    var user = FindUser();
-    return user;  // Automatically wraps in Success or Failure
-}
-*/ 

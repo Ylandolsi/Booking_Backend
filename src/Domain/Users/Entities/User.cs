@@ -9,7 +9,7 @@ public sealed class User : Entity
     public Guid Id { get; private set; } = Guid.NewGuid();
     public Name Name { get; private set; } = default!;
     public string PasswordHash { get; private set; } = default!;
-    public Status Status { get; set; } = default!;
+    public Status Status { get; private set; } = default!;
 
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
     public EmailAdress EmailAddress { get; private set; } = default!;
@@ -69,7 +69,6 @@ public sealed class User : Entity
 
         var user = new User
         {
-            Id =  Guid.NewGuid() ,
             Name = name,
             PasswordHash = passwordHash,
             ProfilePictureUrl = profilePicture,
@@ -77,9 +76,6 @@ public sealed class User : Entity
             EmailAddress = emailAddress
         };
 
-
-
-        // user.Raise(new UserRegisteredDomainEvent(user.Id));
 
         return Result.Success(user);
     }

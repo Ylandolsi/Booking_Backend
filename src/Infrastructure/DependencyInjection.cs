@@ -1,8 +1,11 @@
 ﻿using System.Text;
 using Application.Abstractions.Authentication;
+using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.Data;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
+using Infrastructure.BackgroundJobs;
+using Infrastructure.BackgroundJobs.SendingVerificationEmail;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
 using Infrastructure.Time;
@@ -27,7 +30,8 @@ public static class DependencyInjection
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
-            .AddAuthorizationInternal();
+            .AddAuthorizationInternal()
+            .AddBackgroundJobs();
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
@@ -100,4 +104,15 @@ public static class DependencyInjection
 
         return services;
     }
+
+    public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
+    {
+        services.AddScoped<IRegisterVerificationJob,RegisterRegisterVerificationJob>();
+        services.AddScoped<IRegisterVerificationTrigger, RegisterRegisterVerificationTrigger>();
+        
+        return services;
+
+    } 
+
+
 }
