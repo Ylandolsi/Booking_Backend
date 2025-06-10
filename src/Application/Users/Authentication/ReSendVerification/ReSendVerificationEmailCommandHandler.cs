@@ -10,6 +10,17 @@ using Domain.Users.Entities;
 
 namespace Application.Users.ReSendVerification;
 
+
+public static class EmailVerificationErrors
+{
+
+    public static Error AlreadyVerified(string email) =>
+        Error.Problem("Email.AlreadyVerified", $"The email address {email} is already verified.");
+    public static Error VerificationFailed(string message) =>
+        Error.Failure("Email.VerificationFailed", message);
+
+    public static Error SendingEmailFailed => Error.Failure("Email.Send.Failed", "Failed to enqueue verification email.")
+}
 internal sealed class ReSendVerificationEmailCommandHandler(
     IApplicationDbContext context,
     ILogger<ReSendVerificationEmailCommandHandler> logger,
@@ -36,7 +47,7 @@ internal sealed class ReSendVerificationEmailCommandHandler(
         if (user.EmailAddress.Verified)
         {
             logger.LogInformation("User with email {Email} already verified", user.EmailAddress.Email);
-            return Result.Failure<bool>(Error.Problem("Email.AlreadyVerified", "The email address is already verified."));
+            return Result.Failure<bool>(EmailVerificationErrors.AlreadyVerified(user.EmailAddress.Email);
         }
 
         EmailVerificationToken? emailVerificationToken = await context.EmailVerificationTokens
@@ -62,7 +73,7 @@ internal sealed class ReSendVerificationEmailCommandHandler(
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex, "Failed to save new email verification token for user ID: {UserId}", user.Id);
-                return Result.Failure<bool>(UserErrors.UserRegistrationFailed("Failed to save new verification token."));
+                return Result.Failure<bool>(EmailVerificationErrors.VerificationFailed("Failed to save new verification token."));
             }
         }
         else
@@ -87,7 +98,7 @@ internal sealed class ReSendVerificationEmailCommandHandler(
         {
             logger.LogError(ex, "Failed to enqueue re-send verification email to {UserEmail}", user.EmailAddress.Email);
             
-            return Result.Failure<bool>(Error.Failure("Email.Send.Failed", "Failed to enqueue verification email."));
+            return Result.Failure<bool>(EmailVerificationErrors.SendingEmailFailed) ;
         }
 
         return Result.Success(true);

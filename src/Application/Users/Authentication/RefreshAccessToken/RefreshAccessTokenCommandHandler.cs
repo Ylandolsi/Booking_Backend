@@ -11,6 +11,19 @@ using SharedKernel;
 
 namespace Application.Users.RefreshAccessToken;
 
+
+public static class RefreshTokenErrors{
+
+    public static Error Unauthorized => Error.Unauthorized("RefreshToken.Invalid", "The provided refresh token is invalid or does not exist.");
+
+    public static Error Expired => 
+        Error.Unauthorized("RefreshToken.Expired", "The provided refresh token has expired.");
+
+    public static Error Revoked => 
+        Error.Unauthorized("RefreshToken.Expired", "The provided refresh token has expired.");
+
+    
+}
 public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext applicationDbContext , 
                                                      ITokenProvider tokenProvider , 
                                                      ITokenWriterCookies tokenWriterCookies,
@@ -24,8 +37,7 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
         var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken); 
         if (refreshToken == null)
         {
-            return Result.Failure<bool>(
-                Error.Unauthorized("RefreshToken.Invalid", "The provided refresh token is invalid or does not exist."));
+            return Result.Failure<bool>(RefreshTokenErrors.Unauthorized);
         }
 
         if (refreshToken.IsRevoked)
@@ -48,14 +60,12 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
                 await applicationDbContext.SaveChangesAsync(cancellationToken); 
                 logger.LogInformation("Successfully invalidated {Count} other active refresh token(s) for User ID: {UserId}.", otherActiveTokens.Count, refreshToken.UserId);
             }
-            return Result.Failure<bool>(
-                Error.Unauthorized("RefreshToken.Revoked", "The provided refresh token has been revoked."));
+            return Result.Failure<bool>(RefreshTokenErrors.Revoked);
         }
 
         if (refreshToken.IsExpired)
         {
-            return Result.Failure<bool>(
-                Error.Unauthorized("RefreshToken.Expired", "The provided refresh token has expired."));
+            return Result.Failure<bool>(RefreshTokenErrors.Expired);
         }
 
         string jwtAccessToken = tokenProvider.GenrateJwtToken(refreshToken.User);
@@ -74,8 +84,7 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure<bool>(
-                Error.Failure("Database.SaveChanges", "Failed to save refresh token."));
+            return Result.Failure<bool>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
         }
 
         tokenWriterCookies.WriteRefreshTokenAsHttpOnlyCookie(jwtRefreshToken);

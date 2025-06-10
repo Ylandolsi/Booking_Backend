@@ -63,7 +63,7 @@ public sealed class LoginUserCommandHandler
         catch (DbUpdateException ex)
         {
             logger.LogError(ex, "Failed to save refresh token for user {UserId}", user.Id);
-            return Result.Failure<Guid>(Error.Failure("Database.SaveChanges", "Failed to save refresh token."));
+            return Result.Failure<Guid>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
         }
 
 

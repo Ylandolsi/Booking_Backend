@@ -76,6 +76,8 @@ public class AuthenticationTest : BaseIntegrationTest
         Assert.True(sentEmail.Data.IsHtml);
     }
 
+
+
     [Fact]
     public async Task ReSendVerificationEmail_ShouldSendNewVerificationEmail_WhenUserNotVerified()
     {
