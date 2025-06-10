@@ -6,6 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+		<PackageReference Include="FluentEmail.Smtp" />
         <PackageReference Include="Bogus" />
         <PackageReference Include="Shouldly" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing"/>

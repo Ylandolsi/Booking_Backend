@@ -1,6 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <Compile Remove="Users\Shared\**" />
+    <EmbeddedResource Remove="Users\Shared\**" />
+    <None Remove="Users\Shared\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Hangfire.AspNetCore" />
     <PackageReference Include="Hangfire.Console" />
     <PackageReference Include="Hangfire.PostgreSql" />
@@ -21,10 +27,6 @@
   <ItemGroup>
 	<InternalsVisibleTo Include="Application.UnitTests" />
     <InternalsVisibleTo Include="ArchitectureTests" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Users\Shared\" />
   </ItemGroup>
 
 </Project>

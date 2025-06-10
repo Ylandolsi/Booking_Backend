@@ -21,8 +21,8 @@ internal sealed class ReSendVerificationEmailCommandHandler(
     {
         logger.LogInformation("Handling ReSendVerificationEmailCommand for user ID: {UserId}", command.UserId);
 
+
         User? user = await context.Users
-            .Include(u => u.EmailAddress) 
             .FirstOrDefaultAsync(u => u.Id == command.UserId, cancellationToken);
 
         if (user == null)

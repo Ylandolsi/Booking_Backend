@@ -27,7 +27,7 @@ builder.Services
 builder.Services.AddEmailSender(builder.Configuration); 
 
 
-builder.Services.UseHangFire(builder.Configuration);
+ builder.Services.UseHangFire(builder.Configuration);
 
 
 

@@ -5,9 +5,17 @@ services:
     build:
       context: .
       dockerfile: src/Web.Api/Dockerfile
+    depends_on:
+      postgres : 
+        condition: service_healthy
+        restart: true
+      seq :
+        condition: service_started
+        restart: true
     ports:
       - 5000:8080
       - 5001:8081
+
 
   postgres:
     image: postgres:17

@@ -59,9 +59,17 @@ public static class DependencyInjection
 
     private static IServiceCollection AddHealthChecks(this IServiceCollection services, IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("Database");
+
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            // Consider logging this or throwing a more specific exception
+            throw new InvalidOperationException("Database connection string is not configured.");
+        }
+
         services
             .AddHealthChecks()
-            .AddNpgSql(configuration.GetConnectionString("Database")!);
+            .AddNpgSql(connectionString);
 
         return services;
     }
