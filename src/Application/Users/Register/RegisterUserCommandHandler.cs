@@ -15,7 +15,7 @@ namespace Application.Users.Register;
 internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
             IPasswordHasher passwordHasher , 
             IEmailVerificationLinkFactory emailVerificationLinkFactory , 
-            IRegisterVerificationTrigger registerVerificationTrigger,
+            IRegisterVerificationJob registerVerificationJob,
             ILogger<RegisterUserCommandHandler> logger)
     : ICommandHandler<RegisterUserCommand, Guid>
 {
@@ -67,7 +67,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
 
         try
         {
-            await registerVerificationTrigger.Send(
+            await registerVerificationJob.Send(
                 userEmail,
                 verificationEmailLink
             );

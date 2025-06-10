@@ -14,7 +14,7 @@ internal sealed class ReSendVerificationEmailCommandHandler(
     IApplicationDbContext context,
     ILogger<ReSendVerificationEmailCommandHandler> logger,
     IEmailVerificationLinkFactory emailVerificationLinkFactory,
-    IRegisterVerificationTrigger registerVerificationTrigger) 
+    IRegisterVerificationJob registerVerificationJob) 
     : ICommandHandler<ReSendVerificationEmailCommand, bool>{
 
     public async Task<Result<bool>> Handle(ReSendVerificationEmailCommand command, CancellationToken cancellationToken)
@@ -36,7 +36,7 @@ internal sealed class ReSendVerificationEmailCommandHandler(
         if (user.EmailAddress.Verified)
         {
             logger.LogInformation("User with email {Email} already verified", user.EmailAddress.Email);
-            return Result.Failure<bool>( Error.Problem("Email.AlreadyVerified", "The email address is already verified."));
+            return Result.Failure<bool>(Error.Problem("Email.AlreadyVerified", "The email address is already verified."));
         }
 
         EmailVerificationToken? emailVerificationToken = await context.EmailVerificationTokens
@@ -80,7 +80,7 @@ internal sealed class ReSendVerificationEmailCommandHandler(
 
         try
         {
-            await registerVerificationTrigger.Send(user.EmailAddress.Email, verificationEmailLink);
+            await registerVerificationJob.Send(user.EmailAddress.Email, verificationEmailLink);
             logger.LogInformation("Verification email re-send job enqueued for {Email}", user.EmailAddress.Email);
         }
         catch (Exception ex)

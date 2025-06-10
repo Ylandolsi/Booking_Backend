@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using System.Text.Json;
 using FluentEmail.Core.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace IntegrationsTests.Abstractions;
 
@@ -74,8 +75,8 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, testUserId.ToString()),
-            new(ClaimTypes.Email, testEmail),
+            new(JwtRegisteredClaimNames.Sub, testUserId.ToString()),
+            new(JwtRegisteredClaimNames.Email, testEmail),
             new("IsEmailVerified", isEmailVerified.ToString().ToLowerInvariant())
         };
 

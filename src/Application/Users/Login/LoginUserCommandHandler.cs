@@ -1,22 +1,28 @@
 using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
+using Application.Options;
 using Domain.Users;
 using Domain.Users.Entities;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SharedKernel;
 
 namespace Application.Users.Login;
 
 public sealed class LoginUserCommandHandler
                 (IApplicationDbContext context,
-                IPasswordHasher passwordHasher,
-                ITokenProvider tokenProvider,
-                ILogger<LoginUserCommandHandler> logger) : ICommandHandler<LoginUserCommand, string>
+                 IPasswordHasher passwordHasher,
+                 ITokenProvider tokenProvider,
+                 ITokenWriterCookies tokenWriterCookies,
+                 IOptions<JwtOptions> jwtOptions,
+                 ILogger<LoginUserCommandHandler> logger) : ICommandHandler<LoginUserCommand, Guid> 
 {
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value; 
 
-    public async Task<Result<string>> Handle(LoginUserCommand command,
+    public async Task<Result<Guid>> Handle(LoginUserCommand command, 
                          CancellationToken cancellationToken = default)
     {
         // check if email exists :
@@ -25,24 +31,48 @@ public sealed class LoginUserCommandHandler
 
         if (user is null || !passwordHasher.Verify(command.Password, user.PasswordHash))
         {
-            // group them together for better security ( to avoid timing attacks )
-            // and to avoid leaking information about whether the email exists or not
             logger.LogWarning("Login attempt failed for email : {Email}", command.Email);
-            return Result.Failure<string>(UserErrors.IncorrectEmailOrPassword);
+            return Result.Failure<Guid>(UserErrors.IncorrectEmailOrPassword);
         }
 
-
-        // generate JWT token for the user :
-        string? token = tokenProvider.Create(user);
-        if (token is null)
+        string accessToken = tokenProvider.GenrateJwtToken(user);
+        if (string.IsNullOrEmpty(accessToken))
         {
-            logger.LogError("Failed to generate token for user with email: {Email}", command.Email);
-            return Result.Failure<string>(UserErrors.TokenGenerationFailed);
+            logger.LogError("Failed to generate access token for user with email: {Email}", command.Email);
+            return Result.Failure<Guid>(UserErrors.TokenGenerationFailed);
         }
 
-        logger.LogInformation("User {Email} logged in successfully", command.Email);
-        return token;  // automatically wrapped in Result<string> by the Result type 
+        string refreshTokenString = tokenProvider.GenerateRefreshToken();
+        if (string.IsNullOrEmpty(refreshTokenString))
+        {
+            logger.LogError("Failed to generate refresh token for user with email: {Email}", command.Email);
+            return Result.Failure<Guid>(UserErrors.TokenGenerationFailed);
+        }
 
+       
+        var refreshTokenEntity = new RefreshToken(
+            refreshTokenString,
+            user.Id,
+            DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays));
+
+        context.RefreshTokens.Add(refreshTokenEntity);
+        try
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to save refresh token for user {UserId}", user.Id);
+            return Result.Failure<Guid>(Error.Failure("Database.SaveChanges", "Failed to save refresh token."));
+        }
+
+
+        logger.LogInformation("User {Email} logged in successfully. Refresh token generated and saved.", command.Email);
+
+        tokenWriterCookies.WriteAccessTokenAsHttpOnlyCookie(accessToken);
+        tokenWriterCookies.WriteRefreshTokenAsHttpOnlyCookie(refreshTokenString);
+
+
+        return Result.Success(user.Id);
     }
-
 }

@@ -14,7 +14,7 @@ public class CapturingSender : ISender
         SentEmails.Add(email);
         return new SendResponse { MessageId = Guid.NewGuid().ToString() };
     }
-
+    
     public Task<SendResponse> SendAsync(IFluentEmail email, CancellationToken? token = null)
     {
         SentEmails.Add(email);

@@ -25,7 +25,7 @@ internal sealed class PermissionAuthorizationHandler(IServiceScopeFactory servic
         PermissionProvider permissionProvider = scope.ServiceProvider.GetRequiredService<PermissionProvider>();
 
         // extension method to get user id from claims  
-        Guid userId = context.User.GetUserId();
+        Guid userId = context.User.GetUserId() ?? throw new Exception("IdUser Claim doesnt exists"  );
 
         HashSet<string> permissions = await permissionProvider.GetForUserIdAsync(userId);
 

@@ -4,12 +4,22 @@ namespace Infrastructure.Authentication;
 
 internal static class ClaimsPrincipalExtensions
 {
-    public static Guid GetUserId(this ClaimsPrincipal? principal)
+    public static Guid? GetUserId(this ClaimsPrincipal? principal)
     {
-        string? userId = principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = principal?.FindFirstValue(ClaimsIdentifiers.UserId);
 
         return Guid.TryParse(userId, out Guid parsedUserId) ?
             parsedUserId :
-            throw new ApplicationException("User id is unavailable");
+            null;
     }
+
+    public static bool? IsEmailVerified(this ClaimsPrincipal? principal)
+    {
+        string? isEmailVerified = principal?.FindFirstValue(ClaimsIdentifiers.IsEmailVerified);
+        return bool.TryParse(isEmailVerified, out bool parsedIsEmailVerified) ?
+            parsedIsEmailVerified :
+            null ;
+
+    }
+
 }

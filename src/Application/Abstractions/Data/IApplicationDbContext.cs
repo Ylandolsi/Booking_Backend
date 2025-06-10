@@ -15,6 +15,7 @@ public interface IApplicationDbContext
     public DbSet<Education> Educations { get; set; }
     public DbSet<Experience> Experiences { get; set; }
     public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     // join tables 
     public DbSet<UserLanguage> UserLanguages { get; set; }
     public DbSet<UserSkill> UserSkills { get; set; }

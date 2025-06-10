@@ -21,6 +21,11 @@ public class RegisterRegisterVerificationJob : IRegisterVerificationJob
         _fluentEmail = fluentEmail;
     }
 
+    public async Task Send(string userEmail, string verificationLink)
+    {
+        await SendVerificationEmailAsync(userEmail, verificationLink, null);
+    }
+
     [DisplayName("Send Verification Email to {0}")]
     [AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task SendVerificationEmailAsync(

@@ -2,7 +2,7 @@ using Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Users;
+namespace Infrastructure.Users.Entities;
 
 internal sealed class EducationConfiguration : IEntityTypeConfiguration<Education>
 {

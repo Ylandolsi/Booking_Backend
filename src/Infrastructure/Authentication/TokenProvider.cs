@@ -1,18 +1,22 @@
-﻿using System.Security.Claims;
-using System.Text;
-using Application.Abstractions.Authentication;
+﻿using Application.Abstractions.Authentication;
+using Application.Options;
 using Domain.Users.Entities;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Infrastructure.Authentication;
-
-internal sealed class TokenProvider(IConfiguration configuration) : ITokenProvider
+internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenProvider
 {
-    public string Create(User user)
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value; 
+
+    public string GenrateJwtToken(User user)
     {
-        string secretKey = configuration["Jwt:Secret"]!;
+        string secretKey = _jwtOptions.Secret ?? throw new InvalidOperationException("Secret key is not configured in JWT options.");
+
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -28,14 +32,14 @@ internal sealed class TokenProvider(IConfiguration configuration) : ITokenProvid
                 // && 
                 // if one claims changes frequently , 
                 // the client would only get the updated information when the token is refreshed
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.EmailAddress.Email),
-                new Claim("IsEmailVerified", user.EmailAddress.Verified.ToString())
+                new Claim(ClaimsIdentifiers.UserId, user.Id.ToString()),
+                new Claim(ClaimsIdentifiers.Email, user.EmailAddress.Email),
+                new Claim(ClaimsIdentifiers.IsEmailVerified, user.EmailAddress.Verified.ToString())
             ]),
-            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes( _jwtOptions.ExpirationInMinutes  ),
             SigningCredentials = credentials,
-            Issuer = configuration["Jwt:Issuer"],
-            Audience = configuration["Jwt:Audience"]
+            Issuer = _jwtOptions.Issuer ?? throw new InvalidOperationException("Issuer is not configuterd in JWT ") ,
+            Audience = _jwtOptions.Audience ?? throw new InvalidOperationException("Audience is not configuterd in JWT "),
         };
 
         var handler = new JsonWebTokenHandler();
@@ -43,5 +47,13 @@ internal sealed class TokenProvider(IConfiguration configuration) : ITokenProvid
         string token = handler.CreateToken(tokenDescriptor);
 
         return token;
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

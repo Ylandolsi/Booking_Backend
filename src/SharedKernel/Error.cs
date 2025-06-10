@@ -21,17 +21,18 @@ public record Error
         Type = type;
     }
 
-
-
-    public static Error Failure(string code, string description) =>
+    public static Error Failure(string code, string description) => // 400 badrequest
         new(code, description, ErrorType.Failure);
-
-    public static Error NotFound(string code, string description) =>
-        new(code, description, ErrorType.NotFound);
-
     public static Error Problem(string code, string description) => // 400 
         new(code, description, ErrorType.Problem);
 
-    public static Error Conflict(string code, string description) =>
+    public static Error NotFound(string code, string description) => // 404 
+        new(code, description, ErrorType.NotFound);
+
+
+    public static Error Conflict(string code, string description) => // 409
         new(code, description, ErrorType.Conflict);
+
+    public static Error Unauthorized(string code, string description) => // 401 
+        new(code, description, ErrorType.Unauthorized);
 }

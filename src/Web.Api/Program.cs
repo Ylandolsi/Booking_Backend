@@ -10,7 +10,8 @@ using Web.Api.Extensions;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Hangfire.Console;
-using Infrastructure.BackgroundJobs; 
+using Infrastructure.BackgroundJobs;
+using Web.Api.RecurringJobs;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -61,12 +62,12 @@ app.UseSerilogRequestLogging();
 
 app.UseExceptionHandler();
 
+RecurringJobs.UseTokenCleanup();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
-// REMARK: If you want to use Controllers, you'll need this.
-app.MapControllers();
 
 await app.RunAsync();
 

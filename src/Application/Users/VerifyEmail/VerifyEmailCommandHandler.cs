@@ -1,3 +1,4 @@
+using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Domain.Users;
@@ -7,7 +8,11 @@ using SharedKernel;
 
 namespace Application.Users.VerifyEmail;
 
-public class VerifyEmailCommandHandler(IApplicationDbContext context , ILogger<VerifyEmailCommandHandler> logger ) : ICommandHandler<VerifyEmailCommand , bool >
+public class VerifyEmailCommandHandler(
+    IApplicationDbContext context,
+    ILogger<VerifyEmailCommandHandler> logger,
+    ITokenProvider tokenProvider, 
+    ITokenWriterCookies tokenWriterCookies) : ICommandHandler<VerifyEmailCommand, bool>
 {
     public async Task<Result<bool>> Handle(VerifyEmailCommand command, CancellationToken cancellationToken = default)
     {
@@ -48,7 +53,14 @@ public class VerifyEmailCommandHandler(IApplicationDbContext context , ILogger<V
             logger.LogError(ex, "Failed to verify email for user ID: {UserId}", token.User.Id);
             return Result.Failure<bool>(UserErrors.EmailVerificationFailed(ex.Message));
         }
+
+        logger.LogInformation("Email address {Email} verified successfully for user ID: {UserId}", token.User.EmailAddress.Email, token.User.Id);
         
+        // update the JWTaccesstoken ( EmailVerified Claim now ) 
+        string updatedJwtAccessToken = tokenProvider.GenrateJwtToken(token.User);
+        tokenWriterCookies.WriteAccessTokenAsHttpOnlyCookie(updatedJwtAccessToken);
+        logger.LogInformation("Updated JWT access token for user ID: {UserId}", token.User.Id);
+
         return Result.Success<bool>(true);
     }
     

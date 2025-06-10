@@ -1,80 +1,137 @@
-﻿using IntegrationsTests.Abstractions;
+﻿using Application.Abstractions.Messaging;
+using Application.Users.Register;
+using FluentEmail.Core;
+using FluentEmail.Core.Models;
+using IntegrationsTests.Abstractions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection; 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Xunit;
-using Application.Users.Register;
-using Microsoft.Extensions.DependencyInjection; 
-using FluentEmail.Core.Models;
 using System.Windows.Input;
-using Application.Abstractions.Messaging;
-using System.Net.Http.Json;
-using FluentEmail.Core;
+using Xunit;
 
 namespace IntegrationsTests;
 
-public class Test : BaseIntegrationTest
-{
-    private readonly HttpClient _authenticatedClient;
-    private readonly Guid _testUserId = Guid.NewGuid();
-    private readonly string _testUserEmail = "test.user@example.com";
 
-    public Test(IntegrationTestsWebAppFactory factory) : base(factory)
+
+
+
+public class AuthenticationTest : BaseIntegrationTest
+{
+    private readonly HttpClient _authenticatedVerifiedUserClient;
+    private readonly Guid _verifiedUserId = Guid.NewGuid();
+    private readonly string _verifiedUserEmail = "verified.user@example.com";
+    private readonly HttpClient _client ;
+
+    public AuthenticationTest(IntegrationTestsWebAppFactory factory) : base(factory)
     {
-        _authenticatedClient = Factory.CreateAuthenticatedClient(userId: _testUserId, email: _testUserEmail, isEmailVerified: true);
+        
+        _authenticatedVerifiedUserClient = Factory.CreateAuthenticatedClient(userId: _verifiedUserId, email: _verifiedUserEmail, isEmailVerified: true);
+
+        _client = Factory.CreateClient(); 
     }
 
     [Fact]
-    public async Task RegisterUser_ShouldSendVerificationEmail()
+    public async Task RegisterUser_ShouldSendVerificationEmail_AndReturnUserId()
     {
-        // Arrange
-        var registerCommand = new RegisterUserCommand(
-            "Test",
-            "User",
-            Fake.Internet.Email(),
-            "Password123!",
-            null,
-            false);
+        EmailCapturer.Clear(); 
 
-        //var sender = _scope.ServiceProvider.GetRequiredService<ICommandHandler<RegisterUserCommand , Guid> >(); // Or IMediator if using MediatR
 
         var registrationPayload = new
-        { /* map registerCommand to your API payload */
-            FirstName = registerCommand.FirstName,
-            LastName = registerCommand.LastName,
-            Email = registerCommand.Email,
-            Password = registerCommand.Password,
-            IsMentor = registerCommand.IsMentor,
+        {
+            FirstName = "Test",
+            LastName = "UserReg",
+            Email = Fake.Internet.Email(),
+            Password = "Password123!",
+            IsMentor = true ,
             ProfilePictureSource = "" 
         };
+
+       
+        HttpResponseMessage response = await _client.PostAsJsonAsync("users/register", registrationPayload);
+        response.EnsureSuccessStatusCode(); 
+
         
-        HttpResponseMessage response = await _authenticatedClient.PostAsJsonAsync("users/register", registrationPayload);
-        response.EnsureSuccessStatusCode();
+        var registrationResponse = await response.Content.ReadFromJsonAsync<Guid>();
 
+        Assert.NotNull(registrationResponse);
+        Assert.NotEqual(Guid.Empty, registrationResponse);
 
-
-        var emailService = _scope.ServiceProvider.GetRequiredService<IFluentEmail>();
-        await emailService
-            .To(registerCommand.Email)
-            .Subject("Test Verification")
-            .Body("Click here: http://test.com/verify?token=testtoken", true)
-            .SendAsync();
-
-
-
-        // This might be needed if Hangfire processing isn't immediate in the test host.
-         await Task.Delay(TimeSpan.FromSeconds(1));
+        
+        await Task.Delay(TimeSpan.FromSeconds(2)); 
 
         Assert.NotEmpty(EmailCapturer.SentEmails);
-        var sentEmail = EmailCapturer.SentEmails.FirstOrDefault(e => e.Data.ToAddresses.Any(a => a.EmailAddress == registerCommand.Email));
+        var sentEmail = EmailCapturer.SentEmails.FirstOrDefault(e => e.Data.ToAddresses.Any(a => a.EmailAddress == registrationPayload.Email));
 
         Assert.NotNull(sentEmail);
-        Assert.Equal("Test Verification", sentEmail.Data.Subject); // Or your actual subject
-        Assert.Contains("http://test.com/verify?token=testtoken", sentEmail.Data.Body); // Check for link presence
+        
+        Assert.Contains("click here", sentEmail.Data.Body, StringComparison.OrdinalIgnoreCase);
         Assert.True(sentEmail.Data.IsHtml);
     }
+
+    [Fact]
+    public async Task ReSendVerificationEmail_ShouldSendNewVerificationEmail_WhenUserNotVerified()
+    {
+        EmailCapturer.Clear();
+
+       
+        var newUserEmail = Fake.Internet.Email();
+        var newUserPassword = "Password123!";
+        var registerPayload = new
+        {
+            FirstName = "Unverified",
+            LastName = "User",
+            Email = newUserEmail,
+            Password = newUserPassword,
+            IsMentor = false,
+            ProfilePictureSource = ""
+        };
+
+        HttpResponseMessage registerResponse = await _client.PostAsJsonAsync("users/register", registerPayload);
+        registerResponse.EnsureSuccessStatusCode();
+        var newUserId = await registerResponse.Content.ReadFromJsonAsync<Guid>();
+
+        EmailCapturer.Clear();
+
+        
+        HttpClient unverifiedUserClient = Factory.CreateAuthenticatedClient(userId: newUserId, email: newUserEmail, isEmailVerified: false);
+
+       
+        HttpResponseMessage resendResponse = await unverifiedUserClient.PostAsync("users/resend-verification-email", null);
+        resendResponse.EnsureSuccessStatusCode(); 
+
+        
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        Assert.NotEmpty(EmailCapturer.SentEmails);
+        
+        var sentEmail = EmailCapturer.SentEmails.FirstOrDefault(e => e.Data.ToAddresses.Any(a => a.EmailAddress == newUserEmail));
+
+        Assert.NotNull(sentEmail);
+        Assert.Contains("click here", sentEmail.Data.Body, StringComparison.OrdinalIgnoreCase);
+        Assert.True(sentEmail.Data.IsHtml);
+    }
+
+    [Fact]
+    public async Task ReSendVerificationEmail_ShouldReturnError_WhenUserAlreadyVerified()
+    {
+        EmailCapturer.Clear();
+
+        
+        HttpResponseMessage response = await _authenticatedVerifiedUserClient.PostAsync("users/resend-verification-email", null);
+
+
+        Assert.False(response.IsSuccessStatusCode);
+
+
+    }
 }
+
+
