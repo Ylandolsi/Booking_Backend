@@ -4,6 +4,7 @@ namespace Domain.Users.Entities;
 
 public class Experience : Entity
 {
+    // TODO : Add industry to Experience 
     public Guid Id { get; private set; } = Guid.NewGuid();
     public string Title { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
@@ -19,20 +20,21 @@ public class Experience : Entity
     
     public static Result<Experience> Create(
         string title,
-        string description,
-        DateTime startDate,
-        string companyName,
         Guid userId,
-        DateTime? endDate = null)
+        string companyName,
+        DateTime startDate,
+        DateTime? endDate ,
+        string? description)
+        
     {
         if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure<Experience>(Error.Problem("Experience.InvalidTitle", "Title cannot be empty"));
+            return Result.Failure<Experience>(ExperienceErrors.InvalidTitle);
 
         if (string.IsNullOrWhiteSpace(companyName))
-            return Result.Failure<Experience>(Error.Problem("Experience.InvalidCompanyName", "Company name cannot be empty"));
+            return Result.Failure<Experience>(ExperienceErrors.InvalidCompanyName);
 
         if (endDate.HasValue && endDate < startDate)
-            return Result.Failure<Experience>(Error.Problem("Experience.InvalidEndDate", "End date cannot be before start date"));
+            return Result.Failure<Experience>(ExperienceErrors.InvalidEndDate);
 
         var experience = new Experience(title, description, companyName, userId,startDate ,  endDate);
         return Result.Success(experience);
@@ -51,13 +53,38 @@ public class Experience : Entity
         IsCurrent = !endDate.HasValue;
     }
 
+    public Result Update(string title, string companyName, DateTime startDate, DateTime? endDate, string? description)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            return Result.Failure(ExperienceErrors.InvalidTitle);
+        if (string.IsNullOrWhiteSpace(companyName))
+            return Result.Failure(ExperienceErrors.InvalidCompanyName);
+        if (endDate.HasValue && endDate < startDate)
+            return Result.Failure(ExperienceErrors.InvalidEndDate);
+        Title = title.Trim();
+        CompanyName = companyName.Trim();
+        StartDate = startDate;
+        EndDate = endDate;
+        Description = description?.Trim() ?? string.Empty;
+        IsCurrent = !endDate.HasValue;
+        return Result.Success();
+    }
+
     public Result Complete(DateTime endDate)
     {
         if (endDate < StartDate)
-            return Result.Failure(Error.Problem("Experience.InvalidEndDate", "End date cannot be before start date"));
+            return Result.Failure(ExperienceErrors.InvalidEndDate);
 
         EndDate = endDate;
         IsCurrent = false;
         return Result.Success();
     }
+}
+
+public static class ExperienceErrors
+{
+    public static readonly Error InvalidTitle = Error.Problem("Experience.InvalidTitle", "Title cannot be empty");
+    public static readonly Error InvalidCompanyName = Error.Problem("Experience.InvalidCompanyName", "Company name cannot be empty");
+    public static readonly Error InvalidEndDate = Error.Problem("Experience.InvalidEndDate", "End date cannot be before start date");
+    public static readonly Error ExperienceNotFound = Error.NotFound("Experience.NotFound", "Experience not found");
 }

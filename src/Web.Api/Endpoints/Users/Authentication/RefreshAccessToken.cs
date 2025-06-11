@@ -4,9 +4,9 @@ using Web.Api.Extensions;
 using Web.Api.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Application.Abstractions.Authentication;
-using Application.Users.RefreshAccessToken; // Added for HttpRequest
+using Application.Users.RefreshAccessToken;
 
-namespace Web.Api.Endpoints.Users;
+namespace Web.Api.Endpoints.Users.Authentication;
 
 internal sealed class RefreshAccessToken : IEndpoint
 {

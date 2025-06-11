@@ -7,7 +7,7 @@ using Web.Api.Infrastructure;
 
 
 
-namespace Web.Api.Endpoints.Users;
+namespace Web.Api.Endpoints.Users.Authentication;
 
 internal sealed class VerifyRegistration : IEndpoint
 {
