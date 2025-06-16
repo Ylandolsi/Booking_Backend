@@ -35,6 +35,7 @@ internal sealed class DeleteExperience : IEndpoint
 
             return result.Match(Results.Ok, CustomResults.Problem);
         })
+        .RequireAuthorization()
         .WithTags(Tags.Experience);
     }
 }

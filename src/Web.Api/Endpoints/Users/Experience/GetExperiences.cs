@@ -6,7 +6,6 @@ using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users.Experience;
 
-namespace Web.Api.Endpoints.Users.Experience;
 
 internal sealed class GetExperiences : IEndpoint
 {
@@ -22,6 +21,7 @@ internal sealed class GetExperiences : IEndpoint
 
             return result.Match(Results.Ok, CustomResults.Problem);
         })
+        .RequireAuthorization()
         .WithTags(Tags.Experience);
     }
 }

@@ -20,7 +20,7 @@ public sealed class ApplicationDbContext(
     public DbSet<Education> Educations { get; set; }
     public DbSet<Experience> Experiences { get; set; }
     public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }  
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     // join tables 
     public DbSet<UserLanguage> UserLanguages { get; set; }
     public DbSet<UserSkill> UserSkills { get; set; }
@@ -55,19 +55,30 @@ public sealed class ApplicationDbContext(
 
     private async Task PublishDomainEventsAsync()
     {
-        var domainEvents = ChangeTracker
-            .Entries<Entity>()
-            .Select(entry => entry.Entity)
-            .SelectMany(entity =>
-            {
-                List<IDomainEvent> domainEvents = entity.DomainEvents;
-
-                entity.ClearDomainEvents();
-
-                return domainEvents;
-            })
+        // Get entities that implement IEntity
+        var entitiesWithEvents = ChangeTracker
+            .Entries()
+            .Where(e => e.Entity is IEntity)
+            .Select(e => e.Entity as IEntity)
+            .Where(e => e != null)
             .ToList();
 
-        await domainEventsDispatcher.DispatchAsync(domainEvents);
+        var allDomainEventsToDispatch = new List<IDomainEvent>();
+
+        foreach (var entity in entitiesWithEvents)
+        {
+            var eventsFromThisEntity = entity.DomainEvents;
+
+            if (eventsFromThisEntity.Any())
+            {
+                allDomainEventsToDispatch.AddRange(eventsFromThisEntity);
+                entity.ClearDomainEvents();
+            }
+        }
+
+        if (allDomainEventsToDispatch.Any())
+        {
+            await domainEventsDispatcher.DispatchAsync(allDomainEventsToDispatch, CancellationToken.None); // Consider passing the original cancellationToken
+        }
     }
 }

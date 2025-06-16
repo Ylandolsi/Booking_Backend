@@ -6,14 +6,19 @@ public class Status : ValueObject
 {
     public bool IsMentor { get; private set; }
     public bool IsActive { get; private set; }
-    
+
     private Status() { }
 
-    public Status(bool isMentor  )
+    public Status(bool isMentor)
     {
 
         IsMentor = isMentor;
         IsActive = isMentor; 
+    }
+
+    public void BecomeMentor()
+    {
+        IsMentor = true; 
     }
 
 

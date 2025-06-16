@@ -118,8 +118,6 @@ public static class DependencyInjection
                         return Task.CompletedTask;
                     }
                 };
-
-
             });
 
         services.AddHttpContextAccessor();

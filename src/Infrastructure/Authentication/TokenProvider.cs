@@ -34,7 +34,6 @@ internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenPro
                 // the client would only get the updated information when the token is refreshed
                 new Claim(ClaimsIdentifiers.UserId, user.Id.ToString()),
                 new Claim(ClaimsIdentifiers.Email, user.EmailAddress.Email),
-                new Claim(ClaimsIdentifiers.IsEmailVerified, user.EmailAddress.Verified.ToString())
             ]),
             Expires = DateTime.UtcNow.AddMinutes( _jwtOptions.ExpirationInMinutes  ),
             SigningCredentials = credentials,

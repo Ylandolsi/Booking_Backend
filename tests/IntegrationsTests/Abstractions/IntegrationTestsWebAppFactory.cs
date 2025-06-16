@@ -1,17 +1,18 @@
+using DotNet.Testcontainers.Builders;
+using FluentEmail.Core.Interfaces;
 using Infrastructure.Database;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Testcontainers.PostgreSql;
-using Web.Api;
-using Microsoft.AspNetCore.Authentication;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
-using FluentEmail.Core.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
+using Testcontainers.PostgreSql;
+using Web.Api;
 
 namespace IntegrationsTests.Abstractions;
 

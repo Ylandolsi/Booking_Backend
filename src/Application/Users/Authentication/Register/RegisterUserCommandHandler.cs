@@ -12,6 +12,15 @@ using SharedKernel;
 
 namespace Application.Users.Register;
 
+
+public static class RegisterUserErrors
+{
+    public static readonly Error EmailNotUnique = Error.Conflict("Users.EmailNotUnique",
+                                                                 "The provided email is not unique");
+
+    public static Error UserRegistrationFailed(string message) => Error.Failure("Users.UserRegistrationFailed",
+                                                                                $"User registration failed: {message}");
+}
 internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
             IPasswordHasher passwordHasher , 
             IEmailVerificationLinkFactory emailVerificationLinkFactory , 
@@ -25,7 +34,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
         if (await context.Users.AnyAsync(u => u.EmailAddress.Email == command.Email, cancellationToken))
         {
             logger.LogWarning("Attempt to register user with non-unique email: {Email}", command.Email);
-            return Result.Failure<Guid>(UserErrors.EmailNotUnique);
+            return Result.Failure<Guid>(RegisterUserErrors.EmailNotUnique);
         }
 
         logger.LogInformation("Registering user with email: {Email}", command.Email);
@@ -37,8 +46,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
             command.LastName,
             command.Email,
             hashedPassword,
-            command.ProfilePictureSource,
-            command.IsMentor
+            command.ProfilePictureSource
         );
         if (user.IsFailure)
         {
@@ -57,7 +65,7 @@ internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
         catch (DbUpdateException ex)
         {
             logger.LogError(ex, "Failed to register user with email: {Email}", command.Email);
-            return Result.Failure<Guid>(UserErrors.UserRegistrationFailed(ex.Message));
+            return Result.Failure<Guid>(RegisterUserErrors.UserRegistrationFailed(ex.Message));
         }
 
         string verificationEmailLink = emailVerificationLinkFactory.Create(emailVerificationToken);

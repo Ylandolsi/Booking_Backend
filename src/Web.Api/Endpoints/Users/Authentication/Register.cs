@@ -9,7 +9,7 @@ internal sealed class Register : IEndpoint
 {
 
     public sealed record Request(string FirstName, string LastName, string Email,  string Password ,
-                    string ProfilePictureSource , bool isMentor = false ) ;
+                    string ProfilePictureSource ) ;
 
     public void MapEndpoint(IEndpointRouteBuilder app )
     {
@@ -24,8 +24,7 @@ internal sealed class Register : IEndpoint
                 request.LastName,
                 request.Email,
                 request.Password,
-                request.ProfilePictureSource,
-                request.isMentor
+                request.ProfilePictureSource
             );
 
             Result<Guid> result = await handler.Handle(command, cancellationToken);

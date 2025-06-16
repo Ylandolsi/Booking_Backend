@@ -1,6 +1,6 @@
 ﻿namespace SharedKernel;
 
-public abstract class Entity
+public class DomainEventContainer
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 

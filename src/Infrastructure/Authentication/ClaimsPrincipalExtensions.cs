@@ -13,13 +13,6 @@ internal static class ClaimsPrincipalExtensions
             null;
     }
 
-    public static bool? IsEmailVerified(this ClaimsPrincipal? principal)
-    {
-        string? isEmailVerified = principal?.FindFirstValue(ClaimsIdentifiers.IsEmailVerified);
-        return bool.TryParse(isEmailVerified, out bool parsedIsEmailVerified) ?
-            parsedIsEmailVerified :
-            null ;
 
-    }
 
 }

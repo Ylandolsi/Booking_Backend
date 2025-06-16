@@ -20,13 +20,6 @@ internal sealed class UserContext : IUserContext
         throw new ApplicationException("User context is unavailable");
 
 
-    public bool IsEmailVerified =>
-        _httpContextAccessor
-            .HttpContext?
-            .User
-            .IsEmailVerified() ??
-        throw new ApplicationException("Email verification status is unavailable");
-
 
     public string? RefreshToken =>
         _httpContextAccessor

@@ -14,7 +14,7 @@ internal sealed class RefreshAccessToken : IEndpoint
     {
         app.MapPost("users/refresh-token", async (
             IUserContext userContext,
-            ICommandHandler<RefreshAccessTokenCommand, bool> handler,
+            ICommandHandler<RefreshAccessTokenCommand, string> handler,
             CancellationToken cancellationToken) =>
         {
             var refreshToken = userContext.RefreshToken; 
@@ -27,7 +27,7 @@ internal sealed class RefreshAccessToken : IEndpoint
             }
 
             var command = new RefreshAccessTokenCommand(refreshToken); 
-            Result<bool> result = await handler.Handle(command, cancellationToken);
+            Result<string> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(Results.Ok, CustomResults.Problem);
         })

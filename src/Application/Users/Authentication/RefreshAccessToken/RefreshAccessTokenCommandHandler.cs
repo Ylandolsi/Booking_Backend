@@ -28,16 +28,16 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
                                                      ITokenProvider tokenProvider , 
                                                      ITokenWriterCookies tokenWriterCookies,
                                                      ILogger<RefreshAccessTokenCommandHandler> logger,
-                                                     IOptions<JwtOptions> jwtOptions) : ICommandHandler<RefreshAccessTokenCommand, bool>
+                                                     IOptions<JwtOptions> jwtOptions) : ICommandHandler<RefreshAccessTokenCommand, string>
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public async Task<Result<bool>> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
     {
         var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken); 
         if (refreshToken == null)
         {
-            return Result.Failure<bool>(RefreshTokenErrors.Unauthorized);
+            return Result.Failure<string>(RefreshTokenErrors.Unauthorized);
         }
 
         if (refreshToken.IsRevoked)
@@ -60,44 +60,39 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
                 await applicationDbContext.SaveChangesAsync(cancellationToken); 
                 logger.LogInformation("Successfully invalidated {Count} other active refresh token(s) for User ID: {UserId}.", otherActiveTokens.Count, refreshToken.UserId);
             }
-            return Result.Failure<bool>(RefreshTokenErrors.Revoked);
+            return Result.Failure<string>(RefreshTokenErrors.Revoked);
         }
 
         if (refreshToken.IsExpired)
         {
-            return Result.Failure<bool>(RefreshTokenErrors.Expired);
+            return Result.Failure<string>(RefreshTokenErrors.Expired);
         }
 
-        string jwtAccessToken = tokenProvider.GenrateJwtToken(refreshToken.User);
+        string updatedJwtAccessToken = tokenProvider.GenrateJwtToken(refreshToken.User);
         string jwtRefreshToken = tokenProvider.GenerateRefreshToken();
 
         refreshToken.Revoke();
+
         var refreshTokenEntity = new RefreshToken(
                 jwtRefreshToken,
                 refreshToken.UserId,
                 DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays));
 
         await applicationDbContext.RefreshTokens.AddAsync(refreshTokenEntity);
+
         try
         {
             await applicationDbContext.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure<bool>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
+            return Result.Failure<string>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
         }
 
         tokenWriterCookies.WriteRefreshTokenAsHttpOnlyCookie(jwtRefreshToken);
-        tokenWriterCookies.WriteAccessTokenAsHttpOnlyCookie(jwtAccessToken);
 
 
-
-        return true; 
-
-
-
-
-
+        return updatedJwtAccessToken; 
 
     }
 }

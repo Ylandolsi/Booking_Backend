@@ -50,6 +50,7 @@ internal sealed class AddExperience : IEndpoint
                 id => Results.CreatedAtRoute("GetExperienceById", new { experienceId = id }, id), // Assuming a GetById endpoint exists or will be created
                 CustomResults.Problem);
         })
+        .RequireAuthorization()
         .WithTags(Tags.Experience);
     }
 }

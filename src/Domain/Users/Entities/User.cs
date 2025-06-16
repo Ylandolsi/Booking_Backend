@@ -1,18 +1,20 @@
 ﻿using Domain.Users.JoinTables;
 using Domain.Users.ValueObjects;
+using Microsoft.AspNet.Identity.EntityFramework;
 using SharedKernel;
 
 namespace Domain.Users.Entities;
 
-public sealed class User : Entity
+public sealed class User : IdentityUser
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public Name Name { get; private set; } = default!;
     public string PasswordHash { get; private set; } = default!;
+    //public bool IsAdmin { get; init; } = false;
     public Status Status { get; private set; } = default!;
+    public Name Name { get; private set; } = default!;
 
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
     public EmailAdress EmailAddress { get; private set; } = default!;
+
 
     private User() { }
 
@@ -22,8 +24,7 @@ public sealed class User : Entity
         string lastName,
         string emailValue,
         string passwordHash,
-        string profilePictureSource,
-        bool isMentor = false)
+        string profilePictureSource)
     {
         if (string.IsNullOrWhiteSpace(passwordHash))
         {
@@ -72,7 +73,7 @@ public sealed class User : Entity
             Name = name,
             PasswordHash = passwordHash,
             ProfilePictureUrl = profilePicture,
-            Status = new Status(isMentor),
+            Status = new Status(false),
             EmailAddress = emailAddress
         };
 
@@ -91,7 +92,14 @@ public sealed class User : Entity
 
     public ICollection<UserSkill> UserSkills { get; private set; } = new HashSet<UserSkill>();
     public ICollection<UserLanguage> UserLanguages { get; private set; } = new List<UserLanguage>();
-    
+
+
+
+    // Domain Events
+    private DomainEventContainer _domainContainer = new DomainEventContainer();
+    public List<IDomainEvent> DomainEvents => _domainContainer.DomainEvents;
+    public void ClearDomainEvents() => _domainContainer.ClearDomainEvents();
+    public void Raise(IDomainEvent domainEvent) => _domainContainer.Raise(domainEvent);
 
 
 }
