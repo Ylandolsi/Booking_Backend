@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace IntegrationsTests.Abstractions;
 
 [Collection(nameof(IntegrationTestsCollection))]
-public abstract class BaseIntegrationTest : IDisposable
+public abstract class BaseIntegrationTest : IDisposable, IAsyncLifetime
 {
     protected readonly Faker Fake = new();
     protected readonly IServiceScope _scope;
@@ -19,12 +19,14 @@ public abstract class BaseIntegrationTest : IDisposable
     protected readonly string _verifiedUserEmail = "verified.user@example.com";
     protected readonly HttpClient _client;
     protected readonly HttpClient _authenticatedVerifiedUserClient;
+    private readonly Func<Task> _resetDatabase;
 
 
     public BaseIntegrationTest(IntegrationTestsWebAppFactory factory)
     {
         Factory = factory;
         _scope = Factory.Services.CreateScope();
+        _resetDatabase = factory.ResetDatabase;
         EmailCapturer?.Clear();
 
 
@@ -34,6 +36,14 @@ public abstract class BaseIntegrationTest : IDisposable
             email: _verifiedUserEmail,
             isEmailVerified: true);
     }
+
+    public async Task InitializeAsync()
+    {
+        await _resetDatabase();
+        EmailCapturer?.Clear();
+    } 
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     public void Dispose()
     {

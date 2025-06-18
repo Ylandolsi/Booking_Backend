@@ -12,13 +12,13 @@ internal sealed class RefreshAccessToken : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("users/refresh-token", async (
+        app.MapPost(UsersEndpoints.RefreshAccessToken, async (
             IUserContext userContext,
             ICommandHandler<RefreshAccessTokenCommand, string> handler,
             CancellationToken cancellationToken) =>
         {
-            var refreshToken = userContext.RefreshToken; 
-         
+            var refreshToken = userContext.RefreshToken;
+
 
             if (string.IsNullOrEmpty(refreshToken))
             {
@@ -26,7 +26,7 @@ internal sealed class RefreshAccessToken : IEndpoint
                     Error.Unauthorized("RefreshToken.Missing", "The refresh token was not found in the cookies.")));
             }
 
-            var command = new RefreshAccessTokenCommand(refreshToken); 
+            var command = new RefreshAccessTokenCommand(refreshToken);
             Result<string> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(Results.Ok, CustomResults.Problem);

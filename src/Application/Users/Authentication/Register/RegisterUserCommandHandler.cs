@@ -19,7 +19,7 @@ public static class RegisterUserErrors
         "Users.EmailNotUnique",
         "The provided email is not unique");
 
-    public static Error UserRegistrationFailed(string message) => Error.Failure(
+    public static Error UserRegistrationFailed(string message) => Error.Problem(
         "Users.UserRegistrationFailed",
         message);
 }
@@ -38,7 +38,7 @@ internal sealed class RegisterUserCommandHandler(UserManager<User> userManager,
         if (await userManager.FindByEmailAsync(command.Email) != null)
         {
             logger.LogWarning("Attempt to register user with non-unique email: {Email}", command.Email);
-            return Result.Failure<Guid>(RegisterUserErrors.EmailNotUnique);
+            return Result.Failure(RegisterUserErrors.EmailNotUnique);
         }
 
         logger.LogInformation("Registering user with email: {Email}", command.Email);
@@ -56,7 +56,7 @@ internal sealed class RegisterUserCommandHandler(UserManager<User> userManager,
         if (!result.Succeeded)
         {
             logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", command.Email, result.Errors);
-            return Result.Failure<Guid>(RegisterUserErrors.UserRegistrationFailed(string.Join(", ", result.Errors.Select(e => e.Description))));
+            return Result.Failure(RegisterUserErrors.UserRegistrationFailed(string.Join(", ", result.Errors.Select(e => e.Description))));
         }
 
         string emailVerificationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);

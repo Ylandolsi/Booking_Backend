@@ -1,6 +1,7 @@
 using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using FluentEmail.Core.Interfaces;
 using Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
@@ -9,22 +10,29 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using Respawn;
-using System.Data;
 using System.Data.Common;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text.Json;
 using Testcontainers.PostgreSql;
 using Web.Api;
 
 namespace IntegrationsTests.Abstractions;
 
+// docker pull datalust/seq:latest
+// docker ps 
+    //private readonly IContainer _seqContainer = new ContainerBuilder()
+    //            .WithImage("datalust/seq:latest")
+    //            .WithName("seq-test-container")
+    //            .WithEnvironment("ACCEPT_EULA", "Y")
+    //            .WithPortBinding(80, true)
+    //            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
+    //            .Build();
 public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer;
+
 
     private Respawner _respawner = default!;
     private string _connectionString = default!;
@@ -40,6 +48,8 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
             .WithUsername("postgres")
             .WithPassword("postgres")
             .Build();
+
+
 
         // Start the container and set the connection string synchronously
         _dbContainer.StartAsync().GetAwaiter().GetResult();
@@ -111,26 +121,26 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
-        //using (var scope = Services.CreateScope())
-        //{
-        //    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        //    await dbContext.Database.MigrateAsync();
-        //}
-        //await InitializeDbRespawner();
+        using (var scope = Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await dbContext.Database.MigrateAsync();
+        }
+        await InitializeDbRespawner();
     }
 
 
     public async Task DisposeAsync()
     {
-        //await _dbContainer.StopAsync();
+        await _dbContainer.StopAsync();
 
-        //if (_dbConnection?.State == ConnectionState.Open)
-        //{
-        //    await _dbConnection.CloseAsync();
-        //}
-        //_dbConnection?.Dispose();
+        if (_dbConnection?.State == System.Data.ConnectionState.Open)
+        {
+            await _dbConnection.CloseAsync();
+        }
+        _dbConnection?.Dispose();
 
-        //NpgsqlConnection.ClearAllPools();
+        NpgsqlConnection.ClearAllPools();
 
         await _dbContainer.StopAsync();
         await _dbContainer.DisposeAsync();
@@ -139,7 +149,7 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
     public async Task ResetDatabase()
     {
 
-        //await _respawner.ResetAsync(_dbConnection);
+        await _respawner.ResetAsync(_dbConnection);
     }
 
 

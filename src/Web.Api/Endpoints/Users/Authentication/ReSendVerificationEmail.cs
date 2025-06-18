@@ -15,7 +15,7 @@ internal sealed class ReSendVerificationEmail : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("users/resend-verification-email", async (
+        app.MapPost(UsersEndpoints.ResendVerificationEmail, async (
                 Request request,
                 ICommandHandler<ReSendVerificationEmailCommand> handler,
                 CancellationToken cancellationToken = default) =>
@@ -27,6 +27,6 @@ internal sealed class ReSendVerificationEmail : IEndpoint
                     (_) => CustomResults.Problem(result)
                 );
             })
-            .WithTags(Tags.Users); 
+            .WithTags(Tags.Users);
     }
 }

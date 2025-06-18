@@ -5,6 +5,7 @@ using Web.Api.Extensions;
 using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users.Authentication;
+
 internal sealed class Register : IEndpoint
 {
 
@@ -12,16 +13,16 @@ internal sealed class Register : IEndpoint
                                  string LastName,
                                  string Email,
                                  string Password,
-                                 string ProfilePictureSource) ;
+                                 string ProfilePictureSource);
 
-    public void MapEndpoint(IEndpointRouteBuilder app )
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("users/register", async (
+        app.MapPost(UsersEndpoints.Register, async (
             Request request,
             ICommandHandler<RegisterUserCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            
+
             var command = new RegisterUserCommand(
                 request.FirstName,
                 request.LastName,
@@ -33,7 +34,7 @@ internal sealed class Register : IEndpoint
             Result result = await handler.Handle(command, cancellationToken);
 
             return result.Match(() => Results.Ok(),
-                               (_) => CustomResults.Problem(result));
+                               (result) => CustomResults.Problem(result));
         })
         .WithTags(Tags.Users);
     }

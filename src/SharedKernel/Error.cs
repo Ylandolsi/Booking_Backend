@@ -21,7 +21,7 @@ public record Error
         Type = type;
     }
 
-    public static Error Failure(string code, string description) => // 400 badrequest
+    public static Error Failure(string code, string description) => // 500 server error
         new(code, description, ErrorType.Failure);
     public static Error Problem(string code, string description) => // 400 
         new(code, description, ErrorType.Problem);

@@ -15,7 +15,7 @@ internal sealed class VerifyRegistration : IEndpoint
     public sealed record Request(string Email, string Token);
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("users/verify-email", async ([FromBody] Request request,
+        app.MapPost(UsersEndpoints.VerifyEmail, async ([FromBody] Request request,
                                                 ICommandHandler<VerifyEmailCommand> handler,
                                                 CancellationToken cancellationToken = default) =>
             {

@@ -11,7 +11,7 @@ internal sealed class Logout : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("users/logout", async (
+        app.MapPost(UsersEndpoints.Logout, async (
             IUserContext userContext,
             ICommandHandler<LogoutCommand, bool> handler,
             CancellationToken cancellationToken) =>
@@ -28,7 +28,7 @@ internal sealed class Logout : IEndpoint
 
             var command = new LogoutCommand(userId);
 
-            var result = await handler.Handle(command, cancellationToken);   
+            var result = await handler.Handle(command, cancellationToken);
             return result.Match(Results.Ok, CustomResults.Problem);
         })
         .RequireAuthorization()

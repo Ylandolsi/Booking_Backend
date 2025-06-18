@@ -21,6 +21,11 @@ public class VerifyEmailCommandHandler(UserManager<User> userManager,
             logger.LogWarning("User with email {Email} not found", command.Email);
             return Result.Failure(UserErrors.NotFoundByEmail(command.Email));
         }
+        if (user.EmailConfirmed)
+        {
+            logger.LogInformation("Email for user with email: {Email} is already confirmed", command.Email);
+            return Result.Failure(VerifyEmailErrors.AlreadyVerified);
+        }
 
         IdentityResult result = await userManager.ConfirmEmailAsync(user, command.Token);
 

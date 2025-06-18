@@ -1,0 +1,18 @@
+
+public static class UsersEndpoints
+{
+    // Authentication and Authorization
+    public const string Login = "users/login";
+    public const string Register = "users/register";
+    public const string RefreshAccessToken = "users/refresh-token";
+    public const string VerifyEmail = "users/verify-email";
+    public const string ResendVerificationEmail = "users/resend-verification-email";
+    public const string Logout = "users/logout";
+    // User Management
+    public const string GetUser = "users/{id}";
+
+    // Experience 
+
+    // Education 
+
+}
