@@ -1,84 +1,36 @@
 ﻿using Domain.Users.JoinTables;
+using Microsoft.AspNetCore.Identity;
 using Domain.Users.ValueObjects;
-using Microsoft.AspNet.Identity.EntityFramework;
 using SharedKernel;
 
 namespace Domain.Users.Entities;
 
-public sealed class User : IdentityUser
+public sealed class User : IdentityUser<Guid>, IEntity
 {
-    public string PasswordHash { get; private set; } = default!;
-    //public bool IsAdmin { get; init; } = false;
-    public Status Status { get; private set; } = default!;
     public Name Name { get; private set; } = default!;
-
+    public Status Status { get; private set; } = default!;
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
-    public EmailAdress EmailAddress { get; private set; } = default!;
 
 
     private User() { }
 
 
-    public static Result<User> Create(
+    public static User Create(
         string firstName,
         string lastName,
-        string emailValue,
-        string passwordHash,
+        string emailAddress,
         string profilePictureSource)
     {
-        if (string.IsNullOrWhiteSpace(passwordHash))
-        {
-            return Result.Failure<User>(UserErrors.PasswordCannotBeEmpty);
-        }
-
-        List<Error> validationErrors = new List<Error>();
-        Name name = default!;
-        try
-        {
-            name = new Name(firstName, lastName);
-        }
-        catch (ArgumentException ex)
-        {
-            validationErrors.Add(Error.Problem("User.InvalidName", ex.Message));
-        }
-
-        EmailAdress emailAddress = default!;
-        try
-        {
-            emailAddress = new EmailAdress(emailValue);
-        }
-        catch (ArgumentException ex)
-        {
-            validationErrors.Add(Error.Problem("User.InvalidEmail", ex.Message));
-        }
-
-        ProfilePicture profilePicture = default!;
-        try
-        {
-            profilePicture = new ProfilePicture(profilePictureSource);
-        }
-        catch (ArgumentException ex)
-        {
-            validationErrors.Add(Error.Problem("User.InvalidProfilePicture", ex.Message));
-        }
-
-        if (validationErrors.Any())
-        {
-
-            return Result.Failure<User>(new ValidationError(validationErrors.ToArray()!));
-        }
-
         var user = new User
         {
-            Name = name,
-            PasswordHash = passwordHash,
-            ProfilePictureUrl = profilePicture,
+            Name = new Name(firstName, lastName),
             Status = new Status(false),
-            EmailAddress = emailAddress
+            Email = emailAddress,
+            UserName = emailAddress,
+            ProfilePictureUrl = new ProfilePicture(profilePictureSource)
         };
 
-
-        return Result.Success(user);
+        return user;
     }
 
 

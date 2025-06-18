@@ -10,28 +10,23 @@ namespace Web.Api.Endpoints.Users.Authentication;
 
 internal sealed class ReSendVerificationEmail : IEndpoint
 {
+    public sealed record Request(string Email);
+
+
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("users/resend-verification-email", async (
-                IUserContext userContext,
-                ICommandHandler<ReSendVerificationEmailCommand, bool> handler,
+                Request request,
+                ICommandHandler<ReSendVerificationEmailCommand> handler,
                 CancellationToken cancellationToken = default) =>
             {
-                Guid userId = Guid.Empty;
-                try
-                {
-                    userId = userContext.UserId;
-                }
-                catch (Exception ex)
-                {
-                    return Results.Unauthorized();
-                }
-
-                var command = new ReSendVerificationEmailCommand(userId);
-                Result<bool> result = await handler.Handle(command, cancellationToken);
-                return result.Match(Results.Ok, CustomResults.Problem);
+                var command = new ReSendVerificationEmailCommand(request.Email);
+                Result result = await handler.Handle(command, cancellationToken);
+                return result.Match(
+                    () => Results.Ok(),
+                    (_) => CustomResults.Problem(result)
+                );
             })
-            .WithTags(Tags.Users)
-            .RequireAuthorization();
+            .WithTags(Tags.Users); 
     }
 }

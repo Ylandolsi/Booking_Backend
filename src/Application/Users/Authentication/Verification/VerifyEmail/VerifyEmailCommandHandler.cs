@@ -1,64 +1,39 @@
 using Application.Abstractions.Authentication;
-using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
-using Application.Users.ReSendVerification;
 using Domain.Users;
-using Microsoft.EntityFrameworkCore;
+using Domain.Users.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
 namespace Application.Users.Authentication.Verification.VerifyEmail;
 
-public class VerifyEmailCommandHandler(
-    IApplicationDbContext context,
-    ILogger<VerifyEmailCommandHandler> logger,
-    ITokenProvider tokenProvider ) : ICommandHandler<VerifyEmailCommand, string>
+public class VerifyEmailCommandHandler(UserManager<User> userManager,
+                                       ILogger<VerifyEmailCommandHandler> logger) : ICommandHandler<VerifyEmailCommand>
 {
-    public async Task<Result<string>> Handle(VerifyEmailCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken = default)
     {
-        EmailVerificationToken? token = await context.EmailVerificationTokens
-            .Include(x => x.User)
-            .FirstOrDefaultAsync(x => x.Id == command.Token, cancellationToken); 
-        
+        logger.LogInformation("Handling VerifyEmailCommand for email: {Email}", command.Email);
 
-        if (token is null)
+        User? user = await userManager.FindByEmailAsync(command.Email);
+        if (user is null)
         {
-            logger.LogWarning("Email verification token not found for token ID: {TokenId}", command.Token);
-            return Result.Failure<string>(VerifyEmailErrors.EmailVerificationTokenNotFound);
-        }
-        
-        if (token.User.EmailAddress.IsVerified())
-        {
-            logger.LogInformation("Email address {Email} is already verified.", token.User.EmailAddress.Email);
-            return Result.Failure<string>(VerifyEmailErrors.EmailAlreadyVerified);
+            logger.LogWarning("User with email {Email} not found", command.Email);
+            return Result.Failure(UserErrors.NotFoundByEmail(command.Email));
         }
 
-        if (!token.IsStillValid())
-        {
-            logger.LogWarning("Email verification token expired for token ID: {TokenId}", command.Token);
+        IdentityResult result = await userManager.ConfirmEmailAsync(user, command.Token);
 
-            return Result.Failure<string>(VerifyEmailErrors.EmailVerificationTokenExpired);
-        }
-        logger.LogInformation("Verifying email address for user ID: {UserId}", token.User.Id);
-        
-        token.User.EmailAddress.Verify();
-        context.EmailVerificationTokens.Remove(token);
-        try 
+        if (!result.Succeeded)
         {
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex)
-        {
-            logger.LogError(ex, "Failed to verify email for user ID: {UserId}", token.User.Id);
-            return Result.Failure<string>(VerifyEmailErrors.EmailVerificationFailed(ex.Message));
+            logger.LogWarning("Failed to confirm email for user with email: {Email}. Errors: {Errors}", command.Email, result.Errors);
+            return Result.Failure(VerifyEmailErrors.TokenExpired);
+
         }
 
-        logger.LogInformation("Email address {Email} verified successfully for user ID: {UserId}", token.User.EmailAddress.Email, token.User.Id);
-        
-        string updatedJwtAccessToken = tokenProvider.GenrateJwtToken(token.User);
-        logger.LogInformation("Updated JWT access token for user ID: {UserId}", token.User.Id);
+        logger.LogInformation("Email confirmed successfully for user with email: {Email}", command.Email);
 
-        return Result.Success(updatedJwtAccessToken);
+        return Result.Success();
     }
-    
+
 }

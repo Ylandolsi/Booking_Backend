@@ -4,6 +4,6 @@ namespace Application.Abstractions.Authentication;
 
 public interface IEmailVerificationLinkFactory
 {
-    public string Create(EmailVerificationToken emailVerificationToken); 
+    public string Create(string emailVerificationToken, string emailAdress);
 
-} 
+}

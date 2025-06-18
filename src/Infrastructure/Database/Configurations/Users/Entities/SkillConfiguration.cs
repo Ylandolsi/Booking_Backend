@@ -1,7 +1,7 @@
 using Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-namespace Infrastructure.Users.Entities;
+namespace Infrastructure.Database.Configurations.Users.Entities;
 
 internal sealed class SkillConfiguration : IEntityTypeConfiguration<Skill>
 {

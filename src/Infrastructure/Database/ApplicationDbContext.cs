@@ -1,25 +1,31 @@
 ﻿using Application.Abstractions.Data;
-using Domain.Users;
 using Domain.Users.Entities;
 using Domain.Users.JoinTables;
 using Infrastructure.DomainEvents;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel;
 
 namespace Infrastructure.Database;
 
-public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options,
-    IDomainEventsDispatcher domainEventsDispatcher)
-    : DbContext(options), IApplicationDbContext
+public sealed class ApplicationDbContext
+    : IdentityDbContext<User, IdentityRole<Guid>, Guid>, IApplicationDbContext
 {
+    private readonly IDomainEventsDispatcher _domainEventsDispatcher;
+
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
+                                IDomainEventsDispatcher omainEventsDispatcher) : base(options)
+    {
+        _domainEventsDispatcher = omainEventsDispatcher;
+
+    }
     // Users Modules : 
     public DbSet<User> Users { get; set; }
     public DbSet<Language> Languages { get; set; }
     public DbSet<Skill> Skills { get; set; }
     public DbSet<Education> Educations { get; set; }
     public DbSet<Experience> Experiences { get; set; }
-    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     // join tables 
     public DbSet<UserLanguage> UserLanguages { get; set; }
@@ -29,6 +35,7 @@ public sealed class ApplicationDbContext(
     // 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         modelBuilder.HasDefaultSchema(Schemas.Default);
@@ -53,32 +60,56 @@ public sealed class ApplicationDbContext(
         return result;
     }
 
-    private async Task PublishDomainEventsAsync()
+
+    private async Task<List<IDomainEvent>> GetUsersDomainEvents()
     {
-        // Get entities that implement IEntity
-        var entitiesWithEvents = ChangeTracker
-            .Entries()
-            .Where(e => e.Entity is IEntity)
-            .Select(e => e.Entity as IEntity)
-            .Where(e => e != null)
+        var userEntitiesWithEvents = ChangeTracker
+            .Entries<User>()
+            .Select(entry => entry.Entity) // Get the User entity instances
+            .Where(user => user.DomainEvents.Any()) // Filter for users that have domain events
             .ToList();
 
-        var allDomainEventsToDispatch = new List<IDomainEvent>();
+        List<IDomainEvent> userDomainEventsToDispatch = new List<IDomainEvent>();
 
-        foreach (var entity in entitiesWithEvents)
+        if (userEntitiesWithEvents.Any())
         {
-            var eventsFromThisEntity = entity.DomainEvents;
-
-            if (eventsFromThisEntity.Any())
+            foreach (var userEntity in userEntitiesWithEvents)
             {
-                allDomainEventsToDispatch.AddRange(eventsFromThisEntity);
-                entity.ClearDomainEvents();
+
+                userDomainEventsToDispatch.AddRange(userEntity.DomainEvents);
+                userEntity.ClearDomainEvents();
             }
         }
 
-        if (allDomainEventsToDispatch.Any())
+        return userDomainEventsToDispatch;
+
+    }
+
+
+    private async Task PublishDomainEventsAsync()
+    {
+        // users events 
+        var usersDomainEvents = await GetUsersDomainEvents();
+
+        var domainEvents = ChangeTracker
+            .Entries<Entity>()
+            .Select(entry => entry.Entity)
+            .SelectMany(entity =>
+            {
+                List<IDomainEvent> domainEvents = entity.DomainEvents;
+                entity.ClearDomainEvents();
+                return domainEvents;
+            })
+            .ToList();
+
+        if (usersDomainEvents.Any())
         {
-            await domainEventsDispatcher.DispatchAsync(allDomainEventsToDispatch, CancellationToken.None); // Consider passing the original cancellationToken
+            domainEvents.AddRange(usersDomainEvents);
+        }
+
+        if (domainEvents.Any())
+        {
+            await _domainEventsDispatcher.DispatchAsync(domainEvents);
         }
     }
 }

@@ -17,29 +17,13 @@ public class Education : Entity
 
     private Education() { }
     
-    public static Result<Education> Create(
-        string title,
-        string description,
-        DateTime startDate,
-        string university,
-        Guid userId,
-        DateTime? endDate = null)
-    {
-        if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure<Education>(Error.Problem("Education.InvalidTitle", "Title cannot be empty"));
 
-        if (string.IsNullOrWhiteSpace(university))
-            return Result.Failure<Education>(Error.Problem("Education.InvalidUniversity", "University cannot be empty"));
-
-        if (endDate.HasValue && endDate < startDate)
-            return Result.Failure<Education>(Error.Problem("Education.InvalidEndDate", "End date cannot be before start date"));
-
-        var education = new Education(title, description, startDate, university, userId, endDate);
-        return Result.Success(education);
-    }
-
-    public Education(string title, string description, DateTime startDate,
-                    string university, Guid userId, DateTime? endDate = null)
+    public Education(string title,
+                     string description,
+                     DateTime startDate,
+                     string university,
+                     Guid userId,
+                     DateTime? endDate = null)
     {
 
         Title = title?.Trim() ?? string.Empty;
@@ -60,4 +44,6 @@ public class Education : Entity
         IsCurrent = false;
         return Result.Success();
     }
+
+
 }

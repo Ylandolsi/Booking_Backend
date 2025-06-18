@@ -3,7 +3,8 @@ using Domain.Users.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Users.Entities;
+namespace Infrastructure.Database.Configurations.Users.Entities;
+
 internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
@@ -17,15 +18,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         });
 
-        builder.ComplexProperty(u => u.EmailAddress, email =>
-        {
-            email.Property(e => e.Email)
-                .HasMaxLength(256)
-                .IsRequired();
-        });
-
-        builder.Property(u => u.PasswordHash)
-            .IsRequired();
 
         builder.ComplexProperty(u => u.ProfilePictureUrl, profilePicture =>
         {
@@ -34,7 +26,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 .IsRequired();
         });
 
-        builder.ComplexProperty(u => u.Status, status => { }); 
+        builder.ComplexProperty(u => u.Status, status => { });
 
 
         builder.HasMany(u => u.UserLanguages)

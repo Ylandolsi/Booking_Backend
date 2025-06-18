@@ -3,10 +3,10 @@ using Application.Abstractions.BackgroundJobs;
 using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
+using Application.Users.Authentication.Verification;
 using Domain.Users;
 using Domain.Users.Entities;
-using Hangfire;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 
@@ -15,89 +15,83 @@ namespace Application.Users.Register;
 
 public static class RegisterUserErrors
 {
-    public static readonly Error EmailNotUnique = Error.Conflict("Users.EmailNotUnique",
-                                                                 "The provided email is not unique");
+    public static readonly Error EmailNotUnique = Error.Problem(
+        "Users.EmailNotUnique",
+        "The provided email is not unique");
 
-    public static Error UserRegistrationFailed(string message) => Error.Failure("Users.UserRegistrationFailed",
-                                                                                $"User registration failed: {message}");
+    public static Error UserRegistrationFailed(string message) => Error.Failure(
+        "Users.UserRegistrationFailed",
+        message);
 }
-internal sealed class RegisterUserCommandHandler(IApplicationDbContext context,
-            IPasswordHasher passwordHasher , 
-            IEmailVerificationLinkFactory emailVerificationLinkFactory , 
-            IRegisterVerificationJob registerVerificationJob,
-            ILogger<RegisterUserCommandHandler> logger)
-    : ICommandHandler<RegisterUserCommand, Guid>
+internal sealed class RegisterUserCommandHandler(UserManager<User> userManager,
+                                                 IEmailVerificationLinkFactory emailVerificationLinkFactory,
+                                                 IRegisterVerificationJob registerVerificationJob,
+                                                 ILogger<RegisterUserCommandHandler> logger)
+    : ICommandHandler<RegisterUserCommand>
 {
 
-    public async Task<Result<Guid>> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RegisterUserCommand command,
+                                     CancellationToken cancellationToken)
     {
-        if (await context.Users.AnyAsync(u => u.EmailAddress.Email == command.Email, cancellationToken))
+
+
+        if (await userManager.FindByEmailAsync(command.Email) != null)
         {
             logger.LogWarning("Attempt to register user with non-unique email: {Email}", command.Email);
             return Result.Failure<Guid>(RegisterUserErrors.EmailNotUnique);
         }
 
         logger.LogInformation("Registering user with email: {Email}", command.Email);
-        var hashedPassword = passwordHasher.Hash(command.Password);
-        logger.LogInformation("Password for user {Email} hashed successfully", command.Email);
 
-        Result<User> user = User.Create(
+
+        User user = User.Create(
             command.FirstName,
             command.LastName,
             command.Email,
-            hashedPassword,
             command.ProfilePictureSource
         );
-        if (user.IsFailure)
+
+        IdentityResult result = await userManager.CreateAsync(user, command.Password);
+
+        if (!result.Succeeded)
         {
-            logger.LogError("Failed to create user with email: {Email}. Error: {Error}", command.Email, user.Error);
-            return Result.Failure<Guid>(user.Error);
+            logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", command.Email, result.Errors);
+            return Result.Failure<Guid>(RegisterUserErrors.UserRegistrationFailed(string.Join(", ", result.Errors.Select(e => e.Description))));
         }
 
-        EmailVerificationToken emailVerificationToken;
-        try
-        {
-            context.Users.Add(user.Value);
-            emailVerificationToken = new EmailVerificationToken(user.Value.Id);
-            context.EmailVerificationTokens.Add(emailVerificationToken);
-            await context.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex)
-        {
-            logger.LogError(ex, "Failed to register user with email: {Email}", command.Email);
-            return Result.Failure<Guid>(RegisterUserErrors.UserRegistrationFailed(ex.Message));
-        }
+        string emailVerificationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        string verificationEmailLink = emailVerificationLinkFactory.Create(emailVerificationToken);
-        logger.LogInformation("Sending verification email to {Email}", user.Value.EmailAddress.Email);
+        string verificationEmailLink = emailVerificationLinkFactory.Create(emailVerificationToken, command.Email);
+        logger.LogInformation("Sending verification email to {Email}", command.Email);
 
-        var userEmail = user.Value.EmailAddress.Email;
 
         try
         {
+            // background job
             await registerVerificationJob.Send(
-                userEmail,
+                command.Email,
                 verificationEmailLink
             );
 
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to enqueue verification email to {UserEmail}" , userEmail);
+            logger.LogError(ex, "Failed to enqueue verification email to {UserEmail}", command.Email);
+            return Result.Failure(VerifyEmailErrors.SendingEmailFailed);
 
         }
-        logger.LogInformation("Verification email job enqueued for {Email}", userEmail);
+        logger.LogInformation("Verification email job enqueued for {Email}", command.Email);
 
 
-        user.Value.Raise(new UserRegisteredDomainEvent(user.Value.Id));
+        user.Raise(new UserRegisteredDomainEvent(user.Id));
 
-
-
-        return user.Value.Id;
+        return Result.Success();
 
         // TODO : in front end : 
         // message to show:  Registration successful! A verification email has been sent.
         //  If you don't receive it within a few minutes, 
         // please check your spam folder or use the 'Resend verification' option on the login page
     }
+
+
 }

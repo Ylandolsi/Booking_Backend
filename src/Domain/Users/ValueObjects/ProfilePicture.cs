@@ -8,19 +8,19 @@ public class ProfilePicture : ValueObject
     public string ProfilePictureLink { get; private set; }
 
     public ProfilePicture(string profilePictureLink = "")
-    
+
     {
         if (string.IsNullOrWhiteSpace(profilePictureLink))
         {
             profilePictureLink = DefaultProfilePictureUrl;
         }
 
-        if (!IsValidUrl(profilePictureLink!) )
+        if (!IsValidUrl(profilePictureLink!))
         {
-            throw new ArgumentException("Invalid profile picture URL", nameof(profilePictureLink) );
+            throw new ArgumentException("Invalid profile picture URL", nameof(profilePictureLink));
         }
 
-        ProfilePictureLink = profilePictureLink ;
+        ProfilePictureLink = profilePictureLink;
     }
 
 
@@ -28,7 +28,7 @@ public class ProfilePicture : ValueObject
     {
         if (string.IsNullOrEmpty(profilePictureLink))
         {
-            return Result.Failure(ProfilePictureErrors.InvalidProfilePictureUrl);
+            return ResetToDefaultProfilePicture();
         }
         if (!IsValidUrl(profilePictureLink))
         {
@@ -38,7 +38,7 @@ public class ProfilePicture : ValueObject
         ProfilePictureLink = profilePictureLink;
         return Result.Success();
     }
-    
+
 
     public Result ResetToDefaultProfilePicture()
     {
@@ -51,7 +51,7 @@ public class ProfilePicture : ValueObject
         return Uri.TryCreate(profilePictureLink, UriKind.Absolute, out var result)
                && (result.Scheme == Uri.UriSchemeHttp || result.Scheme == Uri.UriSchemeHttps);
     }
-    
+
     protected override IEnumerable<Object> GetEqualityComponents()
     {
         yield return ProfilePictureLink;

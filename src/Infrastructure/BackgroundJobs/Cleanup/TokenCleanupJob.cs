@@ -23,7 +23,7 @@ public class TokenCleanupJob : ITokenCleanupJob
         _logger = logger;
     }
 
-    [DisplayName("Clean up expired verification tokens and revoked/expired refresh tokens")]
+    [DisplayName("Clean up expired revoked/expired refresh tokens")]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task CleanUpAsync(PerformContext? context)
     {
@@ -31,29 +31,10 @@ public class TokenCleanupJob : ITokenCleanupJob
         _logger.LogInformation("Hangfire Job: Starting token cleanup job...");
 
         var utcNow = DateTime.UtcNow;
-        int emailTokensRemovedCount = 0;
         int refreshTokensRemovedCount = 0;
 
         try
         {
-            // Remove expired email verification tokens
-            var expiredEmailVerificationTokens = await _context.EmailVerificationTokens
-                .Where(t => t.ExpiresOnUtc < utcNow)
-                .ToListAsync();
-
-            if (expiredEmailVerificationTokens.Any())
-            {
-                _context.EmailVerificationTokens.RemoveRange(expiredEmailVerificationTokens);
-                emailTokensRemovedCount = expiredEmailVerificationTokens.Count;
-                context?.WriteLine($"Found {emailTokensRemovedCount} expired email verification tokens to remove.");
-                _logger.LogInformation("Hangfire Job: Found {Count} expired email verification tokens to remove.", emailTokensRemovedCount);
-            }
-            else
-            {
-                context?.WriteLine("No expired email verification tokens found.");
-                _logger.LogInformation("Hangfire Job: No expired email verification tokens found.");
-            }
-
             // Remove revoked or expired refresh tokens
             var oldRefreshTokens = await _context.RefreshTokens
                 .Where(rt => rt.RevokedOnUtc.HasValue || rt.ExpiresOnUtc < utcNow)
@@ -72,11 +53,11 @@ public class TokenCleanupJob : ITokenCleanupJob
                 _logger.LogInformation("Hangfire Job: No revoked or expired refresh tokens found.");
             }
 
-            if (emailTokensRemovedCount > 0 || refreshTokensRemovedCount > 0)
+            if ( refreshTokensRemovedCount > 0)
             {
                 await _context.SaveChangesAsync(CancellationToken.None); // Assuming CancellationToken.None is acceptable for a background job
                 context?.WriteLine("Successfully removed tokens from the database.");
-                _logger.LogInformation("Hangfire Job: Successfully removed {EmailTokenCount} email tokens and {RefreshTokenCount} refresh tokens.", emailTokensRemovedCount, refreshTokensRemovedCount);
+                _logger.LogInformation("Hangfire Job: Successfully removed {RefreshTokenCount} refresh tokens." ,  refreshTokensRemovedCount);
             }
         }
         catch (Exception ex)
@@ -88,6 +69,6 @@ public class TokenCleanupJob : ITokenCleanupJob
         }
 
         context?.WriteLine("Token cleanup job finished.");
-        _logger.LogInformation("Hangfire Job: Token cleanup job finished. Removed {EmailTokenCount} email tokens and {RefreshTokenCount} refresh tokens.", emailTokensRemovedCount, refreshTokensRemovedCount);
+        _logger.LogInformation("Hangfire Job: Token cleanup job finished. Removed {RefreshTokenCount} refresh tokens.", refreshTokensRemovedCount);
     }
 }

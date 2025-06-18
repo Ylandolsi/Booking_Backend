@@ -11,14 +11,19 @@ namespace Web.Api.Endpoints.Users.Authentication;
 
 internal sealed class VerifyRegistration : IEndpoint
 {
+    // [AsParameters]
+    public sealed record Request(string Email, string Token);
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("users/verify-email", async (
-            [FromQuery] Guid token, ICommandHandler<VerifyEmailCommand, string> handler, CancellationToken cancellationToken = default) =>
+        app.MapPost("users/verify-email", async ([FromBody] Request request,
+                                                ICommandHandler<VerifyEmailCommand> handler,
+                                                CancellationToken cancellationToken = default) =>
             {
-                var command = new VerifyEmailCommand(token);
-                Result<string> result = await handler.Handle(command, cancellationToken);
-                return result.Match(Results.Ok, CustomResults.Problem);
+                var command = new VerifyEmailCommand(request.Email, request.Token);
+                Result result = await handler.Handle(command, cancellationToken);
+                return result.Match(
+                        () => Results.Ok(),
+                        (_) => CustomResults.Problem(result));
             })
         .WithTags(Tags.Users)
         .WithName(EndpointsNames.verifyEmail); // to get the endpoint by name and use it in the handler (EmailVerificationLinkFactory)

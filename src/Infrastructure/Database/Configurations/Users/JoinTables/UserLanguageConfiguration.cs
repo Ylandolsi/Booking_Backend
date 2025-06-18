@@ -2,7 +2,7 @@ using Domain.Users.JoinTables;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Users.JoinTables;
+namespace Infrastructure.Database.Configurations.Users.JoinTables;
 
 internal sealed class UserLanguageConfiguration : IEntityTypeConfiguration<UserLanguage>
 {

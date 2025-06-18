@@ -1,8 +1,12 @@
-﻿namespace SharedKernel;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class DomainEventContainer
+namespace SharedKernel;
+
+public abstract class Entity : IEntity
 {
+
     private readonly List<IDomainEvent> _domainEvents = [];
+    [NotMapped]
 
     public List<IDomainEvent> DomainEvents => [.. _domainEvents];
 

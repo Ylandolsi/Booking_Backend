@@ -8,14 +8,17 @@ namespace Web.Api.Endpoints.Users.Authentication;
 internal sealed class Register : IEndpoint
 {
 
-    public sealed record Request(string FirstName, string LastName, string Email,  string Password ,
-                    string ProfilePictureSource ) ;
+    public sealed record Request(string FirstName,
+                                 string LastName,
+                                 string Email,
+                                 string Password,
+                                 string ProfilePictureSource) ;
 
     public void MapEndpoint(IEndpointRouteBuilder app )
     {
         app.MapPost("users/register", async (
             Request request,
-            ICommandHandler<RegisterUserCommand, Guid> handler,
+            ICommandHandler<RegisterUserCommand> handler,
             CancellationToken cancellationToken) =>
         {
             
@@ -27,9 +30,10 @@ internal sealed class Register : IEndpoint
                 request.ProfilePictureSource
             );
 
-            Result<Guid> result = await handler.Handle(command, cancellationToken);
+            Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(Results.Ok, CustomResults.Problem);
+            return result.Match(() => Results.Ok(),
+                               (_) => CustomResults.Problem(result));
         })
         .WithTags(Tags.Users);
     }

@@ -2,19 +2,20 @@ using SharedKernel;
 
 namespace Application.Users.Authentication.Verification;
 
-public static class  VerifyEmailErrors {
+public static class VerifyEmailErrors
+{
 
     public static Error EmailVerificationFailed(string message) => Error.Failure(
         "Users.EmailVerificationFailed",
         $"Email verification failed: {message}");
 
-    public static readonly Error EmailVerificationTokenExpired = Error.Problem("User.Email.Verification.Token.Expired",
-                                                        "Email verification token has expired."); 
+    public static readonly Error TokenExpired = Error.Problem("User.Email.Verification.Token.Expired",
+                                                        "Email verification token has expired.");
 
-    public static readonly Error EmailVerificationTokenNotFound = Error.Problem("User.Email.Verification.Token.NotFound",
+    public static readonly Error TokenNotFound = Error.Problem("User.Email.Verification.Token.NotFound",
         "Email verification token not found.");
 
-    public static readonly Error EmailAlreadyVerified = Error.Problem("User.Email.Already.Verified",
+    public static readonly Error AlreadyVerified = Error.Problem("User.Email.Already.Verified",
         "Email address is already verified.");
 
 

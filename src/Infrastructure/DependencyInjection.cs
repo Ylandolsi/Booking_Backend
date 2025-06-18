@@ -1,16 +1,23 @@
-﻿using Application.Abstractions.Authentication;
+﻿using Amazon.Extensions.NETCore.Setup;
+using Amazon.Runtime;
+using Amazon.SimpleEmail;
+using Application.Abstractions.Authentication;
 using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
+using Application.Abstractions.BackgroundJobs.TokenCleanup;
 using Application.Abstractions.Data;
+using Application.Options;
+using Domain.Users.Entities;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
-using Infrastructure.BackgroundJobs;
 using Infrastructure.BackgroundJobs.SendingVerificationEmail;
+using Infrastructure.BackgroundJobs.TokenCleanup;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
-using Application.Options;
 using Infrastructure.Time;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +25,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SharedKernel;
 using System.Text;
-using Infrastructure.BackgroundJobs.TokenCleanup;
-using Application.Abstractions.BackgroundJobs.TokenCleanup;
 
 namespace Infrastructure;
 
@@ -31,6 +36,7 @@ public static class DependencyInjection
         services
             .AddServices()
             .AddOptions(configuration)
+            .AddSESAWS(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
@@ -46,8 +52,36 @@ public static class DependencyInjection
         return services;
     }
 
+
+    public static IServiceCollection AddIdentityCore(this IServiceCollection services)
+    {
+        services.AddIdentity<User, IdentityRole<Guid>>(
+            o =>
+            {
+                o.User.RequireUniqueEmail = true;
+                o.SignIn.RequireConfirmedAccount = true;
+                o.Password.RequiredLength = 8;
+                o.Password.RequireDigit = true;
+                o.Password.RequireUppercase = true;
+                o.Password.RequireNonAlphanumeric = false;
+
+                // Configure lockout settings
+                o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                o.Lockout.MaxFailedAccessAttempts = 5;
+                o.Lockout.AllowedForNewUsers = true;
+            }
+        )
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders()
+            .AddApiEndpoints();
+
+        return services;
+    }
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
+
+        services.AddIdentityCore();
+
         string? connectionString = configuration.GetConnectionString("Database");
 
         services.AddDbContext<ApplicationDbContext>(
@@ -78,10 +112,12 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddOptions( this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.JwtOptionsKey));
-
+        services.Configure<GoogleOAuthOptions>(configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey));
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.EmailOptionsKey));
+        services.Configure<FrontendApplicationOptions>(configuration.GetSection(FrontendApplicationOptions.FrontEndOptionsKey)); 
         return services;
     }
 
@@ -90,17 +126,23 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }
+            )
             .AddJwtBearer(o =>
             {
-                var jwtOptions = configuration.GetSection(JwtOptions.JwtOptionsKey).Get<JwtOptions>() ?? 
-                throw new InvalidOperationException("JWT options are not configured.");
+                var jwtOptions = configuration.GetSection(JwtOptions.JwtOptionsKey)
+                                              .Get<JwtOptions>() ??
+                                              throw new InvalidOperationException("JWT options are not configured.");
 
 
                 o.RequireHttpsMetadata = false;
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
-                   ValidateIssuerSigningKey = true,
+                    ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
@@ -118,17 +160,44 @@ public static class DependencyInjection
                         return Task.CompletedTask;
                     }
                 };
+            })
+            .AddGoogle(options =>
+            {
+                var googleOptions = configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey)
+                                                 .Get<GoogleOAuthOptions>() ?? throw new InvalidOperationException("Google Oauth is not configured");
+
+                options.ClientId = googleOptions.ClientId!;
+                options.ClientSecret = googleOptions.ClientSecret!;
             });
 
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
         services.AddSingleton<ITokenWriterCookies, TokenWriterCookies>();
         services.AddSingleton<IEmailVerificationLinkFactory, EmailVerificationLinkFactory>();
 
         return services;
     }
+
+    private static IServiceCollection AddSESAWS(this IServiceCollection services,
+                                                IConfiguration configuration)
+    {
+        // TODO : use environment variables or secrets manager for sensitive data
+        var awsOptions = configuration.GetSection("AWS");
+        var awsAccessKey = awsOptions["AccessKey"];
+        var awsSecretKey = awsOptions["SecretKey"];
+        var awsRegion = awsOptions["Region"];
+
+        services.AddDefaultAWSOptions(new AWSOptions
+        {
+            Credentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey),
+            Region = Amazon.RegionEndpoint.GetBySystemName(awsRegion)
+        });
+        services.AddAWSService<IAmazonSimpleEmailService>();
+
+        return services;
+    }
+
 
     private static IServiceCollection AddAuthorizationInternal(this IServiceCollection services)
     {
@@ -145,12 +214,12 @@ public static class DependencyInjection
 
     public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
     {
-        services.AddScoped<IRegisterVerificationJob,RegisterRegisterVerificationJob>();
-        services.AddScoped<ITokenCleanupJob , TokenCleanupJob>();
+        services.AddScoped<IRegisterVerificationJob, VerificationEmailForRegistrationJob>();
+        services.AddScoped<ITokenCleanupJob, TokenCleanupJob>();
 
         return services;
 
-    } 
+    }
 
 
 }

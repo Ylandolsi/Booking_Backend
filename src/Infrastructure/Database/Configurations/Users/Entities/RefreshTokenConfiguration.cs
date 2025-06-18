@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Users.Entities;
+namespace Infrastructure.Database.Configurations.Users.Entities;
 
 internal class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
@@ -16,9 +16,7 @@ internal class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken
         builder.HasKey(rt => rt.Id);
 
         builder.Property(rt => rt.Token)
-            .IsRequired(); 
-
-
+            .IsRequired();
 
         builder.Property(rt => rt.ExpiresOnUtc)
             .IsRequired();
@@ -29,6 +27,11 @@ internal class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken
 
         builder.Property(rt => rt.RevokedOnUtc)
             .IsRequired(false);
+
+        builder.HasIndex(x => x.Token)
+            .IsUnique();
+
+        builder.HasIndex(x => x.UserId);
 
         builder.HasOne(rt => rt.User)
             .WithMany()

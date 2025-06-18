@@ -2,11 +2,11 @@ using Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Users.Entities;
+namespace Infrastructure.Database.Configurations.Users.Entities;
 
-internal sealed class EducationConfiguration : IEntityTypeConfiguration<Education>
+internal sealed class ExperienceConfiguration : IEntityTypeConfiguration<Experience>
 {
-    public void Configure(EntityTypeBuilder<Education> builder)
+    public void Configure(EntityTypeBuilder<Experience> builder)
     {
         builder.HasKey(e => e.Id);
 
@@ -24,12 +24,12 @@ internal sealed class EducationConfiguration : IEntityTypeConfiguration<Educatio
         builder.Property(e => e.EndDate)
             .IsRequired(false);
 
-        builder.Property(e => e.University)
+        builder.Property(e => e.CompanyName)
             .IsRequired()
             .HasMaxLength(100);
 
         builder.HasOne(e => e.User)
-            .WithMany(u => u.Educations)
+            .WithMany(u => u.Experiences)
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }

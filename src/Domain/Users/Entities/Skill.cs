@@ -3,7 +3,7 @@ using SharedKernel;
 
 namespace Domain.Users.Entities;
 
-public class Skill : Entity
+public class Skill : Entity 
 {
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
@@ -24,6 +24,7 @@ public class Skill : Entity
         Description = description?.Trim() ?? string.Empty;
         Category = category;
     }
+
 }
 
 public enum SkillCategory

@@ -4,7 +4,8 @@ using Application.Abstractions.Messaging;
 using Application.Options;
 using Domain.Users;
 using Domain.Users.Entities;
-
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,30 +15,44 @@ namespace Application.Users.Login;
 
 public sealed class LoginUserCommandHandler
                 (IApplicationDbContext context,
-                 IPasswordHasher passwordHasher,
+                 UserManager<User> userManager,
                  ITokenProvider tokenProvider,
                  ITokenWriterCookies tokenWriterCookies,
+                 IHttpContextAccessor httpContextAccessor,
                  IOptions<JwtOptions> jwtOptions,
-                 ILogger<LoginUserCommandHandler> logger) : ICommandHandler<LoginUserCommand, LoginUserResponse> 
+                 ILogger<LoginUserCommandHandler> logger ) : ICommandHandler<LoginUserCommand, LoginUserResponse>
 {
-    private readonly JwtOptions _jwtOptions = jwtOptions.Value; 
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public async Task<Result<LoginUserResponse>> Handle(LoginUserCommand command, 
-                         CancellationToken cancellationToken = default)
+    public async Task<Result<LoginUserResponse>> Handle(LoginUserCommand command,
+                                                        CancellationToken cancellationToken = default)
     {
-        // check if email exists :
-        User? user = await context.Users
-            .FirstOrDefaultAsync(u => u.EmailAddress.Email == command.Email, cancellationToken);
+        User? user = await userManager.FindByEmailAsync(command.Email);
 
-        if (user is null || !passwordHasher.Verify(command.Password, user.PasswordHash))
+        if (user is null)
         {
             logger.LogWarning("Login attempt failed for email : {Email}", command.Email);
             return Result.Failure<LoginUserResponse>(UserErrors.IncorrectEmailOrPassword);
         }
-
-        if (!user.EmailAddress.IsVerified())
+        if (await userManager.IsLockedOutAsync(user))
         {
-            logger.LogWarning("User with email {Email} has not verified their email address.", command.Email);
+            logger.LogWarning("Login attempt for locked-out account: {Email}", command.Email);
+            return Result.Failure<LoginUserResponse>(UserErrors.AccountLockedOut);
+        }
+
+        if (string.IsNullOrEmpty(command.Password) || !await userManager.CheckPasswordAsync(user, command.Password))
+        {
+            logger.LogWarning("Login attempt failed for email: {Email} - Incorrect password", command.Email);
+            await userManager.AccessFailedAsync(user); // increment failed access count
+            return Result.Failure<LoginUserResponse>(UserErrors.IncorrectEmailOrPassword);
+        }
+
+        // if succefully logged in , reset the failed access count
+        await userManager.ResetAccessFailedCountAsync(user);
+
+        if (!user.EmailConfirmed)
+        {
+            logger.LogWarning("Login attempt failed for email: {Email} - Email not confirmed", command.Email);
             return Result.Failure<LoginUserResponse>(UserErrors.EmailIsNotVerified);
         }
 
@@ -54,12 +69,16 @@ public sealed class LoginUserCommandHandler
             logger.LogError("Failed to generate refresh token for user with email: {Email}", command.Email);
             return Result.Failure<LoginUserResponse>(UserErrors.TokenGenerationFailed);
         }
+        string? currentIp = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+        string? currentUserAgent = httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
 
-       
         var refreshTokenEntity = new RefreshToken(
             refreshToken,
             user.Id,
-            DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays));
+            DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays) ,
+            currentIp ,
+            currentUserAgent    
+            );
 
         context.RefreshTokens.Add(refreshTokenEntity);
         try
@@ -84,11 +103,11 @@ public sealed class LoginUserCommandHandler
             AccessToken: accessToken,
             Firstname: user.Name.FirstName,
             Lastname: user.Name.LastName,
-            Email: user.EmailAddress.Email,
+            Email: user.Email!,
             ProfilePictureUrl: user.ProfilePictureUrl.ProfilePictureLink,
             IsMentor: user.Status.IsMentor,
             MentorActive: user.Status.IsMentor && user.Status.IsActive
-        ); 
+        );
 
 
         return Result.Success(response);

@@ -1,3 +1,5 @@
+using Amazon.SimpleEmail;
+using Amazon.SimpleEmail.Model;
 using DotNet.Testcontainers.Builders;
 using FluentEmail.Core.Interfaces;
 using Infrastructure.Database;
@@ -8,6 +10,10 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
+using Respawn;
+using System.Data;
+using System.Data.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
@@ -18,23 +24,31 @@ namespace IntegrationsTests.Abstractions;
 
 public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:17")
-        .WithDatabase("MentorMentee__test")
-        .WithUsername("postgres")
-        .WithPassword("postgres")
-        .Build();
+    private readonly PostgreSqlContainer _dbContainer;
 
-    public async Task InitializeAsync()
+    private Respawner _respawner = default!;
+    private string _connectionString = default!;
+    private DbConnection _dbConnection = default!;
+
+    public List<SendEmailRequest> CapturedEmails { get; private set; } = new();
+
+    public IntegrationTestsWebAppFactory()
     {
-        await _dbContainer.StartAsync();
-    }
+        _dbContainer = new PostgreSqlBuilder()
+            .WithImage("postgres:latest")
+            .WithDatabase("MentorMentee__test")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .Build();
 
+        // Start the container and set the connection string synchronously
+        _dbContainer.StartAsync().GetAwaiter().GetResult();
+        _connectionString = _dbContainer.GetConnectionString();
+
+        Environment.SetEnvironmentVariable("ConnectionStrings:Database", _connectionString);
+    }
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Corrected the environment variable key to "ConnectionStrings:Database"
-        Environment.SetEnvironmentVariable("ConnectionStrings:Database",
-            _dbContainer.GetConnectionString());
 
         builder.ConfigureTestServices(services =>
         {
@@ -49,49 +63,98 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseNpgsql(_dbContainer.GetConnectionString());
+                options.UseNpgsql(_connectionString);
             });
 
             services.AddAuthentication(TestAuthHandler.AuthenticationScheme)
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                     TestAuthHandler.AuthenticationScheme, options => { });
-               
-            // IFluentEmail itself dosnet send the emails : 
-            // it delegate that to FluentEmail.Core.Interfaces.ISender
-            // ==> we are mocking that ISender 
 
-            services.RemoveAll<ISender>();
-            services.AddSingleton<CapturingSender>();
-            services.AddSingleton<ISender>(sp => sp.GetRequiredService<CapturingSender>());
 
-            services.AddFluentEmail("testdefault@example.com");
+            descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAmazonSimpleEmailService));
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
+
+            var mockSes = CaptureAmazonSESServiceMock.CreateMock(out List<SendEmailRequest> capturedEmails);
+            CapturedEmails = capturedEmails;
+            services.AddSingleton<IAmazonSimpleEmailService>(mockSes);
+
+
+
+
         });
+
+
     }
 
-    public HttpClient CreateAuthenticatedClient(Guid? userId = null, string? email = null, bool isEmailVerified = true, IEnumerable<Claim>? additionalClaims = null)
+
+    public HttpClient CreateAuthenticatedClient(Guid? userId = null, string? email = null, bool isEmailVerified = true)
     {
         var client = CreateClient();
-        var testUserId = userId ?? Guid.NewGuid();
-        var testEmail = email ?? "testuser@example.com";
 
-        var claims = new List<Claim>
+        var claims = new List<object>
         {
-            new(JwtRegisteredClaimNames.Sub, testUserId.ToString()),
-            new(JwtRegisteredClaimNames.Email, testEmail),
-            new("IsEmailVerified", isEmailVerified.ToString().ToLowerInvariant())
+            new { Type = JwtRegisteredClaimNames.Sub, Value = (userId ?? Guid.NewGuid()).ToString() },
         };
 
-        if (additionalClaims != null)
-        {
-            claims.AddRange(additionalClaims);
-        }
+        client.DefaultRequestHeaders.Add(
+            TestAuthHandler.TestUserClaimsHeader,
+            JsonSerializer.Serialize(claims));
 
-        client.DefaultRequestHeaders.Add(TestAuthHandler.TestUserClaimsHeader, JsonSerializer.Serialize(claims.Select(c => new { c.Type, c.Value })));
         return client;
     }
 
+
+
+    public async Task InitializeAsync()
+    {
+        await _dbContainer.StartAsync();
+        //using (var scope = Services.CreateScope())
+        //{
+        //    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        //    await dbContext.Database.MigrateAsync();
+        //}
+        //await InitializeDbRespawner();
+    }
+
+
     public async Task DisposeAsync()
     {
+        //await _dbContainer.StopAsync();
+
+        //if (_dbConnection?.State == ConnectionState.Open)
+        //{
+        //    await _dbConnection.CloseAsync();
+        //}
+        //_dbConnection?.Dispose();
+
+        //NpgsqlConnection.ClearAllPools();
+
         await _dbContainer.StopAsync();
+        await _dbContainer.DisposeAsync();
     }
+
+    public async Task ResetDatabase()
+    {
+
+        //await _respawner.ResetAsync(_dbConnection);
+    }
+
+
+    private async Task InitializeDbRespawner()
+    {
+        _connectionString = _dbContainer.GetConnectionString();
+        _dbConnection = new NpgsqlConnection(_connectionString);
+        await _dbConnection.OpenAsync();
+
+        _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
+        {
+            DbAdapter = DbAdapter.Postgres,
+            SchemasToInclude = new[] { "public" }
+        });
+    }
+
+
 }

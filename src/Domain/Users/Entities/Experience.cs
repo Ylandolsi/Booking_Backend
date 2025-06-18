@@ -18,32 +18,15 @@ public class Experience : Entity
 
     private Experience() { }
     
-    public static Result<Experience> Create(
-        string title,
-        Guid userId,
-        string companyName,
-        DateTime startDate,
-        DateTime? endDate ,
-        string? description)
-        
+
+    public Experience(string title,
+                      string description,
+                      string companyName,
+                      Guid userId,
+                      DateTime startDate,
+                      DateTime? endDate = null)
     {
-        if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure<Experience>(ExperienceErrors.InvalidTitle);
-
-        if (string.IsNullOrWhiteSpace(companyName))
-            return Result.Failure<Experience>(ExperienceErrors.InvalidCompanyName);
-
-        if (endDate.HasValue && endDate < startDate)
-            return Result.Failure<Experience>(ExperienceErrors.InvalidEndDate);
-
-        var experience = new Experience(title, description, companyName, userId,startDate ,  endDate);
-        return Result.Success(experience);
-    }
-    public Experience( string title , string description,
-                     string companyName, Guid userId, DateTime startDate ,  DateTime? endDate = null)
-    {
-    
-
+   
         Title = title?.Trim() ?? string.Empty ;
         Description = description?.Trim() ?? string.Empty;
         StartDate = startDate;
@@ -53,21 +36,19 @@ public class Experience : Entity
         IsCurrent = !endDate.HasValue;
     }
 
-    public Result Update(string title, string companyName, DateTime startDate, DateTime? endDate, string? description)
+    public void Update(string title,
+                       string companyName,
+                       DateTime startDate,
+                       DateTime? endDate,
+                       string? description)
     {
-        if (string.IsNullOrWhiteSpace(title))
-            return Result.Failure(ExperienceErrors.InvalidTitle);
-        if (string.IsNullOrWhiteSpace(companyName))
-            return Result.Failure(ExperienceErrors.InvalidCompanyName);
-        if (endDate.HasValue && endDate < startDate)
-            return Result.Failure(ExperienceErrors.InvalidEndDate);
         Title = title.Trim();
         CompanyName = companyName.Trim();
         StartDate = startDate;
         EndDate = endDate;
         Description = description?.Trim() ?? string.Empty;
         IsCurrent = !endDate.HasValue;
-        return Result.Success();
+        
     }
 
     public Result Complete(DateTime endDate)
@@ -79,6 +60,8 @@ public class Experience : Entity
         IsCurrent = false;
         return Result.Success();
     }
+
+
 }
 
 public static class ExperienceErrors

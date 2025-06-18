@@ -4,7 +4,8 @@ using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Verification;
 using Domain.Users;
-using Domain.Users.Entities; 
+using Domain.Users.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
@@ -15,86 +16,54 @@ namespace Application.Users.ReSendVerification;
 
 
 
-internal sealed class ReSendVerificationEmailCommandHandler(
-    IApplicationDbContext context,
-    ILogger<ReSendVerificationEmailCommandHandler> logger,
-    IEmailVerificationLinkFactory emailVerificationLinkFactory,
-    IRegisterVerificationJob registerVerificationJob) 
-    : ICommandHandler<ReSendVerificationEmailCommand, bool>{
+internal sealed class ReSendVerificationEmailCommandHandler(UserManager<User> userManager,
+                                                            ILogger<ReSendVerificationEmailCommandHandler> logger,
+                                                            IEmailVerificationLinkFactory emailVerificationLinkFactory,
+                                                            IRegisterVerificationJob registerVerificationJob)
+    : ICommandHandler<ReSendVerificationEmailCommand>
+{
 
-    public async Task<Result<bool>> Handle(ReSendVerificationEmailCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ReSendVerificationEmailCommand command, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling ReSendVerificationEmailCommand for user ID: {UserId}", command.UserId);
+        logger.LogInformation("Handling ReSendVerificationEmailCommand for user Email: {Email}", command.Email);
 
 
-        User? user = await context.Users
-            .FirstOrDefaultAsync(u => u.Id == command.UserId, cancellationToken);
+        User? user = await userManager.FindByEmailAsync(command.Email);
 
         if (user == null)
         {
-            logger.LogWarning("User with ID {UserId} not found", command.UserId);
-            return Result.Failure<bool>(UserErrors.NotFound(command.UserId));
+            logger.LogWarning("User with Email {Email} not found", command.Email);
+            return Result.Failure(UserErrors.NotFoundByEmail(command.Email));
         }
 
-        logger.LogInformation("User with ID {UserId} found, checking email verification status for {Email}", command.UserId, user.EmailAddress.Email);
+        logger.LogInformation("Checking email verification status for {Email}", command.Email);
 
-        if (user.EmailAddress.Verified)
+        if (user.EmailConfirmed)
         {
-            logger.LogInformation("User with email {Email} already verified", user.EmailAddress.Email);
-            return Result.Failure<bool>(VerifyEmailErrors.EmailAlreadyVerified) ;
+            logger.LogInformation("User with Email {Email} already has a verified email address", command.Email);
+            return Result.Failure(VerifyEmailErrors.AlreadyVerified);
         }
 
-        EmailVerificationToken? emailVerificationToken = await context.EmailVerificationTokens
-            .FirstOrDefaultAsync(t => t.UserId == user.Id, cancellationToken);
-
-        if (emailVerificationToken != null && !emailVerificationToken.IsStillValid())
-        {
-            logger.LogInformation("Existing email verification token found for user ID {UserId} but it has expired. A new one will be created.", user.Id);
-            context.EmailVerificationTokens.Remove(emailVerificationToken);
-            emailVerificationToken = null;
-        }
-
-        if (emailVerificationToken == null)
-        {
-            logger.LogInformation("No valid email verification token found for user ID {UserId}. Creating a new one.", user.Id);
-            emailVerificationToken = new EmailVerificationToken(user.Id);
-            context.EmailVerificationTokens.Add(emailVerificationToken);
-            try
-            {
-                await context.SaveChangesAsync(cancellationToken);
-                logger.LogInformation("New email verification token created and saved for user ID {UserId}", user.Id);
-            }
-            catch (DbUpdateException ex)
-            {
-                logger.LogError(ex, "Failed to save new email verification token for user ID: {UserId}", user.Id);
-                return Result.Failure<bool>(VerifyEmailErrors.FailedToSaveToken);
-            }
-        }
-        else
-        {
-            logger.LogInformation("Valid email verification token found for user ID {UserId}", user.Id);
-
-            emailVerificationToken.UpdateExpiration();
-            logger.LogInformation("Email verification token for user ID {UserId} updated with new expiration time", user.Id);
-        }
-
-        logger.LogInformation("Preparing to send verification email to {Email}", user.EmailAddress.Email);
-
-        string verificationEmailLink = emailVerificationLinkFactory.Create(emailVerificationToken);
-        logger.LogInformation("Verification email link created for email {Email}: {Link}", user.EmailAddress.Email, verificationEmailLink);
+        string emailVerificationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        string verificationEmailLink = emailVerificationLinkFactory.Create(emailVerificationToken, command.Email);
+        logger.LogInformation("Sending verification email to {Email}", command.Email);
 
         try
         {
-            await registerVerificationJob.Send(user.EmailAddress.Email, verificationEmailLink);
-            logger.LogInformation("Verification email re-send job enqueued for {Email}", user.EmailAddress.Email);
+            // background job
+            await registerVerificationJob.Send(
+                command.Email,
+                verificationEmailLink
+            );
+
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to enqueue re-send verification email to {UserEmail}", user.EmailAddress.Email);
-            
-            return Result.Failure<bool>(VerifyEmailErrors.SendingEmailFailed) ;
+            logger.LogError(ex, "Failed to enqueue verification email to {UserEmail}", command.Email);
+            return Result.Failure(VerifyEmailErrors.SendingEmailFailed);
+
         }
 
-        return Result.Success(true);
+        return Result.Success();
     }
 }
