@@ -15,11 +15,11 @@ namespace Application.Users.Register;
 
 public static class RegisterUserErrors
 {
-    public static readonly Error EmailNotUnique = Error.Problem(
+    public static readonly Error EmailNotUnique = Error.Conflict(
         "Users.EmailNotUnique",
         "The provided email is not unique");
 
-    public static Error UserRegistrationFailed(string message) => Error.Problem(
+    public static Error UserRegistrationFailed(string message) => Error.Failure(
         "Users.UserRegistrationFailed",
         message);
 }

@@ -13,9 +13,6 @@ public static class UserErrors
         "Users.NotFoundByEmail",
         $"The user with the email = '{email}' was not found");
 
-    public static Error Unauthorized() => Error.Failure(
-        "Users.Unauthorized",
-        "You are not authorized to perform this action.");
 
     public static readonly Error EmailIsNotVerified = Error.Problem(
         "Users.EmailIsNotVerified",
@@ -34,16 +31,10 @@ public static class UserErrors
         "Users.TokenGenerationFailed",
         "Failed to generate a token for the user. Please try again later.");
 
-    public static readonly Error PasswordCannotBeEmpty = Error.Problem(
-        "Users.PasswordCannotBeEmpty",
-        "The password cannot be empty. Please provide a valid password.");
+    public static Error Unauthorized() => Error.Unauthorized(
+    "Users.Unauthorized",
+    "You are not authorized to perform this action.");
 
 
-
-
-    public static Error InvalideX(string x)
-        => Error.Problem(
-            $"Users.Invalide{x}",
-            $"The provided value for {x} is invalid. Please provide a valid {x}.");
 
 }

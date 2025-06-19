@@ -14,7 +14,7 @@ internal sealed class Logout : IEndpoint
         app.MapPost(UsersEndpoints.Logout, async (
             IUserContext userContext,
             ICommandHandler<LogoutCommand, bool> handler,
-            CancellationToken cancellationToken) =>
+            CancellationToken cancellationToken = default ) =>
         {
             Guid userId;
             try

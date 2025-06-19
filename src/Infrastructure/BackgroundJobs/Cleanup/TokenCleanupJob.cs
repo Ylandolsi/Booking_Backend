@@ -30,11 +30,18 @@ public class TokenCleanupJob : ITokenCleanupJob
         context?.WriteLine("Starting token cleanup job...");
         _logger.LogInformation("Hangfire Job: Starting token cleanup job...");
 
+        // provided by the background job server ( eg hangfire)
+        // to shutdown gracefully 
+        var cancellationToken = context?.CancellationToken.ShutdownToken ?? CancellationToken.None;
+
         var utcNow = DateTime.UtcNow;
         int refreshTokensRemovedCount = 0;
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
+
             // Remove revoked or expired refresh tokens
             var oldRefreshTokens = await _context.RefreshTokens
                 .Where(rt => rt.RevokedOnUtc.HasValue || rt.ExpiresOnUtc < utcNow)
@@ -53,12 +60,18 @@ public class TokenCleanupJob : ITokenCleanupJob
                 _logger.LogInformation("Hangfire Job: No revoked or expired refresh tokens found.");
             }
 
-            if ( refreshTokensRemovedCount > 0)
+            if (refreshTokensRemovedCount > 0)
             {
                 await _context.SaveChangesAsync(CancellationToken.None); // Assuming CancellationToken.None is acceptable for a background job
                 context?.WriteLine("Successfully removed tokens from the database.");
-                _logger.LogInformation("Hangfire Job: Successfully removed {RefreshTokenCount} refresh tokens." ,  refreshTokensRemovedCount);
+                _logger.LogInformation("Hangfire Job: Successfully removed {RefreshTokenCount} refresh tokens.", refreshTokensRemovedCount);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            // The job was gracefully canceled during a server shutdown.
+            context?.WriteLine("Token cleanup job was canceled.");
+            _logger.LogWarning("Hangfire Job: Token cleanup job was canceled during shutdown.");
         }
         catch (Exception ex)
         {

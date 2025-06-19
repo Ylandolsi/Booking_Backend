@@ -11,7 +11,7 @@ namespace Application.Users.Authentication.Verification.VerifyEmail;
 public class VerifyEmailCommandHandler(UserManager<User> userManager,
                                        ILogger<VerifyEmailCommandHandler> logger) : ICommandHandler<VerifyEmailCommand>
 {
-    public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken )
     {
         logger.LogInformation("Handling VerifyEmailCommand for email: {Email}", command.Email);
 

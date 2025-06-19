@@ -11,12 +11,12 @@ public class Education : Entity
     public DateTime? EndDate { get; private set; }
     public string University { get; private set; } = string.Empty;
     public bool IsCurrent { get; private set; }
-    
+
     public Guid UserId { get; set; }
     public User User { get; set; } = default!;
 
     private Education() { }
-    
+
 
     public Education(string title,
                      string description,
@@ -38,7 +38,7 @@ public class Education : Entity
     public Result Complete(DateTime endDate)
     {
         if (endDate < StartDate)
-            return Result.Failure(Error.Problem("Education.InvalidEndDate", "End date cannot be before start date"));
+            return Result.Failure(EducationErrors.InvalidEndDate);
 
         EndDate = endDate;
         IsCurrent = false;
@@ -46,4 +46,11 @@ public class Education : Entity
     }
 
 
+}
+
+
+public static class EducationErrors
+{
+    public static readonly Error InvalidEndDate = Error.Problem("Education.InvalidEndDate", "End date cannot be before start date");
+    public static readonly Error EducationNotFound = Error.NotFound("Education.NotFound", "Education not found");
 }

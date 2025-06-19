@@ -12,7 +12,7 @@ public static class VerifyEmailErrors
     public static readonly Error TokenExpired = Error.Problem("User.Email.Verification.Token.Expired",
                                                         "Email verification token has expired.");
 
-    public static readonly Error TokenNotFound = Error.Problem("User.Email.Verification.Token.NotFound",
+    public static readonly Error TokenNotFound = Error.NotFound("User.Email.Verification.Token.NotFound",
         "Email verification token not found.");
 
     public static readonly Error AlreadyVerified = Error.Problem("User.Email.Already.Verified",

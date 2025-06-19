@@ -20,7 +20,7 @@ internal sealed class Register : IEndpoint
         app.MapPost(UsersEndpoints.Register, async (
             Request request,
             ICommandHandler<RegisterUserCommand> handler,
-            CancellationToken cancellationToken) =>
+            CancellationToken cancellationToken = default) =>
         {
 
             var command = new RegisterUserCommand(

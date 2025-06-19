@@ -43,8 +43,13 @@ namespace Infrastructure.BackgroundJobs.SendingVerificationEmail
             context?.WriteLine($"Attempting to send verification email to: {userEmail}");
             _logger.LogInformation("Hangfire Job: Attempting to send verification email to {Email}", userEmail);
 
+            // provided by the background job server ( eg hangfire)
+            // to shutdown gracefully 
+            var cancellationToken = context?.CancellationToken.ShutdownToken ?? CancellationToken.None;
+
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var request = new SendEmailRequest
                 {
                     Source = _emailOptions.SenderEmail,
@@ -78,6 +83,13 @@ namespace Infrastructure.BackgroundJobs.SendingVerificationEmail
 
                 //     throw new InvalidOperationException($"Failed to send email to {userEmail}. SES response status: {response.ResponseMetadata.ChecksumValidationStatus}");
                 // }
+            }
+            catch (OperationCanceledException)
+            {
+                // The job was gracefully canceled during a server shutdown.
+                context?.WriteLine("Verification email job was canceled.");
+                _logger.LogWarning("Hangfire Job: Verification email job was canceled during shutdown.");
+                return; // Exit gracefully
             }
             catch (AmazonSimpleEmailServiceException sesEx)
             {

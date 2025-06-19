@@ -20,12 +20,12 @@ public sealed class LoginUserCommandHandler
                  ITokenWriterCookies tokenWriterCookies,
                  IHttpContextAccessor httpContextAccessor,
                  IOptions<JwtOptions> jwtOptions,
-                 ILogger<LoginUserCommandHandler> logger ) : ICommandHandler<LoginUserCommand, LoginUserResponse>
+                 ILogger<LoginUserCommandHandler> logger) : ICommandHandler<LoginUserCommand, LoginUserResponse>
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
     public async Task<Result<LoginUserResponse>> Handle(LoginUserCommand command,
-                                                        CancellationToken cancellationToken = default)
+                                                        CancellationToken cancellationToken)
     {
         User? user = await userManager.FindByEmailAsync(command.Email);
 
@@ -75,12 +75,12 @@ public sealed class LoginUserCommandHandler
         var refreshTokenEntity = new RefreshToken(
             refreshToken,
             user.Id,
-            DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays) ,
-            currentIp ,
-            currentUserAgent    
+            DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays),
+            currentIp,
+            currentUserAgent
             );
 
-        context.RefreshTokens.Add(refreshTokenEntity);
+        await context.RefreshTokens.AddAsync(refreshTokenEntity);
         try
         {
             await context.SaveChangesAsync(cancellationToken);

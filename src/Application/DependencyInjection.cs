@@ -10,6 +10,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
+        // thanks to Scrutor  
+
         // find all classes that implement IQueryHandler<,>, ICommandHandler<>, and ICommandHandler<,>
         // and register them as their implemented interfaces with scoped lifetime
         services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))

@@ -39,7 +39,7 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
 
     public async Task<Result<string>> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
     {
-        var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken);
+        var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken, cancellationToken);
         if (refreshToken == null)
         {
             return Result.Failure<string>(RefreshTokenErrors.Unauthorized);

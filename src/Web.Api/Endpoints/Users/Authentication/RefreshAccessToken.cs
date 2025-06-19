@@ -15,7 +15,7 @@ internal sealed class RefreshAccessToken : IEndpoint
         app.MapPost(UsersEndpoints.RefreshAccessToken, async (
             IUserContext userContext,
             ICommandHandler<RefreshAccessTokenCommand, string> handler,
-            CancellationToken cancellationToken) =>
+            CancellationToken cancellationToken = default ) =>
         {
             var refreshToken = userContext.RefreshToken;
 
