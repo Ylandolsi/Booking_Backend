@@ -23,6 +23,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
 using SharedKernel;
 using System.Text;
 
@@ -117,7 +118,7 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.JwtOptionsKey));
         services.Configure<GoogleOAuthOptions>(configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.EmailOptionsKey));
-        services.Configure<FrontendApplicationOptions>(configuration.GetSection(FrontendApplicationOptions.FrontEndOptionsKey)); 
+        services.Configure<FrontendApplicationOptions>(configuration.GetSection(FrontendApplicationOptions.FrontEndOptionsKey));
         return services;
     }
 
@@ -193,7 +194,17 @@ public static class DependencyInjection
             Credentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey),
             Region = Amazon.RegionEndpoint.GetBySystemName(awsRegion)
         });
-        services.AddAWSService<IAmazonSimpleEmailService>();
+        services.AddHttpClient<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>()
+            .AddStandardResilienceHandler(options =>
+            {
+                // Configure retry policy
+                options.Retry.MaxRetryAttempts = 3;
+                options.Retry.BackoffType = DelayBackoffType.Exponential;
+                options.Retry.UseJitter = true; // smooth the retry attempts
+
+
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
+            });
 
         return services;
     }

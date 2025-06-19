@@ -89,7 +89,6 @@ namespace Infrastructure.BackgroundJobs.SendingVerificationEmail
                 // The job was gracefully canceled during a server shutdown.
                 context?.WriteLine("Verification email job was canceled.");
                 _logger.LogWarning("Hangfire Job: Verification email job was canceled during shutdown.");
-                return; // Exit gracefully
             }
             catch (AmazonSimpleEmailServiceException sesEx)
             {
