@@ -76,6 +76,7 @@ app.UseRequestContextLogging();
 app.UseSerilogRequestLogging();
 
 app.UseExceptionHandler();
+app.UseCancellationMiddleware();
 
 RecurringJobs.UseTokenCleanup();
 

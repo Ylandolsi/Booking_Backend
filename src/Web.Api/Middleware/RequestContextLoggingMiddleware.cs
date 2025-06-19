@@ -34,13 +34,13 @@ public class RequestContextLoggingMiddleware(RequestDelegate next)
     // REMARK: This middleware should be registered before SerilogRequestLoggingMiddleware
 
     // EXP : 
-        /* All logs for a slow request 
-        => help identify the time spent in each part of the request:
+    /* All logs for a slow request 
+    => help identify the time spent in each part of the request:
 
-            CorrelationId = "slow-req-456"
+        CorrelationId = "slow-req-456"
 
-            10:30:01.000 - Request started
-            10:30:01.500 - Database query took 500ms (SLOW!)
-            10:30:02.000 - Request completed (1000ms total)
-        */
+        10:30:01.000 - Request started
+        10:30:01.500 - Database query took 500ms (SLOW!)
+        10:30:02.000 - Request completed (1000ms total)
+    */
 }

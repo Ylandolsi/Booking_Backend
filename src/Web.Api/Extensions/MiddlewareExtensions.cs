@@ -4,6 +4,12 @@ namespace Web.Api.Extensions;
 
 public static class MiddlewareExtensions
 {
+    public static IApplicationBuilder UseCancellationMiddleware(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<CancellationMiddleware>();
+
+        return app;
+    }
     public static IApplicationBuilder UseRequestContextLogging(this IApplicationBuilder app)
     {
         app.UseMiddleware<RequestContextLoggingMiddleware>();
