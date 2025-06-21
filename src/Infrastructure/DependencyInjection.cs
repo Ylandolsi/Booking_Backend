@@ -103,7 +103,11 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(
             options => options
                 .UseNpgsql(connectionString, npgsqlOptions =>
-                    npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default))
+                {
+                    npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
+                    npgsqlOptions.EnableRetryOnFailure(5);
+
+                })
                 .UseSnakeCaseNamingConvention());
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
@@ -187,6 +191,20 @@ public static class DependencyInjection
                 options.ClientSecret = googleOptions.ClientSecret!;
             });
 
+        /* 
+                .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+                    {
+                    });
+                    
+                //Add resilience to the Google authentication handler's HttpClient
+                services.AddHttpClient(GoogleDefaults.AuthenticationScheme)
+                    .AddStandardResilienceHandler(options =>
+                    {
+                        options.Retry.MaxRetryAttempts = 3;
+                        options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
+                    });
+                    */
+
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();
         services.AddSingleton<ITokenProvider, TokenProvider>();
@@ -245,7 +263,7 @@ public static class DependencyInjection
 
     public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
     {
-        services.AddScoped< IProcessOutboxMessagesJob , ProcessOutboxMessagesJob>();
+        services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
         services.AddScoped<IVerificationEmailForRegistrationJob, VerificationEmailForRegistrationJob>();
         services.AddScoped<ITokenCleanupJob, TokenCleanupJob>();
 
