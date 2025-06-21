@@ -17,10 +17,10 @@ internal sealed class ReSendVerificationEmail : IEndpoint
     {
         app.MapPost(UsersEndpoints.ResendVerificationEmail, async (
                 Request request,
-                ICommandHandler<ReSendVerificationEmailCommand> handler,
+                ICommandHandler<ReSendVerificationCommand> handler,
                 CancellationToken cancellationToken = default) =>
             {
-                var command = new ReSendVerificationEmailCommand(request.Email);
+                var command = new ReSendVerificationCommand(request.Email);
                 Result result = await handler.Handle(command, cancellationToken);
                 return result.Match(
                     () => Results.Ok(),

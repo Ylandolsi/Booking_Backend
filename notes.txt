@@ -1,0 +1,1 @@
+In your integration test environment, which uses `WebApplicationFactory`, the full background job processing host is not started by default. The test setup creates an in-memory version of your application to handle HTTP requests, but it doesn't automatically start long-running, out-of-request processes like the Hangfire scheduler.

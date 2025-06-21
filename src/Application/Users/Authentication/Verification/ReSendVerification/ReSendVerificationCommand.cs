@@ -2,5 +2,5 @@ using Application.Abstractions.Messaging;
 
 namespace Application.Users.ReSendVerification;
 
-public sealed record ReSendVerificationEmailCommand(string Email)
+public sealed record ReSendVerificationCommand(string Email)
     : ICommand;

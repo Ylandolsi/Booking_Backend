@@ -22,7 +22,31 @@ internal sealed class DomainEventsDispatcher(IServiceProvider serviceProvider) :
                 domainEventType,
                 et => typeof(IDomainEventHandler<>).MakeGenericType(et));
 
+            // since handlers when retrieved from DI are objects 
+            // and c#  does not allow using runtime types in generics directly,
+            // objects have only these methods:
+            // - GetType()
+            // - GetHashCode()
+            // - Equals()
+            //..
+            // we cant call handler.handle directly 
+            // and we cannot cast it handler = (IDomainEventHandler<domainEventType>)handler;
             IEnumerable<object?> handlers = scope.ServiceProvider.GetServices(handlerType);
+            // so we are left with using reflection to invoke the method
+            // the compiler needs to know the type at compile time, not runtime
+            // to avoid changes in the type system at runtime
+
+            /*** exp :
+                * string message = "Hello World";
+                * Type type = message.GetType(); // string
+                * type message ;  // ERROR! 'type' is a variable but is used like a type.
+                    ==: ILLEGAL: The compiler rejects this. It cannot use a variable 
+                    // as a type in this way.
+
+            ***/
+
+            // this casting doesnt work :  (IDomainEventHandler<domainEventType>)handler
+            // cuz "domainEventType" is a variable , we cannot use it directly in the generics 
 
             foreach (object? handler in handlers)
             {
@@ -30,19 +54,6 @@ internal sealed class DomainEventsDispatcher(IServiceProvider serviceProvider) :
                 {
                     continue;
                 }
-                // instead of using reflection directly, we use a wrapper to handle the type casting
-                // and method invocation, which is more efficient and cleaner.
-                /**
-                * This is ILLEGAL in C# - can't use 'domainEventType' (a runtime variable) in generics!
-                await (IDomainEventHandler<domainEventType>)handler.Handle(...);
-                
-                * Instead , we passed that domainEventType to HandlerWrapper
-                    which it will create a handlerWrapper Dynamically based on the type of the domain event ( reflecion ).
-                    
-                    this trick works because the HandlerWrapper is a generic class, and we can create a specific instance of it
-                    =>  typeof(HandlerWrapper<>).MakeGenericType(domainEventType)) 
-                    => will create HanderWrapper<domainEventType>
-                */
 
                 var handlerWrapper = HandlerWrapper.Create(handler, domainEventType);
 
@@ -57,9 +68,11 @@ internal sealed class DomainEventsDispatcher(IServiceProvider serviceProvider) :
 
         public static HandlerWrapper Create(object handler, Type domainEventType)
         {
+            // handlerWrapper<UserRegisteredEvent> 
             Type wrapperType = WrapperTypeDictionary.GetOrAdd(
                 domainEventType,
                 et => typeof(HandlerWrapper<>).MakeGenericType(et));
+
 
             return (HandlerWrapper)Activator.CreateInstance(wrapperType, handler);
         }
@@ -67,12 +80,9 @@ internal sealed class DomainEventsDispatcher(IServiceProvider serviceProvider) :
 
     private sealed class HandlerWrapper<T>(object handler) : HandlerWrapper where T : IDomainEvent
     {
-        // now we can safely cast the handler to IDomainEventHandler<T>
-        // because an instance of HandlerWrapper<T> is created with the appropriate type T
-        // so it can be used at compile time now 
-        
-        // T now is recognized at the compile time, not runtime
-        // and we can safely cast the handler to IDomainEventHandler<T>
+        // T now is know at compile time , after the generic type is created ( userRegisteredEvent )
+        // so we can cast the handler to IDomainEventHandler<T>
+        // and call the Handle method directly 
         private readonly IDomainEventHandler<T> _handler = (IDomainEventHandler<T>)handler;
 
         public override async Task Handle(IDomainEvent domainEvent, CancellationToken cancellationToken)

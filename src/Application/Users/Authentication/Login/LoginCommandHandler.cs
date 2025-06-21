@@ -13,18 +13,18 @@ using SharedKernel;
 
 namespace Application.Users.Login;
 
-public sealed class LoginUserCommandHandler
+public sealed class LoginCommandHandler
                 (IApplicationDbContext context,
                  UserManager<User> userManager,
                  ITokenProvider tokenProvider,
                  ITokenWriterCookies tokenWriterCookies,
                  IHttpContextAccessor httpContextAccessor,
                  IOptions<JwtOptions> jwtOptions,
-                 ILogger<LoginUserCommandHandler> logger) : ICommandHandler<LoginUserCommand, LoginUserResponse>
+                 ILogger<LoginCommandHandler> logger) : ICommandHandler<LoginCommand, LoginResponse>
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public async Task<Result<LoginUserResponse>> Handle(LoginUserCommand command,
+    public async Task<Result<LoginResponse>> Handle(LoginCommand command,
                                                         CancellationToken cancellationToken)
     {
         User? user = await userManager.FindByEmailAsync(command.Email);
@@ -32,19 +32,19 @@ public sealed class LoginUserCommandHandler
         if (user is null)
         {
             logger.LogWarning("Login attempt failed for email : {Email}", command.Email);
-            return Result.Failure<LoginUserResponse>(UserErrors.IncorrectEmailOrPassword);
+            return Result.Failure<LoginResponse>(UserErrors.IncorrectEmailOrPassword);
         }
         if (await userManager.IsLockedOutAsync(user))
         {
             logger.LogWarning("Login attempt for locked-out account: {Email}", command.Email);
-            return Result.Failure<LoginUserResponse>(UserErrors.AccountLockedOut);
+            return Result.Failure<LoginResponse>(UserErrors.AccountLockedOut);
         }
 
         if (string.IsNullOrEmpty(command.Password) || !await userManager.CheckPasswordAsync(user, command.Password))
         {
             logger.LogWarning("Login attempt failed for email: {Email} - Incorrect password", command.Email);
             await userManager.AccessFailedAsync(user); // increment failed access count
-            return Result.Failure<LoginUserResponse>(UserErrors.IncorrectEmailOrPassword);
+            return Result.Failure<LoginResponse>(UserErrors.IncorrectEmailOrPassword);
         }
 
         // if succefully logged in , reset the failed access count
@@ -53,21 +53,21 @@ public sealed class LoginUserCommandHandler
         if (!user.EmailConfirmed)
         {
             logger.LogWarning("Login attempt failed for email: {Email} - Email not confirmed", command.Email);
-            return Result.Failure<LoginUserResponse>(UserErrors.EmailIsNotVerified);
+            return Result.Failure<LoginResponse>(UserErrors.EmailIsNotVerified);
         }
 
         string accessToken = tokenProvider.GenrateJwtToken(user);
         if (string.IsNullOrEmpty(accessToken))
         {
             logger.LogError("Failed to generate access token for user with email: {Email}", command.Email);
-            return Result.Failure<LoginUserResponse>(UserErrors.TokenGenerationFailed);
+            return Result.Failure<LoginResponse>(UserErrors.TokenGenerationFailed);
         }
 
         string refreshToken = tokenProvider.GenerateRefreshToken();
         if (string.IsNullOrEmpty(refreshToken))
         {
             logger.LogError("Failed to generate refresh token for user with email: {Email}", command.Email);
-            return Result.Failure<LoginUserResponse>(UserErrors.TokenGenerationFailed);
+            return Result.Failure<LoginResponse>(UserErrors.TokenGenerationFailed);
         }
         string? currentIp = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
         string? currentUserAgent = httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
@@ -88,7 +88,7 @@ public sealed class LoginUserCommandHandler
         catch (DbUpdateException ex)
         {
             logger.LogError(ex, "Failed to save refresh token for user {UserId}", user.Id);
-            return Result.Failure<LoginUserResponse>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
+            return Result.Failure<LoginResponse>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
         }
 
 
@@ -97,7 +97,7 @@ public sealed class LoginUserCommandHandler
         tokenWriterCookies.WriteRefreshTokenAsHttpOnlyCookie(refreshToken);
 
 
-        var response = new LoginUserResponse
+        var response = new LoginResponse
         (
             UserId: user.Id,
             AccessToken: accessToken,

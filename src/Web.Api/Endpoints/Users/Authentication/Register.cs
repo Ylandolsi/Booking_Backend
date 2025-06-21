@@ -19,11 +19,11 @@ internal sealed class Register : IEndpoint
     {
         app.MapPost(UsersEndpoints.Register, async (
             Request request,
-            ICommandHandler<RegisterUserCommand> handler,
+            ICommandHandler<RegisterCommand> handler,
             CancellationToken cancellationToken = default) =>
         {
 
-            var command = new RegisterUserCommand(
+            var command = new RegisterCommand(
                 request.FirstName,
                 request.LastName,
                 request.Email,

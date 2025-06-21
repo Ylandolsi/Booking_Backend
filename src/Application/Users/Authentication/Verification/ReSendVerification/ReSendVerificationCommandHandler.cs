@@ -16,14 +16,13 @@ namespace Application.Users.ReSendVerification;
 
 
 
-internal sealed class ReSendVerificationEmailCommandHandler(UserManager<User> userManager,
-                                                            ILogger<ReSendVerificationEmailCommandHandler> logger,
-                                                            IEmailVerificationLinkFactory emailVerificationLinkFactory,
-                                                            IRegisterVerificationJob registerVerificationJob)
-    : ICommandHandler<ReSendVerificationEmailCommand>
+internal sealed class ReSendVerificationCommandHandler(UserManager<User> userManager,
+                                                       EmailVerificationSender emailVerificationSender,
+                                                       ILogger<ReSendVerificationCommandHandler> logger)
+    : ICommandHandler<ReSendVerificationCommand>
 {
 
-    public async Task<Result> Handle(ReSendVerificationEmailCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ReSendVerificationCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling ReSendVerificationEmailCommand for user Email: {Email}", command.Email);
 
@@ -44,24 +43,13 @@ internal sealed class ReSendVerificationEmailCommandHandler(UserManager<User> us
             return Result.Failure(VerifyEmailErrors.AlreadyVerified);
         }
 
-        string emailVerificationToken = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        string verificationEmailLink = emailVerificationLinkFactory.Create(emailVerificationToken, command.Email);
-        logger.LogInformation("Sending verification email to {Email}", command.Email);
-
         try
         {
-            // background job
-            await registerVerificationJob.Send(
-                command.Email,
-                verificationEmailLink
-            );
-
+            await emailVerificationSender.SendVerificationEmailAsync(user);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to enqueue verification email to {UserEmail}", command.Email);
             return Result.Failure(VerifyEmailErrors.SendingEmailFailed);
-
         }
 
         return Result.Success();

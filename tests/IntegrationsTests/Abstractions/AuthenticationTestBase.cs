@@ -1,6 +1,8 @@
-﻿using System.Net.Http.Json;
-using System.Text.RegularExpressions;
+﻿using Application.Abstractions.BackgroundJobs;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http.Json;
+using System.Text.RegularExpressions;
 
 namespace IntegrationsTests.Abstractions;
 
@@ -8,6 +10,12 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
 {
     protected AuthenticationTestBase(IntegrationTestsWebAppFactory factory) : base(factory)
     {
+    }
+
+    protected async Task TriggerOutboxProcess()
+    {
+        var outboxProcessor = _scope.ServiceProvider.GetRequiredService<IProcessOutboxMessagesJob>();
+        await outboxProcessor.ExecuteAsync(null);
     }
 
     protected async Task RegisterAndVerifyUser(string email, string password, bool verify = true)
@@ -24,18 +32,23 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         var registerResponse = await _client.PostAsJsonAsync("users/register", registrationPayload);
         registerResponse.EnsureSuccessStatusCode();
 
+        await TriggerOutboxProcess();
+
         if (!verify) return;
 
         await Task.Delay(TimeSpan.FromSeconds(2));
 
         var (token, parsedEmail) = ExtractTokenAndEmailFromEmail(email);
+
         Assert.NotNull(token);
         Assert.NotNull(parsedEmail);
+
         var verificationPayload = new { Email = parsedEmail, Token = token };
         var verifyResponse = await _client.PostAsJsonAsync("users/verify-email", verificationPayload);
 
         verifyResponse.EnsureSuccessStatusCode();
     }
+
 
     protected (string? Token, string? Email) ExtractTokenAndEmailFromEmail(string userEmail)
     {
@@ -46,6 +59,8 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
             sentEmail.Message.Body.Html.Data,
             @"href=['""](?<url>https?://[^'""]+/email-verification\?token=[^&]+&email=[^'""]+)['""]",
             RegexOptions.IgnoreCase);
+
+
 
         if (!match.Success) return (null, null);
 

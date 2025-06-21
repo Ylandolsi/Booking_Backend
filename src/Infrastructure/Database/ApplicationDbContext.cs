@@ -5,6 +5,7 @@ using Infrastructure.DomainEvents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using SharedKernel;
 
 namespace Infrastructure.Database;
@@ -32,6 +33,11 @@ public sealed class ApplicationDbContext
     public DbSet<UserSkill> UserSkills { get; set; }
     public DbSet<MentorMentee> UserMentors { get; set; }
 
+
+    // outbox messages
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
+
+
     // 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,21 +49,50 @@ public sealed class ApplicationDbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        // When should you publish domain events?
-        //
-        // 1. BEFORE calling SaveChangesAsync
-        //     - domain events are part of the same transaction
-        //     - immediate consistency
-        // 2. AFTER calling SaveChangesAsync
-        //     - domain events are a separate transaction
-        //     - eventual consistency
-        //     - handlers can fail
-
+        await ConvertDomainEventsToOutboxMessages();
         int result = await base.SaveChangesAsync(cancellationToken);
 
-        await PublishDomainEventsAsync();
-
         return result;
+    }
+
+    private async Task ConvertDomainEventsToOutboxMessages()
+    {
+        var domainEvents = ChangeTracker
+            .Entries<Entity>()
+            .Select(entry => entry.Entity)
+            .SelectMany(entity =>
+            {
+                List<IDomainEvent> events = entity.DomainEvents;
+                entity.ClearDomainEvents();
+                return events;
+            })
+            .ToList();
+
+        var userDomainEvents = ChangeTracker
+            .Entries<User>()
+            .Select(entry => entry.Entity)
+            .SelectMany(user =>
+            {
+                List<IDomainEvent> events = user.DomainEvents;
+                user.ClearDomainEvents();
+                return events;
+            })
+            .ToList();
+
+        domainEvents.AddRange(userDomainEvents);
+
+        var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
+            domainEvent.GetType().FullName!,
+            JsonConvert.SerializeObject(
+                domainEvent,
+                new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                }),
+            DateTime.UtcNow
+        )).ToList();
+
+        await OutboxMessages.AddRangeAsync(outboxMessages);
     }
 
 
@@ -107,9 +142,10 @@ public sealed class ApplicationDbContext
             domainEvents.AddRange(usersDomainEvents);
         }
 
-        if (domainEvents.Any())
-        {
-            await _domainEventsDispatcher.DispatchAsync(domainEvents);
-        }
+        //if (domainEvents.Any())
+        //{
+        //    await _domainEventsDispatcher.DispatchAsync(domainEvents);
+        //}
+        // apply outbox messages 
     }
 }

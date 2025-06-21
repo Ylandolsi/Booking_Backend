@@ -2,6 +2,7 @@
 using Domain.Users.Entities;
 using Domain.Users.JoinTables;
 using Microsoft.EntityFrameworkCore;
+using SharedKernel;
 
 namespace Application.Abstractions.Data;
 
@@ -18,6 +19,9 @@ public interface IApplicationDbContext
     public DbSet<UserLanguage> UserLanguages { get; set; }
     public DbSet<UserSkill> UserSkills { get; set; }
     public DbSet<MentorMentee> UserMentors { get; set; }
+
+    // outbox messages
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

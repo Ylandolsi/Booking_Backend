@@ -2,9 +2,9 @@
 
 namespace Application.Users.Register;
 
-internal sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+internal sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand>
 {
-    public RegisterUserCommandValidator()
+    public RegisterCommandValidator()
     {
         RuleFor(c => c.FirstName).NotEmpty();
         RuleFor(c => c.LastName).NotEmpty();

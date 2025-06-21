@@ -20,8 +20,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+    <PackageReference Include="Microsoft.Extensions.Resilience" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="Polly" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +34,11 @@
   <ItemGroup>
 	<InternalsVisibleTo Include="ArchitectureTests" />
     <InternalsVisibleTo Include="IntegrationsTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- This tells MSBuild to embed any .html file from the EmailTemplates folder as a resource -->
+    <EmbeddedResource Include=".\Email\Templates\*.html" />
   </ItemGroup>
 
 </Project>

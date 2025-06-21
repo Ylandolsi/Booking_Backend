@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Application.Users.ReSendVerification;
 
-internal sealed class ReSendVerificationCommandValidator : AbstractValidator<ReSendVerificationEmailCommand>
+internal sealed class ReSendVerificationCommandValidator : AbstractValidator<ReSendVerificationCommand>
 {
     public ReSendVerificationCommandValidator()
     {

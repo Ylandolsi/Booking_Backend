@@ -1,6 +1,8 @@
-﻿using System.Net;
-using System.Net.Http.Json;
+﻿using Application.Abstractions.BackgroundJobs;
 using IntegrationsTests.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace IntegrationsTests.Tests;
 
@@ -29,6 +31,10 @@ public class UserRegistrationTests : AuthenticationTestBase
 
         // Assert
         response.EnsureSuccessStatusCode();
+
+
+        await TriggerOutboxProcess(); 
+        
         await Task.Delay(TimeSpan.FromSeconds(2));
         var sentEmail = EmailCapturer.FirstOrDefault(e => e.Destination.ToAddresses.Contains(registrationPayload.Email));
         Assert.NotNull(sentEmail);

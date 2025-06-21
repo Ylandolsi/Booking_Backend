@@ -2,17 +2,21 @@
 using Amazon.Runtime;
 using Amazon.SimpleEmail;
 using Application.Abstractions.Authentication;
+using Application.Abstractions.BackgroundJobs;
 using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.BackgroundJobs.TokenCleanup;
 using Application.Abstractions.Data;
+using Application.Abstractions.Email;
 using Application.Options;
 using Domain.Users.Entities;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
+using Infrastructure.BackgroundJobs;
 using Infrastructure.BackgroundJobs.SendingVerificationEmail;
 using Infrastructure.BackgroundJobs.TokenCleanup;
 using Infrastructure.Database;
 using Infrastructure.DomainEvents;
+using Infrastructure.Email;
 using Infrastructure.Time;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,6 +28,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
 using SharedKernel;
 using System.Text;
 
@@ -36,6 +42,8 @@ public static class DependencyInjection
         IConfiguration configuration) =>
         services
             .AddServices()
+            .AddCache()
+            .AddResielenecPipelines(configuration)
             .AddOptions(configuration)
             .AddSESAWS(configuration)
             .AddDatabase(configuration)
@@ -47,9 +55,16 @@ public static class DependencyInjection
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+        services.AddScoped<IEmailService, AwsSesEmailService>();
+        services.AddSingleton<IEmailTemplateProvider, EmailTemplateProvider>();
 
+        return services;
+    }
+
+    private static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        services.AddMemoryCache();
         return services;
     }
 
@@ -92,6 +107,7 @@ public static class DependencyInjection
                 .UseSnakeCaseNamingConvention());
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
@@ -210,6 +226,7 @@ public static class DependencyInjection
     }
 
 
+
     private static IServiceCollection AddAuthorizationInternal(this IServiceCollection services)
     {
         services.AddAuthorization();
@@ -225,11 +242,56 @@ public static class DependencyInjection
 
     public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
     {
-        services.AddScoped<IRegisterVerificationJob, VerificationEmailForRegistrationJob>();
+        services.AddScoped< IProcessOutboxMessagesJob , ProcessOutboxMessagesJob>();
+        services.AddScoped<IVerificationEmailForRegistrationJob, VerificationEmailForRegistrationJob>();
         services.AddScoped<ITokenCleanupJob, TokenCleanupJob>();
 
         return services;
 
+    }
+    public static IServiceCollection AddResielenecPipelines(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddResiliencePipeline(ProcessOutboxMessagesJob.OutboxProcessorPipelineKey,
+            builder =>
+            {
+                builder.AddRetry(new RetryStrategyOptions
+                {
+
+                    Delay = TimeSpan.FromSeconds(1),
+                    MaxRetryAttempts = 3,
+                    BackoffType = DelayBackoffType.Exponential,
+                    UseJitter = true, // Helps prevent "thundering herd" issues.
+                                      // This will add a random delay to each retry attempt, which can help distribute load more evenly.
+                                      // to avoid overwhelming the system with retries at the same time.
+
+                    OnRetry = args =>
+                    {
+                        Console.WriteLine($"Retrying operation due to: {args.Outcome.Exception?.Message}. Attempt #{args.AttemptNumber}");
+                        return ValueTask.CompletedTask;
+                    }
+                });
+
+                builder.AddCircuitBreaker(new CircuitBreakerStrategyOptions
+                {
+                    ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                    FailureRatio = 0.5, // Break the circuit if 50% of requests fail...
+                    MinimumThroughput = 5, // at least 5 request must be made before ( 1 request = complete process with retry )
+                    SamplingDuration = TimeSpan.FromSeconds(60), // within a 60-second window.
+                    BreakDuration = TimeSpan.FromSeconds(30),
+                    OnOpened = args =>
+                    {
+                        Console.WriteLine($"Circuit breaker opened for {args.BreakDuration.TotalSeconds}s due to: {args.Outcome.Exception?.Message}");
+                        return ValueTask.CompletedTask;
+                    },
+                    OnClosed = _ =>
+                    {
+                        Console.WriteLine("Circuit breaker closed. Operations have resumed.");
+                        return ValueTask.CompletedTask;
+                    }
+                });
+            });
+
+        return services;
     }
 
 
