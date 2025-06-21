@@ -18,7 +18,7 @@ namespace Infrastructure.BackgroundJobs;
 [DisableConcurrentExecution(timeoutInSeconds: 60)]
 public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 {
-    
+
     public static string OutboxProcessorPipelineKey = "OutboxProcessorPipeline";
 
     private readonly IApplicationDbContext _dbContext;
@@ -97,6 +97,12 @@ public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
                     await _pipeline.ExecuteAsync(
                         async token => await _domainEventsDispatcher.DispatchAsync(new[] { domainEvent }, token),
                         cancellationToken);
+
+
+                    outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
+                    context?.WriteLine($"Successfully processed message {outboxMessage.Id} of type {domainEvent.GetType().Name}.");
+                    _logger.LogInformation("Hangfire Job: Successfully processed message {MessageId} of type {EventType}.",
+                        outboxMessage.Id, domainEvent.GetType().Name);
                 }
                 catch (Exception ex)
                 // captures exceptions from the entire procces of the eventHandler 
@@ -105,7 +111,6 @@ public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
                     _logger.LogWarning(ex, "Hangfire Job: Failed to process message {MessageId} after resilience policy.", outboxMessage.Id);
                 }
 
-                outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
             }
 
             await _dbContext.SaveChangesAsync(CancellationToken.None);

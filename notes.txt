@@ -1,1 +1,7 @@
-In your integration test environment, which uses `WebApplicationFactory`, the full background job processing host is not started by default. The test setup creates an in-memory version of your application to handle HTTP requests, but it doesn't automatically start long-running, out-of-request processes like the Hangfire scheduler.
+in integrations tests , background jobs needs to be triggered manually because they are not automatically executed in the test environment  . 
+------
+
+// Ensure the token is properly encoded for URL usage ( + , / , = .. )
+string encodedToken = Uri.EscapeDataString(emailVerificationToken);
+string verificationLink = $"{_frontEndOptions.BaseUrl}{_frontEndOptions.EmailVerificationPagePath}?token={encodedToken}&email={emailAdress}";
+return verificationLink ?? throw new InvalidOperationException("Failed to generate verification link.");

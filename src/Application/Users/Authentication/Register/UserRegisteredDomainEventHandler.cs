@@ -9,6 +9,7 @@ namespace Application.Users.Authentication.Register;
 
 internal sealed class UserRegisteredDomainEventHandler : IDomainEventHandler<UserRegisteredDomainEvent>
 {
+
     private readonly UserManager<User> _userManager;
     private readonly EmailVerificationSender _emailVerificationSender;
     private readonly ILogger<UserRegisteredDomainEventHandler> _logger;
@@ -41,8 +42,14 @@ internal sealed class UserRegisteredDomainEventHandler : IDomainEventHandler<Use
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to enqueue verification email for user {UserId}", user.Id);
-            // In a real-world scenario, you might want to add this to a retry queue or alert administrators.
-            // For now, we log the error and let the transaction complete.
+            throw; // Re-throwing the exception to ensure that the job is retried :
+                   // there is pipeline for this job 
+                   // resilience pipline that is used for publishing domain events
+                   // and it is used in the ProcessOutboxMessagesJob
+                   // so to make sure that the email verification is sent
+                   // if something goes wrong, we can retry the job
+                   // by throwing exception in the handler, it will be retried by polly 
+                   // polly detect exception and retry the job
         }
     }
 }

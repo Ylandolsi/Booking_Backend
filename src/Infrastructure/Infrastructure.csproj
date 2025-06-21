@@ -4,7 +4,6 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
     <PackageReference Include="AWSSDK.SimpleEmail" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
-    <PackageReference Include="FluentEmail.Smtp" />
     <PackageReference Include="Hangfire.AspNetCore" />
     <PackageReference Include="Hangfire.Console" />
     <PackageReference Include="Hangfire.PostgreSql" />

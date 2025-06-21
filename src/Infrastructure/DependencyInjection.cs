@@ -213,13 +213,16 @@ public static class DependencyInjection
         services.AddHttpClient<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>()
             .AddStandardResilienceHandler(options =>
             {
+                // add resillience for http requests : Http.Resilience
+
                 // Configure retry policy
                 options.Retry.MaxRetryAttempts = 3;
                 options.Retry.BackoffType = DelayBackoffType.Exponential;
-                options.Retry.UseJitter = true; // smooth the retry attempts
+                options.Retry.UseJitter = true; // smooth the retry attempts for concurrency handeling 
 
 
                 options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
+                options.CircuitBreaker.FailureRatio = 0.5; // Break the circuit if 50% of requests fail
             });
 
         return services;
@@ -254,6 +257,7 @@ public static class DependencyInjection
         services.AddResiliencePipeline(ProcessOutboxMessagesJob.OutboxProcessorPipelineKey,
             builder =>
             {
+                // polly : add resilience for executing outbox messages
                 builder.AddRetry(new RetryStrategyOptions
                 {
 
