@@ -31,10 +31,10 @@ public abstract class BaseIntegrationTest : IDisposable, IAsyncLifetime
 
 
         _client = Factory.CreateClient();
-        _authenticatedVerifiedUserClient = Factory.CreateAuthenticatedClient(
-            userId: _verifiedUserId,
-            email: _verifiedUserEmail,
-            isEmailVerified: true);
+        //_authenticatedVerifiedUserClient = Factory.CreateAuthenticatedClient(
+        //    userId: _verifiedUserId,
+        //    email: _verifiedUserEmail,
+        //    isEmailVerified: true);
     }
 
     public async Task InitializeAsync()

@@ -88,6 +88,8 @@ public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
                 {
                     outboxMessage.Error = "Deserialized domain event is null";
                     outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+
                     continue;
                 }
 
@@ -99,10 +101,13 @@ public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
                         cancellationToken);
 
 
-                    outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
                     context?.WriteLine($"Successfully processed message {outboxMessage.Id} of type {domainEvent.GetType().Name}.");
                     _logger.LogInformation("Hangfire Job: Successfully processed message {MessageId} of type {EventType}.",
                         outboxMessage.Id, domainEvent.GetType().Name);
+
+
+                    outboxMessage.ProcessedOnUtc = DateTime.UtcNow;
+                    await _dbContext.SaveChangesAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 // captures exceptions from the entire procces of the eventHandler 
@@ -113,7 +118,6 @@ public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
             }
 
-            await _dbContext.SaveChangesAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
         {

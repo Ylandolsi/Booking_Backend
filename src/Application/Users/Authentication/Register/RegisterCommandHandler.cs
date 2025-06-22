@@ -65,9 +65,10 @@ internal sealed class RegisterCommandHandler(UserManager<User> userManager,
                 return Result.Failure(RegisterErrors.UserRegistrationFailed(string.Join(", ", result.Errors.Select(e => e.Description))));
             }
             logger.LogInformation("User registered successfully with email: {Email}", command.Email);
-            logger.LogInformation("UserRegisteredDomainEvent raised for user with ID: {UserId}", user.Id);
+
 
             user.Raise(new UserRegisteredDomainEvent(user.Id));
+            logger.LogInformation("UserRegisteredDomainEvent raised for user with ID: {UserId}", user.Id);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             await unitOfWork.CommitTransactionAsync(cancellationToken);

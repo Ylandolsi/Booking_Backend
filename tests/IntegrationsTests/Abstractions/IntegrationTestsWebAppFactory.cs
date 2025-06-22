@@ -22,13 +22,13 @@ namespace IntegrationsTests.Abstractions;
 
 // docker pull datalust/seq:latest
 // docker ps 
-    //private readonly IContainer _seqContainer = new ContainerBuilder()
-    //            .WithImage("datalust/seq:latest")
-    //            .WithName("seq-test-container")
-    //            .WithEnvironment("ACCEPT_EULA", "Y")
-    //            .WithPortBinding(80, true)
-    //            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
-    //            .Build();
+//private readonly IContainer _seqContainer = new ContainerBuilder()
+//            .WithImage("datalust/seq:latest")
+//            .WithName("seq-test-container")
+//            .WithEnvironment("ACCEPT_EULA", "Y")
+//            .WithPortBinding(80, true)
+//            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
+//            .Build();
 public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer;
@@ -76,9 +76,9 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
                 options.UseNpgsql(_connectionString);
             });
 
-            services.AddAuthentication(TestAuthHandler.AuthenticationScheme)
-                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-                    TestAuthHandler.AuthenticationScheme, options => { });
+            //services.AddAuthentication(TestAuthHandler.AuthenticationScheme)
+            //    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
+            //        TestAuthHandler.AuthenticationScheme, options => { });
 
 
             descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAmazonSimpleEmailService));
@@ -100,21 +100,21 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
     }
 
 
-    public HttpClient CreateAuthenticatedClient(Guid? userId = null, string? email = null, bool isEmailVerified = true)
-    {
-        var client = CreateClient();
+    //public HttpClient CreateAuthenticatedClient(Guid? userId = null, string? email = null, bool isEmailVerified = true)
+    //{
+    //    var client = CreateClient();
 
-        var claims = new List<object>
-        {
-            new { Type = JwtRegisteredClaimNames.Sub, Value = (userId ?? Guid.NewGuid()).ToString() },
-        };
+    //    var claims = new List<object>
+    //    {
+    //        new { Type = JwtRegisteredClaimNames.Sub, Value = (userId ?? Guid.NewGuid()).ToString() },
+    //    };
 
-        client.DefaultRequestHeaders.Add(
-            TestAuthHandler.TestUserClaimsHeader,
-            JsonSerializer.Serialize(claims));
+    //    client.DefaultRequestHeaders.Add(
+    //        TestAuthHandler.TestUserClaimsHeader,
+    //        JsonSerializer.Serialize(claims));
 
-        return client;
-    }
+    //    return client;
+    //}
 
 
 

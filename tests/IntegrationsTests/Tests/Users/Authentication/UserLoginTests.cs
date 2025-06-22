@@ -21,7 +21,7 @@ public class UserLoginTests : AuthenticationTestBase
 
         // Act
         var loginPayload = new { Email = userEmail, Password = userPassword };
-        var loginResponse = await _client.PostAsJsonAsync("users/login", loginPayload);
+        var loginResponse = await _client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
 
         // Assert
         loginResponse.EnsureSuccessStatusCode();
@@ -40,7 +40,7 @@ public class UserLoginTests : AuthenticationTestBase
 
         // Act
         var loginPayload = new { Email = userEmail, Password = "WrongPassword!" };
-        var loginResponse = await _client.PostAsJsonAsync("users/login", loginPayload);
+        var loginResponse = await _client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
 
         // Assert
         Assert.NotEqual(HttpStatusCode.OK, loginResponse.StatusCode);
@@ -55,7 +55,7 @@ public class UserLoginTests : AuthenticationTestBase
 
         // Act
         var loginPayload = new { Email = userEmail, Password = userPassword };
-        var loginResponse = await _client.PostAsJsonAsync("users/login", loginPayload);
+        var loginResponse = await _client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, loginResponse.StatusCode);

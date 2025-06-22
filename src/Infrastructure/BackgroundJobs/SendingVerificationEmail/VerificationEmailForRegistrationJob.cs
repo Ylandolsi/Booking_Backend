@@ -25,11 +25,6 @@ public class VerificationEmailForRegistrationJob : IVerificationEmailForRegistra
         _emailTemplateProvider = emailTemplateProvider;
     }
 
-    public async Task Send(string userEmail, string verificationLink)
-    {
-        await SendVerificationEmailAsync(userEmail, verificationLink, null);
-    }
-
     [DisplayName("Send Verification Email to {0}")]
     [AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task SendVerificationEmailAsync(
@@ -53,6 +48,8 @@ public class VerificationEmailForRegistrationJob : IVerificationEmailForRegistra
             body = body.Replace("{{verificationLink}}", verificationLink);
 
             await _emailService.SendEmailAsync(userEmail, subject, body, cancellationToken);
+            context?.WriteLine($"Verification email sent successfully to: {userEmail}");
+            _logger.LogInformation("Hangfire Job: Verification email sent successfully to {Email}", userEmail);
 
         }
         catch (OperationCanceledException)

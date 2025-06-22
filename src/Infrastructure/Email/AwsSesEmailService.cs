@@ -55,5 +55,6 @@ internal sealed class AwsSesEmailService : IEmailService
             _logger.LogError(sesEx, "Hangfire Job: AWS SES exception occurred while sending verification email to {Email}", recipient);
             throw;
         }
+
     }
 }

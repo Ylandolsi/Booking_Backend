@@ -19,7 +19,7 @@ public class EmailVerificationTests : AuthenticationTestBase
 
         // Act
         var resendPayload = new { Email = userEmail };
-        var response = await _client.PostAsJsonAsync("users/resend-verification-email", resendPayload);
+        var response = await _client.PostAsJsonAsync(UsersEndpoints.ResendVerificationEmail, resendPayload);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -36,7 +36,7 @@ public class EmailVerificationTests : AuthenticationTestBase
 
         // Act
         var verificationPayload = new { Email = userEmail, Token = "invalid-token" };
-        var verifyResponse = await _client.PostAsJsonAsync("users/verify-email", verificationPayload);
+        var verifyResponse = await _client.PostAsJsonAsync(UsersEndpoints.VerifyEmail, verificationPayload);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, verifyResponse.StatusCode);
@@ -57,10 +57,10 @@ public class EmailVerificationTests : AuthenticationTestBase
 
         // Act
         // First attempt
-        var firstResponse = await _client.PostAsJsonAsync("users/verify-email", verificationPayload);
+        var firstResponse = await _client.PostAsJsonAsync(UsersEndpoints.VerifyEmail, verificationPayload);
 
         // Second attempt
-        var secondResponse = await _client.PostAsJsonAsync("users/verify-email", verificationPayload);
+        var secondResponse = await _client.PostAsJsonAsync(UsersEndpoints.VerifyEmail, verificationPayload);
 
         // Assert
         firstResponse.EnsureSuccessStatusCode();

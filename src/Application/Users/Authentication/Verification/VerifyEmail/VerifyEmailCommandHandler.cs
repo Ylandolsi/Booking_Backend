@@ -11,7 +11,7 @@ namespace Application.Users.Authentication.Verification.VerifyEmail;
 public class VerifyEmailCommandHandler(UserManager<User> userManager,
                                        ILogger<VerifyEmailCommandHandler> logger) : ICommandHandler<VerifyEmailCommand>
 {
-    public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken )
+    public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling VerifyEmailCommand for email: {Email}", command.Email);
 
@@ -27,7 +27,9 @@ public class VerifyEmailCommandHandler(UserManager<User> userManager,
             return Result.Failure(VerifyEmailErrors.AlreadyVerified);
         }
 
-        IdentityResult result = await userManager.ConfirmEmailAsync(user, command.Token);
+        string decodedToken = System.Net.WebUtility.UrlDecode(command.Token);
+
+        IdentityResult result = await userManager.ConfirmEmailAsync(user, decodedToken);
 
         if (!result.Succeeded)
         {

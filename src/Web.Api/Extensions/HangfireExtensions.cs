@@ -35,15 +35,14 @@ public static class HangfireExtensions
 
     public static IApplicationBuilder UseHangfireDashboard(this IApplicationBuilder app)
     {
-        // Add Hangfire Dashboard
-        //  secure this dashboard in production
+
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
-            Authorization = [] // Anyone can access the dashboard (for development)
-                               // In production, you'd implement IAuthorizationFilter, e.g.:
-                               // Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+            // middleware to filter users for the dashboard
+            // Authorization = [new HangfireDashboardAuthorizationFilter()]
+            Authorization = []
         });
-            
+
         return app;
 
     }

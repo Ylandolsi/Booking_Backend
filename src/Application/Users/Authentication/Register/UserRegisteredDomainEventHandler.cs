@@ -26,6 +26,7 @@ internal sealed class UserRegisteredDomainEventHandler : IDomainEventHandler<Use
 
     public async Task Handle(UserRegisteredDomainEvent notification, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Handling UserRegisteredDomainEvent for user ID: {UserId}", notification.UserId);
         User? user = await _userManager.FindByIdAsync(notification.UserId.ToString());
 
         if (user is null)

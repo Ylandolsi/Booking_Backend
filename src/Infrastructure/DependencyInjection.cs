@@ -105,7 +105,7 @@ public static class DependencyInjection
                 .UseNpgsql(connectionString, npgsqlOptions =>
                 {
                     npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
-                    npgsqlOptions.EnableRetryOnFailure(5);
+                    // npgsqlOptions.EnableRetryOnFailure(5);
 
                 })
                 .UseSnakeCaseNamingConvention());
@@ -228,21 +228,9 @@ public static class DependencyInjection
             Credentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey),
             Region = Amazon.RegionEndpoint.GetBySystemName(awsRegion)
         });
-        services.AddHttpClient<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>()
-            .AddStandardResilienceHandler(options =>
-            {
-                // add resillience for http requests : Http.Resilience
-
-                // Configure retry policy
-                options.Retry.MaxRetryAttempts = 3;
-                options.Retry.BackoffType = DelayBackoffType.Exponential;
-                options.Retry.UseJitter = true; // smooth the retry attempts for concurrency handeling 
-
-
-                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(20);
-                options.CircuitBreaker.FailureRatio = 0.5; // Break the circuit if 50% of requests fail
-            });
-
+        // have its own polling and retry policies
+        // TODO : recheck it 
+        services.AddAWSService<IAmazonSimpleEmailService>();
         return services;
     }
 
@@ -263,8 +251,8 @@ public static class DependencyInjection
 
     public static IServiceCollection AddBackgroundJobs(this IServiceCollection services)
     {
-        services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
         services.AddScoped<IVerificationEmailForRegistrationJob, VerificationEmailForRegistrationJob>();
+        services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
         services.AddScoped<ITokenCleanupJob, TokenCleanupJob>();
 
         return services;

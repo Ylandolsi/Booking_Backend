@@ -38,7 +38,6 @@ builder.Services.UseHangFire(builder.Configuration);
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 WebApplication app = builder.Build();
-
 app.MapEndpoints();
 
 if (app.Environment.IsDevelopment())
@@ -79,6 +78,7 @@ app.UseExceptionHandler();
 app.UseCancellationMiddleware();
 
 RecurringJobs.UseTokenCleanup();
+RecurringJobs.UseOutboxMessgesProcessor();
 
 app.UseAuthentication();
 

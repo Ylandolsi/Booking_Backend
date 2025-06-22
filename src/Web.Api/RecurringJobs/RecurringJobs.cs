@@ -1,5 +1,6 @@
 using Hangfire;
 using Application.Abstractions.BackgroundJobs.TokenCleanup;
+using Application.Abstractions.BackgroundJobs;
 namespace Web.Api.RecurringJobs;
 
 public static class RecurringJobs
@@ -16,5 +17,13 @@ public static class RecurringJobs
                 TimeZone = TimeZoneInfo.Utc // timezone = GMT (UTC)
             });
 
+    }
+
+    public static void UseOutboxMessgesProcessor()
+    {
+        RecurringJob.AddOrUpdate<IProcessOutboxMessagesJob>(
+            "process-outbox-messages",
+            job => job.ExecuteAsync(null),
+            Cron.Minutely());
     }
 }

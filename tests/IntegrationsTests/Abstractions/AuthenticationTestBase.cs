@@ -1,4 +1,5 @@
 ﻿using Application.Abstractions.BackgroundJobs;
+using Application.Users.Login;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
@@ -8,6 +9,8 @@ namespace IntegrationsTests.Abstractions;
 
 public abstract class AuthenticationTestBase : BaseIntegrationTest
 {
+    protected string DefaultPassword => "TestPassword123!";
+    protected string DefaultEmail => "test@gmail.com";
     protected AuthenticationTestBase(IntegrationTestsWebAppFactory factory) : base(factory)
     {
     }
@@ -16,6 +19,23 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
     {
         var outboxProcessor = _scope.ServiceProvider.GetRequiredService<IProcessOutboxMessagesJob>();
         await outboxProcessor.ExecuteAsync(null);
+    }
+
+    protected async Task<LoginResponse> LoginUser(string email, string password)
+    {
+        var loginPayload = new
+        {
+            Email = email,
+            Password = password
+        };
+
+        var response = await _client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
+        response.EnsureSuccessStatusCode();
+
+        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        Assert.NotNull(loginResponse);
+        Assert.NotEmpty(loginResponse.AccessToken);
+        return loginResponse;
     }
 
     protected async Task RegisterAndVerifyUser(string email, string password, bool verify = true)
