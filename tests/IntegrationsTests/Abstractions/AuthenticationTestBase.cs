@@ -2,6 +2,8 @@
 using Application.Users.Login;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using SharedKernel;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 
@@ -13,6 +15,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
     protected string DefaultEmail => "test@gmail.com";
     protected AuthenticationTestBase(IntegrationTestsWebAppFactory factory) : base(factory)
     {
+
     }
 
     protected async Task TriggerOutboxProcess()
@@ -49,7 +52,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
             ProfilePictureSource = ""
         };
 
-        var registerResponse = await _client.PostAsJsonAsync("users/register", registrationPayload);
+        var registerResponse = await _client.PostAsJsonAsync(UsersEndpoints.Register, registrationPayload);
         registerResponse.EnsureSuccessStatusCode();
 
         await TriggerOutboxProcess();
@@ -59,12 +62,13 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         await Task.Delay(TimeSpan.FromSeconds(2));
 
         var (token, parsedEmail) = ExtractTokenAndEmailFromEmail(email);
-
+        Console.WriteLine($"Extracted token: {token}");
+        Console.WriteLine($"Extracted email: {parsedEmail}");
         Assert.NotNull(token);
         Assert.NotNull(parsedEmail);
 
         var verificationPayload = new { Email = parsedEmail, Token = token };
-        var verifyResponse = await _client.PostAsJsonAsync("users/verify-email", verificationPayload);
+        var verifyResponse = await _client.PostAsJsonAsync(UsersEndpoints.VerifyEmail, verificationPayload);
 
         verifyResponse.EnsureSuccessStatusCode();
     }
@@ -77,19 +81,39 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
 
         var match = Regex.Match(
             sentEmail.Message.Body.Html.Data,
-            @"href=['""](?<url>https?://[^'""]+/email-verification\?token=[^&]+&email=[^'""]+)['""]",
+            @"href=['""](?<url>https?://[^'""]+\?token=[^&]+&email=[^'""]+)['""]",
             RegexOptions.IgnoreCase);
-
 
 
         if (!match.Success) return (null, null);
 
-        var url = System.Net.WebUtility.HtmlDecode(match.Groups["url"].Value);
+
+        var url = match.Groups["url"].Value;
 
         var uri = new Uri(url);
+        string query = uri.Query;
+        // extract without decoding the URL (  decoding happens in the handler )
+        string token = ExtractRawQueryParameter(query, "token");
+        string email = ExtractRawQueryParameter(query, "email");
 
-        var queryDict = QueryHelpers.ParseQuery(uri.Query);
+        return (token, email);
+    }
 
-        return (queryDict["token"].ToString(), queryDict["email"].ToString());
+    private string ExtractRawQueryParameter(string query, string paramName)
+    {
+        if (query.StartsWith("?")) query = query.Substring(1);
+
+        var parameters = query.Split('&');
+
+        foreach (var param in parameters)
+        {
+            var parts = param.Split('=');
+            if (parts.Length == 2 && parts[0] == paramName)
+            {
+                return parts[1];
+            }
+        }
+
+        return string.Empty;
     }
 }

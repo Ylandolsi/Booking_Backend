@@ -61,6 +61,25 @@ if (app.Environment.IsDevelopment())
     {
         await userManager.DeleteAsync(user);
     }
+    var testUser = User.Create(
+    "Test",
+    "User",
+    "yesslandolsi@gmail.com",
+    "");
+
+    var result = await userManager.CreateAsync(testUser, "Password123!");
+
+    if (result.Succeeded)
+    {
+        var emailToken = await userManager.GenerateEmailConfirmationTokenAsync(testUser);
+        await userManager.ConfirmEmailAsync(testUser, emailToken);
+
+        Console.WriteLine("✅ Seeded verified user: yesslandolsi@gmail.com/ Password123!");
+    }
+    else
+    {
+        Console.WriteLine("❌ Failed to seed user: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+    }
 }
 
 app.MapHealthChecks("health", new HealthCheckOptions

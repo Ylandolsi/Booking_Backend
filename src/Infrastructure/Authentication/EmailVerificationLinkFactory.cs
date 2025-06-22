@@ -22,7 +22,8 @@ internal sealed class EmailVerificationLinkFactory(IHttpContextAccessor httpCont
         //    new { token = emailVerificationToken, email = emailAdress })!; // Query Parameter 
 
 
-        // Ensure the token is properly encoded for URL usage ( + , / , = .. )
+        // Ensure the token is properly encoded for URL usage
+        // cuz it contains characters that are not safe for URL ( + , / , = .. )
         string encodedToken = Uri.EscapeDataString(emailVerificationToken);
         string verificationLink = $"{_frontEndOptions.BaseUrl}{_frontEndOptions.EmailVerificationPagePath}?token={encodedToken}&email={emailAdress}";
         return verificationLink ?? throw new InvalidOperationException("Failed to generate verification link.");

@@ -20,17 +20,21 @@ internal sealed class ChangePassword : IEndpoint
         app.MapPut(UsersEndpoints.ChangePassword, async (
             Request request,
             IUserContext userContext,
+            HttpContext httpContext,
             ICommandHandler<ChangePasswordCommand> handler,
+            ILogger<ChangePassword> logger,
             CancellationToken cancellationToken) =>
         {
             Guid userId;
             try
             {
                 userId = userContext.UserId;
+                logger.LogInformation("Successfully retrieved user ID: {UserId}", userId);
             }
-            catch (ApplicationException)
+            catch (ApplicationException ex)
             {
-                return Results.Unauthorized();
+                logger.LogWarning(ex, "Failed to get user ID in change password endpoint");
+                return Results.Problem($"Failed to get user ID: {ex.Message}", statusCode: 401);
             }
 
             var command = new ChangePasswordCommand(
@@ -45,7 +49,7 @@ internal sealed class ChangePassword : IEndpoint
                 () => Results.Ok(),
                 CustomResults.Problem);
         })
-        // .RequireAuthorization()
+        .RequireAuthorization()
         .WithTags(Tags.Users);
     }
 }

@@ -27,9 +27,11 @@ public class VerifyEmailCommandHandler(UserManager<User> userManager,
             return Result.Failure(VerifyEmailErrors.AlreadyVerified);
         }
 
-        string decodedToken = System.Net.WebUtility.UrlDecode(command.Token);
+        // decode the token from the command cuz its URL encoded
+        string tokenToUse = System.Net.WebUtility.UrlDecode(command.Token);
+       
 
-        IdentityResult result = await userManager.ConfirmEmailAsync(user, decodedToken);
+        IdentityResult result = await userManager.ConfirmEmailAsync(user, tokenToUse);
 
         if (!result.Succeeded)
         {

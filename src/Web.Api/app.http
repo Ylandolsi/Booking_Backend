@@ -1,0 +1,24 @@
+### Variables
+@baseUrl = http://localhost:5000
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJkZXZlbG9wZXJzIiwiaXNzIjoiY2xlYW4tYXJjaGl0ZWN0dXJlIiwiZXhwIjoxNzUwNTg1OTE5LCJzdWIiOiIwMTk3OTZmZi01Y2FhLTcyMWItYjU4Yy02M2Y5MDEwNmZjYTYiLCJpYXQiOjE3NTA1ODUwMTksIm5iZiI6MTc1MDU4NTAxOX0.iP-Ovhvk4tR4nIZD5dHYhf_CnrvEAf-FzWif3TEuZmE
+
+### Login to get access token
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "yesslandolsi@gmail.com",
+  "password": "Password123!"
+}
+
+
+### Change Password (using manual token variable)
+PUT {{baseUrl}}/users/change-password
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "oldPassword": "Password123!",
+  "newPassword": "NewPassword123!",
+  "confirmNewPassword": "NewPassword123!"
+}

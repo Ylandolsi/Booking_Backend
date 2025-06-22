@@ -9,9 +9,10 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace Infrastructure.Authentication;
+
 internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenProvider
 {
-    private readonly JwtOptions _jwtOptions = jwtOptions.Value; 
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
     public string GenrateJwtToken(User user)
     {
@@ -32,11 +33,11 @@ internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenPro
                 // && 
                 // if one claims changes frequently , 
                 // the client would only get the updated information when the token is refreshed
-                new Claim(ClaimsIdentifiers.UserId, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             ]),
-            Expires = DateTime.UtcNow.AddMinutes( _jwtOptions.ExpirationInMinutes  ),
+            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
             SigningCredentials = credentials,
-            Issuer = _jwtOptions.Issuer ?? throw new InvalidOperationException("Issuer is not configuterd in JWT ") ,
+            Issuer = _jwtOptions.Issuer ?? throw new InvalidOperationException("Issuer is not configuterd in JWT "),
             Audience = _jwtOptions.Audience ?? throw new InvalidOperationException("Audience is not configuterd in JWT "),
         };
 
@@ -46,6 +47,8 @@ internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenPro
 
         return token;
     }
+
+
 
     public string GenerateRefreshToken()
     {
