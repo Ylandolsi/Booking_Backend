@@ -9,6 +9,11 @@ public static class UsersEndpoints
     public const string ResendVerificationEmail = "users/resend-verification-email";
     public const string Logout = "users/logout";
     public const string ChangePassword = "users/change-password";
+
+    public const string ResetPassword = "users/reset-password-email";
+    public const string ResetPasswordSendToken = "/users/reset-password/send-token";
+    public const string ResetPasswordVerify = "/users/reset-password/verify";
+
     // User Management
     public const string GetUser = "users/{id}";
 

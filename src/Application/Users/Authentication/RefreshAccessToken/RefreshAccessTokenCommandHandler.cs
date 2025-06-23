@@ -35,7 +35,7 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
                                                      ILogger<RefreshAccessTokenCommandHandler> logger,
                                                      IOptions<JwtOptions> jwtOptions) : ICommandHandler<RefreshAccessTokenCommand, string>
 {
-    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+    private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
     public async Task<Result<string>> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
     {

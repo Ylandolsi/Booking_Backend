@@ -40,4 +40,5 @@
     <EmbeddedResource Include=".\Email\Templates\*.html" />
   </ItemGroup>
 
+
 </Project>

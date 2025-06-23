@@ -6,9 +6,12 @@ using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Verification;
 using Domain.Users;
 using Domain.Users.Entities;
+using FluentEmail.Core;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
+using System.Numerics;
+using System.Security.Principal;
 
 namespace Application.Users.Register;
 
@@ -41,6 +44,13 @@ internal sealed class RegisterCommandHandler(UserManager<User> userManager,
         {
             logger.LogWarning("Attempt to register user with non-unique email: {Email}", command.Email);
             return Result.Failure(RegisterErrors.EmailNotUnique);
+
+            // TODO : for improvement :
+            // if already  exists user with this email,
+            // then we can simulate some work to make it look like  user dosent exists
+            // and send email to user :
+            // "Someone tried to create an account with your email.
+            // If this was you, please sign in instead. If not, you can ignore this email."
         }
 
         logger.LogInformation("Registering user with email: {Email}", command.Email);
@@ -85,9 +95,7 @@ internal sealed class RegisterCommandHandler(UserManager<User> userManager,
         return Result.Success();
 
         // TODO : in front end : 
-        // message to show:  Registration successful! A verification email has been sent.
-        //  If you don't receive it within a few minutes, 
-        // please check your spam folder or use the 'Resend verification' option on the login page
+        // Welcome! Please confirm your email to complete registration
     }
 
 

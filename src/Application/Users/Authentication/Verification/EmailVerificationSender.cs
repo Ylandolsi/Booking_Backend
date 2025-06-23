@@ -3,10 +3,9 @@ using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Domain.Users.Entities;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using SharedKernel;
-using System;
-using System.Threading.Tasks;
+
 
 namespace Application.Users.Authentication.Verification;
 
@@ -17,11 +16,11 @@ internal sealed class EmailVerificationSender
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly ILogger<EmailVerificationSender> _logger;
 
-    public EmailVerificationSender(
-        UserManager<User> userManager,
-        IEmailVerificationLinkFactory emailVerificationLinkFactory,
-        IBackgroundJobClient backgroundJobClient,
-        ILogger<EmailVerificationSender> logger)
+
+    public EmailVerificationSender(UserManager<User> userManager,
+                                   IEmailVerificationLinkFactory emailVerificationLinkFactory,
+                                   IBackgroundJobClient backgroundJobClient,
+                                   ILogger<EmailVerificationSender> logger )
     {
         _userManager = userManager;
         _emailVerificationLinkFactory = emailVerificationLinkFactory;
@@ -41,7 +40,7 @@ internal sealed class EmailVerificationSender
         try
         {
             _backgroundJobClient.Enqueue<IVerificationEmailForRegistrationJob>(
-                            job => job.SendVerificationEmailAsync(user.Email!, verificationEmailLink, null));
+                            job => job.SendAsync(user.Email!, verificationEmailLink, null));
         }
         catch (Exception ex)
         {
@@ -49,5 +48,7 @@ internal sealed class EmailVerificationSender
             throw;
         }
     }
+
+
 }
 

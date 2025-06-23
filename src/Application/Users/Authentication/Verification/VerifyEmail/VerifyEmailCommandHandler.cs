@@ -13,34 +13,38 @@ public class VerifyEmailCommandHandler(UserManager<User> userManager,
 {
     public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling VerifyEmailCommand for email: {Email}", command.Email);
+        // decode the token from the command cuz its URL encoded
+        string decodedToken = System.Net.WebUtility.UrlDecode(command.Token);
+        string decodedEmail = System.Net.WebUtility.UrlDecode(command.Email);
 
-        User? user = await userManager.FindByEmailAsync(command.Email);
+
+        logger.LogInformation("Handling VerifyEmailCommand for email: {Email}", decodedEmail) ;
+
+        User? user = await userManager.FindByEmailAsync(decodedEmail) ;
         if (user is null)
         {
-            logger.LogWarning("User with email {Email} not found", command.Email);
-            return Result.Failure(UserErrors.NotFoundByEmail(command.Email));
+            logger.LogWarning("User with email {Email} not found", decodedEmail) ;
+            return Result.Failure(UserErrors.NotFoundByEmail(decodedEmail) );
         }
         if (user.EmailConfirmed)
         {
-            logger.LogInformation("Email for user with email: {Email} is already confirmed", command.Email);
+            logger.LogInformation("Email for user with email: {Email} is already confirmed", decodedEmail) ;
             return Result.Failure(VerifyEmailErrors.AlreadyVerified);
         }
 
-        // decode the token from the command cuz its URL encoded
-        string tokenToUse = System.Net.WebUtility.UrlDecode(command.Token);
-       
 
-        IdentityResult result = await userManager.ConfirmEmailAsync(user, tokenToUse);
+
+
+        IdentityResult result = await userManager.ConfirmEmailAsync(user, decodedToken);
 
         if (!result.Succeeded)
         {
-            logger.LogWarning("Failed to confirm email for user with email: {Email}. Errors: {Errors}", command.Email, result.Errors);
+            logger.LogWarning("Failed to confirm email for user with email: {Email}. Errors: {Errors}", decodedEmail, result.Errors);
             return Result.Failure(VerifyEmailErrors.TokenExpired);
 
         }
 
-        logger.LogInformation("Email confirmed successfully for user with email: {Email}", command.Email);
+        logger.LogInformation("Email confirmed successfully for user with email: {Email}", decodedEmail);
 
         return Result.Success();
     }

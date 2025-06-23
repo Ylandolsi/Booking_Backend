@@ -12,7 +12,7 @@ namespace Infrastructure.Authentication;
 
 internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenProvider
 {
-    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+    private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
     public string GenrateJwtToken(User user)
     {

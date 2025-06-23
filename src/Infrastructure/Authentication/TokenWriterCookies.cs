@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Application.Abstractions.Authentication;
-using Application.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
+using Application.Options;
 namespace Infrastructure.Authentication;
 
 
@@ -12,7 +12,7 @@ internal class TokenWriterCookies(IHttpContextAccessor httpContextAccessor,
                                   ILogger<TokenWriterCookies> logger) :  ITokenWriterCookies
 {
 
-    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+    private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
 
 
@@ -27,7 +27,7 @@ internal class TokenWriterCookies(IHttpContextAccessor httpContextAccessor,
                                                                  CreateRefreshCookieOptions(_jwtOptions));
         logger.LogInformation("Refresh token written to HTTP-only cookie.");
     }
-    private CookieOptions CreateRefreshCookieOptions(JwtOptions jwtAuthOptions)
+    private CookieOptions CreateRefreshCookieOptions(AccessOptions jwtAuthOptions)
     {
         return new CookieOptions
         {

@@ -1,11 +1,13 @@
 using Amazon.SimpleEmail;
 using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.Email;
+using Application.Options;
 using Hangfire;
 using Hangfire.Console;
 using Hangfire.Server;
 using Infrastructure.Email.Templates;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.ComponentModel;
 
 namespace Infrastructure.BackgroundJobs.SendingVerificationEmail;
@@ -15,19 +17,22 @@ public class VerificationEmailForRegistrationJob : IVerificationEmailForRegistra
     private readonly IEmailService _emailService;
     private readonly IEmailTemplateProvider _emailTemplateProvider;
     private readonly ILogger<VerificationEmailForRegistrationJob> _logger;
+    private readonly FrontendApplicationOptions _frontendApplicationOptions;
 
     public VerificationEmailForRegistrationJob(IEmailService emailService,
-                                               ILogger<VerificationEmailForRegistrationJob> logger,
-                                               IEmailTemplateProvider emailTemplateProvider)
+                                               IOptions<FrontendApplicationOptions> frontendApplicationOptions,
+                                               IEmailTemplateProvider emailTemplateProvider ,
+                                               ILogger<VerificationEmailForRegistrationJob> logger)
     {
         _emailService = emailService;
-        _logger = logger;
         _emailTemplateProvider = emailTemplateProvider;
+        _frontendApplicationOptions = frontendApplicationOptions.Value;
+        _logger = logger;
     }
 
     [DisplayName("Send Verification Email to {0}")]
     [AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task SendVerificationEmailAsync(
+    public async Task SendAsync(
                             string userEmail,
                             string verificationLink,
                             PerformContext? context)
@@ -45,7 +50,10 @@ public class VerificationEmailForRegistrationJob : IVerificationEmailForRegistra
 
             cancellationToken.ThrowIfCancellationRequested();
             var (subject, body) = await _emailTemplateProvider.GetTemplateAsync(TemplatesNames.VerificationEmailForRegistration, cancellationToken);
-            body = body.Replace("{{verificationLink}}", verificationLink);
+            body = body.Replace("{{VERIFICATION_LINK}}", verificationLink)
+                        .Replace("{{APP_NAME}}",  _frontendApplicationOptions.AppName)
+                        .Replace("{{SUPPORT_LINK}}", _frontendApplicationOptions.SupportLink)
+                        .Replace("{{SECURITY_LINK}}", _frontendApplicationOptions.SecurityLink);
 
             await _emailService.SendEmailAsync(userEmail, subject, body, cancellationToken);
             context?.WriteLine($"Verification email sent successfully to: {userEmail}");

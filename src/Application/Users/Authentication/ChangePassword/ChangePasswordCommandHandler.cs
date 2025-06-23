@@ -9,6 +9,9 @@ namespace Application.Users.Authentication.ChangePassword;
 
 public static class ChangePasswordErrors
 {
+    public static readonly Error PasswordIncorrect = Error.Problem(
+        "ChangePassword.PasswordIncorrect", "The old password is not correct "
+    );
     public static readonly Error PasswordsDoNotMatch = Error.Problem(
         "ChangePassword.PasswordsDoNotMatch",
         "The new password and confirmation password do not match.");
@@ -18,26 +21,24 @@ public static class ChangePasswordErrors
         $"Failed to change password: {errors}");
 }
 
-internal sealed class ChangePasswordCommandHandler(
-    UserManager<User> userManager,
-    ILogger<ChangePasswordCommandHandler> logger)
+internal sealed class ChangePasswordCommandHandler(UserManager<User> userManager,
+                                                   ILogger<ChangePasswordCommandHandler> logger)
     : ICommandHandler<ChangePasswordCommand>
 {
     public async Task<Result> Handle(ChangePasswordCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Attempting to change password for user {UserId}", command.UserId);
 
-        if (command.NewPassword != command.ConfirmNewPassword)
-        {
-            logger.LogWarning("Password change failed for user {UserId}: New passwords do not match.", command.UserId);
-            return Result.Failure(ChangePasswordErrors.PasswordsDoNotMatch);
-        }
-
         var user = await userManager.FindByIdAsync(command.UserId.ToString());
         if (user is null)
         {
             logger.LogWarning("Password change failed: User with ID {UserId} not found.", command.UserId);
             return Result.Failure(UserErrors.NotFoundById(command.UserId));
+        }
+        if (!await userManager.CheckPasswordAsync(user, command.OldPassword))
+        {
+            logger.LogWarning("Old password is wrong");
+            return Result.Failure(ChangePasswordErrors.PasswordIncorrect);
         }
 
         var result = await userManager.ChangePasswordAsync(user, command.OldPassword, command.NewPassword);

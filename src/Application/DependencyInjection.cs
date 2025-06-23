@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Behaviors;
 using Application.Abstractions.Messaging;
+using Application.Users.Authentication.ResetPassword;
 using Application.Users.Authentication.Verification;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;

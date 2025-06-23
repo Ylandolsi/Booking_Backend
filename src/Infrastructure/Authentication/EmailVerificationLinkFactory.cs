@@ -1,9 +1,10 @@
 using Application.Abstractions.Authentication;
+using Application.Options;
 using Domain.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
-using SharedKernel;
+using System.Web;
 
 namespace Infrastructure.Authentication;
 
@@ -24,9 +25,18 @@ internal sealed class EmailVerificationLinkFactory(IHttpContextAccessor httpCont
 
         // Ensure the token is properly encoded for URL usage
         // cuz it contains characters that are not safe for URL ( + , / , = .. )
-        string encodedToken = Uri.EscapeDataString(emailVerificationToken);
-        string verificationLink = $"{_frontEndOptions.BaseUrl}{_frontEndOptions.EmailVerificationPagePath}?token={encodedToken}&email={emailAdress}";
-        return verificationLink ?? throw new InvalidOperationException("Failed to generate verification link.");
+        //string encodedToken = Uri.EscapeDataString(emailVerificationToken);
+        //string verificationLink = $"{_frontEndOptions.BaseUrl}{_frontEndOptions.EmailVerification}?token={encodedToken}&email={emailAdress}";
+        //return verificationLink ?? throw new InvalidOperationException("Failed to generate verification link.");
+
+        var builder = new UriBuilder(_frontEndOptions.BaseUrl)
+        {
+            Path = _frontEndOptions.EmailVerification.Trim('/'),
+            Query = $"token={HttpUtility.UrlEncode(emailVerificationToken)}&email={HttpUtility.UrlEncode(emailAdress)}"
+        };
+        var resetUrl = builder.ToString();
+
+        return resetUrl ?? throw new InvalidOperationException("Failed to generate email verification link. The link is null or empty.");
 
     }
 

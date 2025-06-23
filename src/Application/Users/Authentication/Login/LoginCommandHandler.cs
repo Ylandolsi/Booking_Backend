@@ -22,7 +22,7 @@ public sealed class LoginCommandHandler
                  IOptions<JwtOptions> jwtOptions,
                  ILogger<LoginCommandHandler> logger) : ICommandHandler<LoginCommand, LoginResponse>
 {
-    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+    private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
     public async Task<Result<LoginResponse>> Handle(LoginCommand command,
                                                         CancellationToken cancellationToken)

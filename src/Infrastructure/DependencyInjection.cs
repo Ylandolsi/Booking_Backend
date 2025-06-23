@@ -3,6 +3,8 @@ using Amazon.Runtime;
 using Amazon.SimpleEmail;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.BackgroundJobs;
+using Application.Abstractions.BackgroundJobs.SendingOtpEmail;
+using Application.Abstractions.BackgroundJobs.SendingPasswordResetToken;
 using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.BackgroundJobs.TokenCleanup;
 using Application.Abstractions.Data;
@@ -12,6 +14,7 @@ using Domain.Users.Entities;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.BackgroundJobs;
+using Infrastructure.BackgroundJobs.SendingPasswordResetToken;
 using Infrastructure.BackgroundJobs.SendingVerificationEmail;
 using Infrastructure.BackgroundJobs.TokenCleanup;
 using Infrastructure.Database;
@@ -26,6 +29,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.CircuitBreaker;
@@ -85,6 +89,9 @@ public static class DependencyInjection
                 o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 o.Lockout.MaxFailedAccessAttempts = 5;
                 o.Lockout.AllowedForNewUsers = true;
+
+                // configure token providers
+                o.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
             }
         )
             .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -156,7 +163,7 @@ public static class DependencyInjection
             .AddJwtBearer(o =>
             {
                 var jwtOptions = configuration.GetSection(JwtOptions.JwtOptionsKey)
-                                              .Get<JwtOptions>() ??
+                                              .Get<JwtOptions>()?.AccessToken ??
                                               throw new InvalidOperationException("JWT options are not configured.");
 
 
@@ -254,6 +261,7 @@ public static class DependencyInjection
         services.AddScoped<IVerificationEmailForRegistrationJob, VerificationEmailForRegistrationJob>();
         services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
         services.AddScoped<ITokenCleanupJob, TokenCleanupJob>();
+        services.AddScoped<ISendingPasswordResetToken, SendingPasswordResetToken>();
 
         return services;
 

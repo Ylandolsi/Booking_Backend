@@ -62,8 +62,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         await Task.Delay(TimeSpan.FromSeconds(2));
 
         var (token, parsedEmail) = ExtractTokenAndEmailFromEmail(email);
-        Console.WriteLine($"Extracted token: {token}");
-        Console.WriteLine($"Extracted email: {parsedEmail}");
+
         Assert.NotNull(token);
         Assert.NotNull(parsedEmail);
 
