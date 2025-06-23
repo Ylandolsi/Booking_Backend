@@ -2,7 +2,7 @@ using Hangfire.Server;
 
 namespace Application.Abstractions.BackgroundJobs.TokenCleanup;
 
-public interface ITokenCleanupJob
+public interface IOutboxCleanupJob
 {
     Task CleanUpAsync(PerformContext? context);
 }

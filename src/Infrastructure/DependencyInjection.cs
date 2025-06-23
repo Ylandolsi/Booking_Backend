@@ -3,7 +3,6 @@ using Amazon.Runtime;
 using Amazon.SimpleEmail;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.BackgroundJobs;
-using Application.Abstractions.BackgroundJobs.SendingOtpEmail;
 using Application.Abstractions.BackgroundJobs.SendingPasswordResetToken;
 using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.BackgroundJobs.TokenCleanup;
@@ -14,6 +13,7 @@ using Domain.Users.Entities;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.BackgroundJobs;
+using Infrastructure.BackgroundJobs.Cleanup;
 using Infrastructure.BackgroundJobs.SendingPasswordResetToken;
 using Infrastructure.BackgroundJobs.SendingVerificationEmail;
 using Infrastructure.BackgroundJobs.TokenCleanup;
@@ -260,6 +260,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IVerificationEmailForRegistrationJob, VerificationEmailForRegistrationJob>();
         services.AddScoped<IProcessOutboxMessagesJob, ProcessOutboxMessagesJob>();
+        services.AddScoped<IOutboxCleanupJob, OutboxCleanupJob>();
         services.AddScoped<ITokenCleanupJob, TokenCleanupJob>();
         services.AddScoped<ISendingPasswordResetToken, SendingPasswordResetToken>();
 

@@ -97,7 +97,9 @@ app.UseExceptionHandler();
 app.UseCancellationMiddleware();
 
 RecurringJobs.UseTokenCleanup();
+RecurringJobs.UseOutboxMessagesCleanUp();
 RecurringJobs.UseOutboxMessgesProcessor();
+
 
 app.UseAuthentication();
 
