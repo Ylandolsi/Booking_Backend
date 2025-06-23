@@ -1,9 +1,6 @@
 ﻿using Application.Abstractions.BackgroundJobs;
 using Application.Users.Login;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using SharedKernel;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 
@@ -55,9 +52,9 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         var registerResponse = await _client.PostAsJsonAsync(UsersEndpoints.Register, registrationPayload);
         registerResponse.EnsureSuccessStatusCode();
 
-        await TriggerOutboxProcess();
 
         if (!verify) return;
+        await TriggerOutboxProcess();
 
         await Task.Delay(TimeSpan.FromSeconds(2));
 

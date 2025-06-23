@@ -32,6 +32,28 @@ public class SendResetTokenTests : AuthenticationTestBase
         Assert.NotNull(sentEmail);
         Assert.Contains("Password Reset Request", sentEmail.Message.Body.Html.Data);
     }
+    [Fact]
+    public async Task SendResetToken_ShouldSendEmail_WhenEmailIsNotVerified()
+    {
+        EmailCapturer.Clear();
+        var userEmail = Fake.Internet.Email();
+        await RegisterAndVerifyUser(userEmail, DefaultPassword , false);
+
+        EmailCapturer.Clear(); // delete regisration email ! 
+        var requestPayload = new { Email = userEmail };
+
+
+        var response = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordSendToken, requestPayload);
+
+        // Assert
+        response.EnsureSuccessStatusCode();
+
+        await Task.Delay(2000); // Wait for the email to be sent
+
+        var sentEmail = EmailCapturer.FirstOrDefault(e => e.Destination.ToAddresses.Contains(userEmail));
+        Assert.NotNull(sentEmail);
+        Assert.Contains("Password Reset Request", sentEmail.Message.Body.Html.Data);
+    }
 
     [Fact]
     public async Task SendResetToken_ShouldReturnOk_WhenEmailDoesNotExist()

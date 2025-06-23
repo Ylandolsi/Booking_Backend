@@ -52,6 +52,47 @@ public class VerifyResetPasswordTests : AuthenticationTestBase
         Assert.False(string.IsNullOrWhiteSpace(loginResponse.AccessToken));
     }
 
+    [Fact]
+    public async Task VerifyResetPassword_ShouldResetPassword_WhenEmailIsNotValidated()
+    {
+        EmailCapturer.Clear();
+        var userEmail = Fake.Internet.Email();
+        var newPassword = "NewPassword123!";
+        await RegisterAndVerifyUser(userEmail, DefaultPassword , false );
+
+
+        var resetRequestPayload = new { Email = userEmail };
+        var resetResponse = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordSendToken, resetRequestPayload);
+        resetResponse.EnsureSuccessStatusCode();
+
+        await Task.Delay(2000);  // wait for the email to be sent
+
+
+        var (token, email) = ExtractTokenAndEmailFromEmail(userEmail);
+        Assert.NotNull(token);
+        Assert.NotNull(email);
+
+        var decodedEmail = Uri.UnescapeDataString(email);
+        Assert.Equal(userEmail, decodedEmail);
+
+
+        var verifyPayload = new
+        {
+            Email = userEmail,
+            Token = token,
+            Password = newPassword,
+            ConfirmPassword = newPassword
+        };
+        var verifyResponse = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordVerify, verifyPayload);
+
+        verifyResponse.EnsureSuccessStatusCode();
+
+
+        var loginResponse = await LoginUser(userEmail, newPassword);
+        Assert.NotNull(loginResponse);
+        Assert.False(string.IsNullOrWhiteSpace(loginResponse.AccessToken));
+    }
+
 
 
     [Fact]
