@@ -3,4 +3,4 @@ using System.Threading.RateLimiting;
 
 
 namespace Application.Users.RefreshAccessToken; 
-public record RefreshAccessTokenCommand(string RefreshToken) : ICommand<string>;
+public record RefreshAccessTokenCommand(string RefreshToken) : ICommand;

@@ -4,7 +4,6 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "papercut": "StartWithoutDebugging",
         "postgres": "StartWithoutDebugging",
         "seq": "StartWithoutDebugging",
         "web-api": "StartDebugging"

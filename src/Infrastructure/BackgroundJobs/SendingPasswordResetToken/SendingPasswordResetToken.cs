@@ -1,5 +1,4 @@
-﻿using Application.Abstractions.BackgroundJobs.SendingOtpEmail;
-using Application.Abstractions.BackgroundJobs.SendingPasswordResetToken;
+﻿using Application.Abstractions.BackgroundJobs.SendingPasswordResetToken;
 using Application.Abstractions.Email;
 using Application.Options;
 using Hangfire;

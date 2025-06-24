@@ -3,6 +3,7 @@ using Domain.Users.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
+using System.Web;
 
 namespace Application.Users.Authentication.ResetPassword.Verify;
 
@@ -13,8 +14,8 @@ internal sealed class VerifyResetPasswordCommandHandler(UserManager<User> userMa
     {
         // decode the email and token if they are URL encoded
         var updatedCommand = new VerifyResetPasswordCommand(
-            Uri.UnescapeDataString(command.Email),
-            Uri.UnescapeDataString(command.Token),
+            HttpUtility.UrlDecode(command.Email),
+            HttpUtility.UrlDecode(command.Token),
             command.Password,
             command.ConfirmPassword
         );

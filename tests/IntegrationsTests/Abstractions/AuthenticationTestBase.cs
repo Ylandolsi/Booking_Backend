@@ -34,7 +34,6 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
 
         var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull(loginResponse);
-        Assert.NotEmpty(loginResponse.AccessToken);
         return loginResponse;
     }
 
@@ -53,10 +52,11 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         registerResponse.EnsureSuccessStatusCode();
 
 
-        if (!verify) return;
         await TriggerOutboxProcess();
 
         await Task.Delay(TimeSpan.FromSeconds(2));
+        if (!verify) return;
+
 
         var (token, parsedEmail) = ExtractTokenAndEmailFromEmail(email);
 

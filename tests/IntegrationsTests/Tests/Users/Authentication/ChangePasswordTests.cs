@@ -12,6 +12,7 @@ public class ChangePasswordTests : AuthenticationTestBase
     {
     }
 
+    //     var (userId, httpClient) = await GetAuthenticatedUserAndClientAsync();
     [Fact]
     public async Task ChangePassword_Should_ReturnUnauthorized_WhenUserIsNotAuthenticated()
     {
@@ -37,66 +38,77 @@ public class ChangePasswordTests : AuthenticationTestBase
     {
         // Arrange
         await RegisterAndVerifyUser(DefaultEmail, DefaultPassword, true);
-        var loginResponse = await LoginUser(DefaultEmail, DefaultPassword);
+        await LoginUser(DefaultEmail, DefaultPassword);
 
-        // Use the real access token from the login response for authentication
-        var authenticatedClient = Factory.CreateClient();
-        authenticatedClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
-        authenticatedClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+        var client = Factory.CreateClient();
+
+        var loginPayload = new { Email = DefaultEmail, Password = DefaultPassword };
+        var loginResult = await client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
+        loginResult.EnsureSuccessStatusCode();
 
         var request = new
         {
-            OldPassword = DefaultPassword, // Use the correct old password
+            OldPassword = DefaultPassword,
             NewPassword = "newPassword123!",
             ConfirmNewPassword = "passwordsDoNotMatch456!"
         };
+        // cookies are sent automatically
 
-        // Act
-        var response = await authenticatedClient.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
+        var response = await client.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
 
-        authenticatedClient.DefaultRequestHeaders.Authorization = null;
-
+        // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
     }
 
-    // [Fact]
-    // public async Task ChangePassword_Should_ReturnBadRequest_WhenOldPasswordIsIncorrect()
-    // {
-    //     // Arrange
-    //     var (userId, httpClient) = await GetAuthenticatedUserAndClientAsync();
-    //     var request = new ChangePassword.Request(
-    //         "incorrectOldPassword",
-    //         "newPassword123!",
-    //         "newPassword123!");
+    [Fact]
+    public async Task ChangePassword_Should_ReturnBadRequest_WhenOldPasswordIsIncorrect()
+    {
 
-    //     // Act
-    //     var response = await httpClient.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
+        await RegisterAndVerifyUser(DefaultEmail, DefaultPassword, true);
+        await LoginUser(DefaultEmail, DefaultPassword);
 
-    //     // Assert
-    //     response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var client = Factory.CreateClient();
 
-    //     var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-    //     problemDetails.ErrorCode.Should().Contain("ChangePassword.Failed");
-    // }
+        var loginPayload = new { Email = DefaultEmail, Password = DefaultPassword };
+        var loginResult = await client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
+        loginResult.EnsureSuccessStatusCode();
 
-    // [Fact]
-    // public async Task ChangePassword_Should_ReturnOk_WhenRequestIsValid()
-    // {
-    //     // Arrange
-    //     var (userId, httpClient) = await GetAuthenticatedUserAndClientAsync();
-    //     var newPassword = "newValidPassword123!";
-    //     var request = new ChangePassword.Request(
-    //         BaseIntegrationTest.DefaultPassword,
-    //         newPassword,
-    //         newPassword);
+        var request = new
+        {
+            OldPassword = "incorrectOldPasswords",
+            NewPassword = "newPassword123!",
+            ConfirmNewPassword = "passwordsDoNotMatch456!"
+        };
 
-    //     // Act
-    //     var response = await httpClient.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
+        var response = await client.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
 
-    //     // Assert
-    //     response.StatusCode.Should().Be(HttpStatusCode.OK);
-    // }
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ChangePassword_Should_ReturnOk_WhenRequestIsValid()
+    {
+        // Arrange
+        await RegisterAndVerifyUser(DefaultEmail, DefaultPassword, true);
+        await LoginUser(DefaultEmail, DefaultPassword);
+
+        var client = Factory.CreateClient();
+
+        var loginPayload = new { Email = DefaultEmail, Password = DefaultPassword };
+        var loginResult = await client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
+        loginResult.EnsureSuccessStatusCode();
+
+        var request = new
+        {
+            OldPassword = DefaultPassword,
+            NewPassword = "newPassword123!",
+            ConfirmNewPassword = "newPassword123!"
+        };
+
+        var response = await client.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.Behaviors;
 using Application.Abstractions.Messaging;
+using Application.Users.Authentication;
 using Application.Users.Authentication.ResetPassword;
 using Application.Users.Authentication.Verification;
 using FluentValidation;
@@ -13,6 +14,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<EmailVerificationSender>();
+        services.AddScoped<TokenHelper>(); 
         // thanks to Scrutor  
 
         // find all classes that implement IQueryHandler<,>, ICommandHandler<>, and ICommandHandler<,>

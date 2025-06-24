@@ -2,6 +2,7 @@ using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Options;
+using Application.Users.Authentication;
 using Domain.Users.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -30,14 +31,15 @@ public static class RefreshTokenErrors
 public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext applicationDbContext,
                                                      ITokenProvider tokenProvider,
                                                      UserManager<User> userManager,
+                                                     TokenHelper tokenHelper , 
                                                      ITokenWriterCookies tokenWriterCookies,
                                                      IHttpContextAccessor httpContextAccessor,
                                                      ILogger<RefreshAccessTokenCommandHandler> logger,
-                                                     IOptions<JwtOptions> jwtOptions) : ICommandHandler<RefreshAccessTokenCommand, string>
+                                                     IOptions<JwtOptions> jwtOptions) : ICommandHandler<RefreshAccessTokenCommand>
 {
     private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
-    public async Task<Result<string>> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
     {
         var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken, cancellationToken);
         if (refreshToken == null)
@@ -115,33 +117,16 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
 
 
 
-        string updatedJwtAccessToken = tokenProvider.GenrateJwtToken(refreshToken.User);
-        string jwtRefreshToken = tokenProvider.GenerateRefreshToken();
-
         refreshToken.Revoke();
 
-        var refreshTokenEntity = new RefreshToken(
-                jwtRefreshToken,
-                refreshToken.UserId,
-                DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays),
-                currentIp,
-                currentUserAgent);
-
-        await applicationDbContext.RefreshTokens.AddAsync(refreshTokenEntity);
-
-        try
+        Result result = await tokenHelper.GenerateTokens(refreshToken.User, currentIp, currentUserAgent, cancellationToken);
+        if (result.IsFailure)
         {
-            await applicationDbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateException ex)
-        {
-            return Result.Failure<string>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
+            return Result.Failure<string>(result.Error);
         }
 
-        tokenWriterCookies.WriteRefreshTokenAsHttpOnlyCookie(jwtRefreshToken);
 
-
-        return updatedJwtAccessToken;
+        return Result.Success();
 
     }
 }

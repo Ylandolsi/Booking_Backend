@@ -3,9 +3,9 @@
 public sealed class JwtOptions
 {
     public const string JwtOptionsKey = "Jwt"; // ## name in appsettings.json
-    public AccessOptions AccessToken { get; set; } = new AccessOptions(); 
-        
- }
+    public AccessOptions AccessToken { get; set; } = new AccessOptions();
+
+}
 
 public class JwtSettings
 {
@@ -15,7 +15,7 @@ public class JwtSettings
     public int ExpirationInMinutes { get; set; }
 
 }
-public sealed class AccessOptions : JwtSettings 
+public sealed class AccessOptions : JwtSettings
 {
     public int RefreshTokenExpirationDays { get; set; } = 7;
     public int MaxActiveTokensPerUser { get; set; } = 5;

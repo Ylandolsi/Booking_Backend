@@ -17,7 +17,8 @@ public static class HangfireExtensions
                .UseRecommendedSerializerSettings()
                .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(hangfireConnectionString), new PostgreSqlStorageOptions
                {
-                   SchemaName = "hangfire"
+                   SchemaName = "hangfire",
+                   DistributedLockTimeout = TimeSpan.FromMinutes(2)
                })
                .UseConsole()); // logs to the Hangfire dashboard
 

@@ -15,7 +15,7 @@ public class EmailVerificationTests : AuthenticationTestBase
     {
 
         var userEmail = Fake.Internet.Email();
-        await RegisterAndVerifyUser(userEmail, "Password123!", verify: false);
+        await RegisterAndVerifyUser(userEmail, "Password123!", verify: false  );
 
         // Act
         var resendPayload = new { Email = userEmail };
@@ -48,7 +48,7 @@ public class EmailVerificationTests : AuthenticationTestBase
     {
         // Arrange
         var userEmail = Fake.Internet.Email();
-        await RegisterAndVerifyUser(userEmail, "Password123!", verify: false);
+        await RegisterAndVerifyUser(userEmail, "Password123!", verify: false );
         await Task.Delay(TimeSpan.FromSeconds(2)); // Allow email to be "sent"
         var (token, parsedEmail) = ExtractTokenAndEmailFromEmail(userEmail);
         Assert.NotNull(token);

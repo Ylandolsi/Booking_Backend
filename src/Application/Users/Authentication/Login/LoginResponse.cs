@@ -5,7 +5,6 @@ public sealed record LoginResponse(
     string Firstname,
     string Lastname,
     string Email,
-    string AccessToken,
     bool IsMentor,
     string? ProfilePictureUrl = null,
     bool MentorActive = false);

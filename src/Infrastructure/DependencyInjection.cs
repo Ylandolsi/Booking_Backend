@@ -21,6 +21,7 @@ using Infrastructure.Database;
 using Infrastructure.DomainEvents;
 using Infrastructure.Email;
 using Infrastructure.Time;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -196,21 +197,20 @@ public static class DependencyInjection
 
                 options.ClientId = googleOptions.ClientId!;
                 options.ClientSecret = googleOptions.ClientSecret!;
+
+                options.AccessType = "offline";
+
+                options.SaveTokens = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+
+                options.ClaimActions.MapJsonKey("picture", "picture");
+                options.ClaimActions.MapJsonKey("given_name", "given_name");
+                options.ClaimActions.MapJsonKey("family_name", "family_name");
+
+
             });
 
-        /* 
-                .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-                    {
-                    });
-                    
-                //Add resilience to the Google authentication handler's HttpClient
-                services.AddHttpClient(GoogleDefaults.AuthenticationScheme)
-                    .AddStandardResilienceHandler(options =>
-                    {
-                        options.Retry.MaxRetryAttempts = 3;
-                        options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
-                    });
-                    */
 
         services.AddHttpContextAccessor();
         services.AddScoped<IUserContext, UserContext>();

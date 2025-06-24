@@ -2,6 +2,7 @@ using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Options;
+using Application.Users.Authentication;
 using Domain.Users;
 using Domain.Users.Entities;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SharedKernel;
+using System.Threading;
 
 namespace Application.Users.Login;
 
@@ -20,6 +22,7 @@ public sealed class LoginCommandHandler
                  ITokenWriterCookies tokenWriterCookies,
                  IHttpContextAccessor httpContextAccessor,
                  IOptions<JwtOptions> jwtOptions,
+                 TokenHelper tokenHelper,
                  ILogger<LoginCommandHandler> logger) : ICommandHandler<LoginCommand, LoginResponse>
 {
     private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
@@ -56,51 +59,22 @@ public sealed class LoginCommandHandler
             return Result.Failure<LoginResponse>(UserErrors.EmailIsNotVerified);
         }
 
-        string accessToken = tokenProvider.GenrateJwtToken(user);
-        if (string.IsNullOrEmpty(accessToken))
-        {
-            logger.LogError("Failed to generate access token for user with email: {Email}", command.Email);
-            return Result.Failure<LoginResponse>(UserErrors.TokenGenerationFailed);
-        }
 
-        string refreshToken = tokenProvider.GenerateRefreshToken();
-        if (string.IsNullOrEmpty(refreshToken))
-        {
-            logger.LogError("Failed to generate refresh token for user with email: {Email}", command.Email);
-            return Result.Failure<LoginResponse>(UserErrors.TokenGenerationFailed);
-        }
+
         string? currentIp = httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
         string? currentUserAgent = httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
 
-        var refreshTokenEntity = new RefreshToken(
-            refreshToken,
-            user.Id,
-            DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays),
-            currentIp,
-            currentUserAgent
-            );
-
-        await context.RefreshTokens.AddAsync(refreshTokenEntity);
-        try
+        Result resultt = await tokenHelper.GenerateTokens(user, currentIp, currentUserAgent, cancellationToken);
+        if (resultt.IsFailure)
         {
-            await context.SaveChangesAsync(cancellationToken);
+            return Result.Failure<LoginResponse>(resultt.Error);
         }
-        catch (DbUpdateException ex)
-        {
-            logger.LogError(ex, "Failed to save refresh token for user {UserId}", user.Id);
-            return Result.Failure<LoginResponse>(DatabaseErrors.SaveChangeError("Failed to save refresh token."));
-        }
-
-
-        logger.LogInformation("User {Email} logged in successfully. Refresh token generated and saved.", command.Email);
-
-        tokenWriterCookies.WriteRefreshTokenAsHttpOnlyCookie(refreshToken);
+        logger.LogInformation("User {Email} logged in successfully.!", command.Email);
 
 
         var response = new LoginResponse
         (
             UserId: user.Id,
-            AccessToken: accessToken,
             Firstname: user.Name.FirstName,
             Lastname: user.Name.LastName,
             Email: user.Email!,
@@ -113,3 +87,5 @@ public sealed class LoginCommandHandler
         return Result.Success(response);
     }
 }
+
+

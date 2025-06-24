@@ -39,10 +39,10 @@ public class SendResetTokenTests : AuthenticationTestBase
         var userEmail = Fake.Internet.Email();
         await RegisterAndVerifyUser(userEmail, DefaultPassword , false);
 
-        EmailCapturer.Clear(); // delete regisration email ! 
         var requestPayload = new { Email = userEmail };
 
 
+        EmailCapturer.Clear(); // delete regisration email ! 
         var response = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordSendToken, requestPayload);
 
         // Assert

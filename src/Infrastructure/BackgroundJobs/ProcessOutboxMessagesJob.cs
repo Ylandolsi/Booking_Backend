@@ -53,7 +53,8 @@ public sealed class ProcessOutboxMessagesJob : IProcessOutboxMessagesJob
 
             List<OutboxMessage> messages = await _dbContext.OutboxMessages
                 .Where(m => m.ProcessedOnUtc == null && m.Error == null)
-                .Take(20) // Process in batches
+                .OrderBy(m => m.OccurredOnUtc)
+                .Take(20)
                 .ToListAsync(cancellationToken);
 
             if (!messages.Any())

@@ -30,10 +30,10 @@ internal sealed class LogoutCommandHandler(IApplicationDbContext context,
         }
 
         logger.LogInformation("Logging out user ID: {UserId}", query.UserId);
-        // Clear the refresh token from the user's context
 
         tokenWriterCookies.ClearRefreshTokenCookie();
-        logger.LogInformation("Cleared refresh token cookie for user ID: {UserId}", query.UserId);
+        tokenWriterCookies.ClearAccessTokenCookie();
+        logger.LogInformation("Cleared tokens cookie for user ID: {UserId}", query.UserId);
 
         // revoke it in the database 
 
@@ -48,7 +48,7 @@ internal sealed class LogoutCommandHandler(IApplicationDbContext context,
 
         refreshToken.Revoke();
 
-        context.RefreshTokens.Update(refreshToken );
+        context.RefreshTokens.Update(refreshToken);
 
         return true;
 

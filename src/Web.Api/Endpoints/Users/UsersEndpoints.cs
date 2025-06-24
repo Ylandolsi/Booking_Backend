@@ -1,6 +1,8 @@
 
 public static class UsersEndpoints
 {
+    public const string GoogleLogin = "users/login/google";
+    public const string GoogleLoginCallback = "users/login/google/callback";
     // Authentication and Authorization
     public const string Login = "users/login";
     public const string Register = "users/register";

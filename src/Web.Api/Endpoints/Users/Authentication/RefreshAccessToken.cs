@@ -14,7 +14,7 @@ internal sealed class RefreshAccessToken : IEndpoint
     {
         app.MapPost(UsersEndpoints.RefreshAccessToken, async (
             IUserContext userContext,
-            ICommandHandler<RefreshAccessTokenCommand, string> handler,
+            ICommandHandler<RefreshAccessTokenCommand> handler,
             CancellationToken cancellationToken = default ) =>
         {
             var refreshToken = userContext.RefreshToken;
@@ -27,9 +27,9 @@ internal sealed class RefreshAccessToken : IEndpoint
             }
 
             var command = new RefreshAccessTokenCommand(refreshToken);
-            Result<string> result = await handler.Handle(command, cancellationToken);
+            Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(Results.Ok, CustomResults.Problem);
+            return result.Match(() =>Results.Ok(), (_) => CustomResults.Problem(result) ) ;
         })
         .WithTags(Tags.Users);
     }

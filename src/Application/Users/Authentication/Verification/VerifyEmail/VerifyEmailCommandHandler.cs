@@ -5,6 +5,7 @@ using Domain.Users.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
+using System.Web;
 
 namespace Application.Users.Authentication.Verification.VerifyEmail;
 
@@ -14,8 +15,8 @@ public class VerifyEmailCommandHandler(UserManager<User> userManager,
     public async Task<Result> Handle(VerifyEmailCommand command, CancellationToken cancellationToken)
     {
         // decode the token from the command cuz its URL encoded
-        string decodedToken = System.Net.WebUtility.UrlDecode(command.Token);
-        string decodedEmail = System.Net.WebUtility.UrlDecode(command.Email);
+        string decodedToken = HttpUtility.UrlDecode(command.Token);
+        string decodedEmail = HttpUtility.UrlDecode(command.Email);
 
 
         logger.LogInformation("Handling VerifyEmailCommand for email: {Email}", decodedEmail) ;

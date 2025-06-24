@@ -5,6 +5,10 @@ namespace Application.Abstractions.Authentication;
 public interface ITokenWriterCookies
 {
     void WriteRefreshTokenAsHttpOnlyCookie(string token);
-    void ClearRefreshTokenCookie(); 
+    void ClearRefreshTokenCookie();
+
+    void WriteAccessTokenAsHttpOnlyCookie(string token);
+
+    void ClearAccessTokenCookie();
 
 }

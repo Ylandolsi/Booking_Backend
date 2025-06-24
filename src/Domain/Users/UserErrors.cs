@@ -26,11 +26,6 @@ public static class UserErrors
         "Users.AccountLockedOut",
         "This account has been locked out due to too many failed login attempts. Please try again later.");
 
-
-    public static readonly Error TokenGenerationFailed = Error.Failure(
-        "Users.TokenGenerationFailed",
-        "Failed to generate a token for the user. Please try again later.");
-
     public static Error Unauthorized() => Error.Unauthorized(
     "Users.Unauthorized",
     "You are not authorized to perform this action.");

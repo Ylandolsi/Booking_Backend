@@ -1,25 +1,15 @@
 using Application.Abstractions.Authentication;
 using Application.Options;
-using Domain.Users;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 using System.Web;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class EmailVerificationLinkFactory(IHttpContextAccessor httpContextAccessor,
-                                                   LinkGenerator linkGenerator,
-                                                   IOptions<FrontendApplicationOptions> frontEndOptions) : IEmailVerificationLinkFactory
+internal sealed class EmailVerificationLinkFactory(IOptions<FrontendApplicationOptions> frontEndOptions) : IEmailVerificationLinkFactory
 {
     private readonly FrontendApplicationOptions _frontEndOptions = frontEndOptions.Value;
     public string Create(string emailVerificationToken, string emailAdress)
     {
-        //string? verificationLink = linkGenerator.GetUriByName(
-        //    httpContextAccessor.HttpContext!,
-        //    EndpointsNames.verifyEmail,
-        //    new { token = emailVerificationToken, email = emailAdress })!; // Query Parameter 
-
 
         // Ensure the token is properly encoded for URL usage
         // cuz it contains characters that are not safe for URL ( + , / , = .. )
