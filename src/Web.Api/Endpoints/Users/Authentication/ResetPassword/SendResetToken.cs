@@ -21,7 +21,7 @@ internal sealed class SendResetToken : IEndpoint
 
             Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(() => Results.Ok(),
+            return result.Match(() => Results.NoContent(),
                                 (result) => CustomResults.Problem(result));
         })
         .WithTags(Tags.Users);

@@ -46,7 +46,7 @@ internal sealed class ChangePassword : IEndpoint
             Result result = await handler.Handle(command, cancellationToken);
 
             return result.Match(
-                () => Results.Ok(),
+                () => Results.NoContent(),
                 CustomResults.Problem);
         })
         .RequireAuthorization()

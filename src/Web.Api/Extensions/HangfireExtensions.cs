@@ -39,6 +39,7 @@ public static class HangfireExtensions
 
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
+            // TODO : implement a custom authorization filter for the dashboard
             // middleware to filter users for the dashboard
             // Authorization = [new HangfireDashboardAuthorizationFilter()]
             Authorization = []

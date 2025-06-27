@@ -22,7 +22,7 @@ internal sealed class VerifyRegistration : IEndpoint
                 var command = new VerifyEmailCommand(request.Email, request.Token);
                 Result result = await handler.Handle(command, cancellationToken);
                 return result.Match(
-                        () => Results.Ok(),
+                        () => Results.Created(), // 201 no return data 
                         (_) => CustomResults.Problem(result));
             })
         .WithTags(Tags.Users)

@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 using Polly;
 using SharedKernel;
 using System.ComponentModel;
-using Microsoft.Extensions.Resilience;
 using Polly.Registry;
 
 namespace Infrastructure.BackgroundJobs;

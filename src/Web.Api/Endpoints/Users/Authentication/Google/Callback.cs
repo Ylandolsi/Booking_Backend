@@ -51,8 +51,6 @@ internal sealed class LoginGoogleCallback : IEndpoint
             // cuz i am saving jwt in state 
 
 
-
-
             Results.Redirect(returnUrl ?? "/");
 
 

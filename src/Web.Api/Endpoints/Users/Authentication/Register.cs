@@ -33,7 +33,7 @@ internal sealed class Register : IEndpoint
 
             Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(() => Results.Ok(),
+            return result.Match(() => Results.Created(),
                                (result) => CustomResults.Problem(result));
         })
         .WithTags(Tags.Users);

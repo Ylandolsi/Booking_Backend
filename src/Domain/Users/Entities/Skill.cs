@@ -3,14 +3,11 @@ using SharedKernel;
 
 namespace Domain.Users.Entities;
 
-public class Skill : Entity 
+public class Skill : Entity
 {
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
-    public SkillCategory Category { get; private set; }
-
-    public ICollection<UserSkill> UserSkills { get; private set; } = new List<UserSkill>();
 
     private Skill() { }
 
@@ -24,6 +21,9 @@ public class Skill : Entity
         Description = description?.Trim() ?? string.Empty;
         Category = category;
     }
+    public SkillCategory Category { get; private set; }
+    public ICollection<UserSkill> UserSkills { get; private set; } = new List<UserSkill>();
+
 
 }
 

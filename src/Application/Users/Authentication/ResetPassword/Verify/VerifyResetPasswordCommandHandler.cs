@@ -12,17 +12,11 @@ internal sealed class VerifyResetPasswordCommandHandler(UserManager<User> userMa
 {
     public async Task<Result> Handle(VerifyResetPasswordCommand command, CancellationToken cancellationToken)
     {
-        // decode the email and token if they are URL encoded
-        var updatedCommand = new VerifyResetPasswordCommand(
-            HttpUtility.UrlDecode(command.Email),
-            HttpUtility.UrlDecode(command.Token),
-            command.Password,
-            command.ConfirmPassword
-        );
+        // decoded by react !
 
 
-        logger.LogInformation("Handling VerifyResetPasswordCommand for email: {Email}", updatedCommand.Email);
-        User? user = await userManager.FindByEmailAsync(updatedCommand.Email);
+        logger.LogInformation("Handling VerifyResetPasswordCommand for email: {Email}", command.Email);
+        User? user = await userManager.FindByEmailAsync(command.Email);
         if (user is null)
         {
             // dont reveal if user exists or not
@@ -37,18 +31,18 @@ internal sealed class VerifyResetPasswordCommandHandler(UserManager<User> userMa
                 await userManager.ConfirmEmailAsync(user, emailConfirmToken);
             }
 
-            IdentityResult? resetPasswordResult = await userManager.ResetPasswordAsync(user!, updatedCommand.Token, updatedCommand.Password);
+            IdentityResult? resetPasswordResult = await userManager.ResetPasswordAsync(user!, command.Token, command.Password);
             if (!resetPasswordResult.Succeeded)
             {
                 logger.LogWarning("Failed to reset password for user with email {Email}. Errors: {Errors}",
-                    updatedCommand.Email,
+                    command.Email,
                     string.Join(", ", resetPasswordResult.Errors.Select(e => e.Description)));
                 return Result.Failure(ResetPasswordErrors.GenericError);
             }
 
         }
 
-        logger.LogInformation("Password reset successfully for user with email {Email}", updatedCommand.Email);
+        logger.LogInformation("Password reset successfully for user with email {Email}", command.Email);
         return Result.Success();
 
     }

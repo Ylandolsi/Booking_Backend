@@ -46,6 +46,7 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration) =>
         services
+            .AddCors()
             .AddServices()
             .AddCache()
             .AddResielenecPipelines(configuration)
@@ -64,6 +65,27 @@ public static class DependencyInjection
         services.AddScoped<IEmailService, AwsSesEmailService>();
         services.AddSingleton<IEmailTemplateProvider, EmailTemplateProvider>();
 
+        return services;
+    }
+
+    private static IServiceCollection AddCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("DefaultCors", builder =>
+            {
+                builder.WithOrigins("http://localhost:3000") 
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials();
+                // TODO 
+                // For production 
+                // .WithOrigins("https://yourproductiondomain.com")
+
+                // If you need to expose custom headers
+                // .WithExposedHeaders("access_token", "refresh_token");
+            });
+        });
         return services;
     }
 
@@ -190,26 +212,27 @@ public static class DependencyInjection
                     }
                 };
             })
-            .AddGoogle(options =>
-            {
-                var googleOptions = configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey)
-                                                 .Get<GoogleOAuthOptions>() ?? throw new InvalidOperationException("Google Oauth is not configured");
+            ;
+            //.AddGoogle(options =>
+            //{
+            //    var googleOptions = configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey)
+            //                                     .Get<GoogleOAuthOptions>() ?? throw new InvalidOperationException("Google Oauth is not configured");
 
-                options.ClientId = googleOptions.ClientId!;
-                options.ClientSecret = googleOptions.ClientSecret!;
+            //    options.ClientId = googleOptions.ClientId!;
+            //    options.ClientSecret = googleOptions.ClientSecret!;
 
-                options.AccessType = "offline";
+            //    options.AccessType = "offline";
 
-                options.SaveTokens = true;
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
+            //    options.SaveTokens = true;
+            //    options.Scope.Add("openid");
+            //    options.Scope.Add("profile");
 
-                options.ClaimActions.MapJsonKey("picture", "picture");
-                options.ClaimActions.MapJsonKey("given_name", "given_name");
-                options.ClaimActions.MapJsonKey("family_name", "family_name");
+            //    options.ClaimActions.MapJsonKey("picture", "picture");
+            //    options.ClaimActions.MapJsonKey("given_name", "given_name");
+            //    options.ClaimActions.MapJsonKey("family_name", "family_name");
 
 
-            });
+            //});
 
 
         services.AddHttpContextAccessor();

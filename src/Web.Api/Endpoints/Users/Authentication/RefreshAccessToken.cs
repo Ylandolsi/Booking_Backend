@@ -29,7 +29,7 @@ internal sealed class RefreshAccessToken : IEndpoint
             var command = new RefreshAccessTokenCommand(refreshToken);
             Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(() =>Results.Ok(), (_) => CustomResults.Problem(result) ) ;
+            return result.Match(() =>Results.Created(), (_) => CustomResults.Problem(result) ) ;
         })
         .WithTags(Tags.Users);
     }

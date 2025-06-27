@@ -52,3 +52,6 @@ seq-data/
 appsettings.*.Secrets.json
 
 # End of .gitignore
+
+.env
+*.env

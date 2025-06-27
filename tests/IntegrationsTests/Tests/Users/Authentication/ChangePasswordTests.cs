@@ -108,7 +108,6 @@ public class ChangePasswordTests : AuthenticationTestBase
 
         var response = await client.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
+        CheckSuccess(response);
     }
 }

@@ -87,6 +87,9 @@ app.MapHealthChecks("health", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
+// TODO  : app.useStaticfiles ? 
+
+app.UseCors("DefaultCors"); 
 app.UseHangfireDashboard();
 
 app.UseRequestContextLogging();

@@ -23,7 +23,7 @@ internal sealed class ReSendVerificationEmail : IEndpoint
                 var command = new ReSendVerificationCommand(request.Email);
                 Result result = await handler.Handle(command, cancellationToken);
                 return result.Match(
-                    () => Results.Ok(),
+                    () => Results.Created(),
                     (_) => CustomResults.Problem(result)
                 );
             })

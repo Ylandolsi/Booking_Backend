@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.BackgroundJobs;
 using Application.Users.Login;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
@@ -66,13 +67,14 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         var verificationPayload = new { Email = parsedEmail, Token = token };
         var verifyResponse = await _client.PostAsJsonAsync(UsersEndpoints.VerifyEmail, verificationPayload);
 
-        verifyResponse.EnsureSuccessStatusCode();
+        //verifyResponse.EnsureSuccessStatusCode();
+        CheckSuccess(verifyResponse);
     }
-
 
     protected (string? Token, string? Email) ExtractTokenAndEmailFromEmail(string userEmail)
     {
-        var sentEmail = EmailCapturer.FirstOrDefault(e => e.Destination.ToAddresses.Contains(userEmail));
+
+        var sentEmail = EmailCapturer.LastOrDefault(e => e.Destination.ToAddresses.Contains(userEmail));
         if (sentEmail is null) return (null, null);
 
         var match = Regex.Match(
@@ -80,36 +82,18 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
             @"href=['""](?<url>https?://[^'""]+\?token=[^&]+&email=[^'""]+)['""]",
             RegexOptions.IgnoreCase);
 
-
         if (!match.Success) return (null, null);
 
-
         var url = match.Groups["url"].Value;
-
         var uri = new Uri(url);
-        string query = uri.Query;
-        // extract without decoding the URL (  decoding happens in the handler )
-        string token = ExtractRawQueryParameter(query, "token");
-        string email = ExtractRawQueryParameter(query, "email");
 
-        return (token, email);
+        // Use QueryHelpers to parse and decode the query string
+        var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+        queryParams.TryGetValue("token", out var token);
+        queryParams.TryGetValue("email", out var email);
+
+        return (token.ToString(), email.ToString());
     }
 
-    private string ExtractRawQueryParameter(string query, string paramName)
-    {
-        if (query.StartsWith("?")) query = query.Substring(1);
-
-        var parameters = query.Split('&');
-
-        foreach (var param in parameters)
-        {
-            var parts = param.Split('=');
-            if (parts.Length == 2 && parts[0] == paramName)
-            {
-                return parts[1];
-            }
-        }
-
-        return string.Empty;
-    }
 }

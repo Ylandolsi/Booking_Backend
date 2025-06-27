@@ -1,5 +1,7 @@
 ﻿using Amazon.SimpleEmail.Model;
+using Azure;
 using Bogus;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationsTests.Abstractions;
@@ -36,6 +38,16 @@ public abstract class BaseIntegrationTest : IDisposable, IAsyncLifetime
         //    email: _verifiedUserEmail,
         //    isEmailVerified: true);
     }
+
+    protected bool IsSucceed(int statusCode) // Change parameter type to int
+    {
+        return statusCode == StatusCodes.Status200OK ||
+               statusCode == StatusCodes.Status201Created ||
+               statusCode == StatusCodes.Status204NoContent;
+    }
+    
+    protected void CheckSuccess( HttpResponseMessage response ) => Assert.True(IsSucceed((int)response.StatusCode), "The response status code does not indicate success.");
+
 
     public async Task InitializeAsync()
     {
