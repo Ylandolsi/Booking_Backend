@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Respawn;
@@ -59,6 +60,18 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
     }
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration((context, config) =>
+        {
+            // Add dummy Google auth settings that will be used during registration
+            var testConfig = new Dictionary<string, string>
+            {
+                ["Google:ClientId"] = "test-client-id",
+                ["Google:ClientSecret"] = "test-client-secret"
+            };
+
+            config.AddInMemoryCollection(testConfig);
+        });
+
 
         builder.ConfigureTestServices(services =>
         {

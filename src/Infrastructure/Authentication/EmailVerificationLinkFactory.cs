@@ -16,9 +16,9 @@ internal sealed class EmailVerificationLinkFactory(IOptions<FrontendApplicationO
 
         var builder = new UriBuilder(_frontEndOptions.BaseUrl)
         {
-            Path = _frontEndOptions.EmailVerification.Trim('/'),
+            Path = _frontEndOptions.EmailVerification , 
             Query = $"token={HttpUtility.UrlEncode(emailVerificationToken)}&email={HttpUtility.UrlEncode(emailAdress)}"
-        };
+        }; 
         var resetUrl = builder.ToString();
 
         return resetUrl ?? throw new InvalidOperationException("Failed to generate email verification link. The link is null or empty.");

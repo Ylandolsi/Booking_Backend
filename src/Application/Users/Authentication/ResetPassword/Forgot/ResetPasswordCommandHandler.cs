@@ -7,10 +7,10 @@ using System.Web;
 
 namespace Application.Users.Authentication.ResetPassword.Verify;
 
-internal sealed class VerifyResetPasswordCommandHandler(UserManager<User> userManager,
-                                                           ILogger<VerifyResetPasswordCommandHandler> logger) : ICommandHandler<VerifyResetPasswordCommand>
+internal sealed class ResetPasswordCommandHandler(UserManager<User> userManager,
+                                                  ILogger<ResetPasswordCommandHandler> logger) : ICommandHandler<ResetPasswordCommand>
 {
-    public async Task<Result> Handle(VerifyResetPasswordCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(ResetPasswordCommand command, CancellationToken cancellationToken)
     {
         // decoded by react !
 

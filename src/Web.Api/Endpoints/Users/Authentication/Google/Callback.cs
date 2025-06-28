@@ -46,12 +46,10 @@ internal sealed class LoginGoogleCallback : IEndpoint
                     detail: "Authentication with Google was not successful. Please try again."
                 );
             }
-            // TODO : refresh token is sent to front end 
-            // to enter with google make a request to refresh the token 
-            // cuz i am saving jwt in state 
 
 
-            Results.Redirect(returnUrl ?? "/");
+            
+            return Results.Redirect(returnUrl);
 
 
         })

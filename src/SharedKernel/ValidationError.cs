@@ -46,6 +46,8 @@ if (errors.Any())
 
 
 {
+"status":400,"detail":"The provided email or password is incorrect. Please try again.","traceId":"00-418f39a963aa53e4393b907e8542df06-2f18b0edea9851f8-00"}
+
     "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
     "title": "User.Validation",
     "status": 400,

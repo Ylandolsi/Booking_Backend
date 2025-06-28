@@ -12,9 +12,8 @@ public static class UsersEndpoints
     public const string Logout = "users/logout";
     public const string ChangePassword = "users/change-password";
 
-    public const string ResetPassword = "users/reset-password-email";
-    public const string ResetPasswordSendToken = "/users/reset-password/send-token";
-    public const string ResetPasswordVerify = "/users/reset-password/verify";
+    public const string ForgotPassword = "/users/forgot-password";
+    public const string ResetPassword = "/users/reset-password";
 
     // User Management
     public const string GetUser = "users/{id}";

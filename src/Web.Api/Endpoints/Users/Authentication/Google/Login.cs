@@ -26,6 +26,8 @@ internal sealed class LoginGoogle : IEndpoint
                                                                  UsersEndpoints.GoogleLoginCallback,
                                                                  new { returnUrl = returnUrl })!;
 
+
+
             // internally : 
             // * .net identity send the request including the scopes
             // * .net identity have its callback that change the auth code with token which is ( signin-google ) 

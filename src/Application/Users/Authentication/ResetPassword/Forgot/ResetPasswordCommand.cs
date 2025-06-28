@@ -3,7 +3,7 @@
 
 namespace Application.Users.Authentication.ResetPassword.Verify;
 
-public record VerifyResetPasswordCommand(string Email,
+public record ResetPasswordCommand(string Email,
                                           string Token,
                                           string Password,
                                           string ConfirmPassword) : ICommand;

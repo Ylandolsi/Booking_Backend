@@ -2,9 +2,9 @@
 
 namespace Application.Users.Authentication.ResetPassword.Send;
 
-public class ResetTokenCommandValidator : AbstractValidator<ResetTokenCommand>
+public class ResetPasswordCommandValidator : AbstractValidator<RestPasswordCommand>
 {
-    public ResetTokenCommandValidator()
+    public ResetPasswordCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")

@@ -11,14 +11,14 @@ using System.Web;
 
 namespace Application.Users.Authentication.ResetPassword.Send;
 
-internal sealed class ResetTokenCommandHandler(UserManager<User> userManager,
+internal sealed class ResetPasswordCommandHandler(UserManager<User> userManager,
                                                  IOptions<FrontendApplicationOptions> frontendApplicationOptions,
                                                  IBackgroundJobClient backgroundJobClient,
-                                                 ILogger<ResetTokenCommandHandler> logger) : ICommandHandler<ResetTokenCommand>
+                                                 ILogger<ResetPasswordCommandHandler> logger) : ICommandHandler<RestPasswordCommand>
 {
 
     private readonly FrontendApplicationOptions frontendApplicationOptions = frontendApplicationOptions.Value;
-    public async Task<Result> Handle(ResetTokenCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RestPasswordCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Sending password reset token to {Email}", command.Email);
 

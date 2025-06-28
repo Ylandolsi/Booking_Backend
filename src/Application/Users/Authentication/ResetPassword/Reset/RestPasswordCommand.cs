@@ -2,4 +2,4 @@
 
 namespace Application.Users.Authentication.ResetPassword.Send;
 
-public record ResetTokenCommand(string Email) : ICommand;
+public record RestPasswordCommand(string Email) : ICommand;

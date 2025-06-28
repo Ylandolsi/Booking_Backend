@@ -74,7 +74,8 @@ public static class DependencyInjection
         {
             options.AddPolicy("DefaultCors", builder =>
             {
-                builder.WithOrigins("http://localhost:3000") 
+                builder.WithOrigins("http://localhost:3000",
+                                    "http://localhost:5000")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
@@ -212,27 +213,30 @@ public static class DependencyInjection
                     }
                 };
             })
-            ;
-            //.AddGoogle(options =>
-            //{
-            //    var googleOptions = configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey)
-            //                                     .Get<GoogleOAuthOptions>() ?? throw new InvalidOperationException("Google Oauth is not configured");
+            
+            .AddGoogle(options =>
+            {
+                var googleOptions = configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey)
+                                                 .Get<GoogleOAuthOptions>() ?? throw new InvalidOperationException("Google Oauth is not configured");
 
-            //    options.ClientId = googleOptions.ClientId!;
-            //    options.ClientSecret = googleOptions.ClientSecret!;
+                options.ClientId = googleOptions.ClientId!;
+                options.ClientSecret = googleOptions.ClientSecret!;
 
-            //    options.AccessType = "offline";
+                options.AccessType = "offline";
 
-            //    options.SaveTokens = true;
-            //    options.Scope.Add("openid");
-            //    options.Scope.Add("profile");
+                options.SaveTokens = true;
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
 
-            //    options.ClaimActions.MapJsonKey("picture", "picture");
-            //    options.ClaimActions.MapJsonKey("given_name", "given_name");
-            //    options.ClaimActions.MapJsonKey("family_name", "family_name");
+                options.ClaimActions.MapJsonKey("picture", "picture");
+                options.ClaimActions.MapJsonKey("given_name", "given_name");
+                options.ClaimActions.MapJsonKey("family_name", "family_name");
+
+                //options.CallbackPath = "http://localhost:5000/auth/login/google/callback"; 
+                options.ReturnUrlParameter = "/auth/login/google/callback";
 
 
-            //});
+            });
 
 
         services.AddHttpContextAccessor();

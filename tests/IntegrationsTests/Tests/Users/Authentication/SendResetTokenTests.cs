@@ -21,7 +21,7 @@ public class SendResetTokenTests : AuthenticationTestBase
         var requestPayload = new { Email = userEmail };
 
 
-        var response = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordSendToken, requestPayload);
+        var response = await _client.PostAsJsonAsync(UsersEndpoints.ForgotPassword, requestPayload);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -43,7 +43,7 @@ public class SendResetTokenTests : AuthenticationTestBase
 
 
         EmailCapturer.Clear(); // delete regisration email ! 
-        var response = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordSendToken, requestPayload);
+        var response = await _client.PostAsJsonAsync(UsersEndpoints.ForgotPassword, requestPayload);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -65,7 +65,7 @@ public class SendResetTokenTests : AuthenticationTestBase
         var requestPayload = new { Email = nonExistentEmail };
 
         // Act
-        var response = await _client.PostAsJsonAsync(UsersEndpoints.ResetPasswordSendToken, requestPayload);
+        var response = await _client.PostAsJsonAsync(UsersEndpoints.ForgotPassword, requestPayload);
 
         await Task.Delay(2000); // Wait for the email to be sent
 

@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace Application.Users.Authentication.ResetPassword.Verify;
 
-public class VerifyResetPasswordCommandValidator : AbstractValidator<VerifyResetPasswordCommand>
+public class ResetPasswordCommandValidator : AbstractValidator<ResetPasswordCommand>
 {
-    public VerifyResetPasswordCommandValidator()
+    public ResetPasswordCommandValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")

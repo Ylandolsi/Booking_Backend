@@ -6,18 +6,18 @@ using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users.Authentication.ResetPassword;
 
-internal sealed class VerifyResetPassword : IEndpoint
+internal sealed class ResetPassword : IEndpoint
 {
     public sealed record Request(string Email, string Token, string Password, string ConfirmPassword);
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost(UsersEndpoints.ResetPasswordVerify, async (
+        app.MapPost(UsersEndpoints.ResetPassword, async (
             Request request,
-            ICommandHandler<VerifyResetPasswordCommand> handler,
+            ICommandHandler<ResetPasswordCommand> handler,
             CancellationToken cancellationToken = default) =>
         {
-            var command = new VerifyResetPasswordCommand(
+            var command = new ResetPasswordCommand(
                 request.Email,
                 request.Token,
                 request.Password,
