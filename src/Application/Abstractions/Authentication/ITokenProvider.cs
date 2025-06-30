@@ -4,6 +4,6 @@ namespace Application.Abstractions.Authentication;
 
 public interface ITokenProvider
 {
-    string GenrateJwtToken(User user);
+    string GenerateJwtToken(User user);
     string GenerateRefreshToken();
 }

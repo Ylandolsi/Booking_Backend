@@ -1,10 +1,7 @@
 ﻿using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
 using Application.Options;
-using Application.Users.Login;
-using Domain.Users;
 using Domain.Users.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -26,7 +23,6 @@ public class TokenHelper(ITokenProvider tokenProvider,
                            IOptions<JwtOptions> jwtOptions,
                            ILogger<TokenHelper> logger)
 {
-
     private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
     public async Task<Result> GenerateTokens(User user,
@@ -35,7 +31,7 @@ public class TokenHelper(ITokenProvider tokenProvider,
                                              CancellationToken cancellationToken)
     {
 
-        string accessToken = tokenProvider.GenrateJwtToken(user);
+        string accessToken = tokenProvider.GenerateJwtToken(user);
         if (string.IsNullOrEmpty(accessToken))
         {
             logger.LogError("Failed to generate access token for user with email: {Email}", user.Email);

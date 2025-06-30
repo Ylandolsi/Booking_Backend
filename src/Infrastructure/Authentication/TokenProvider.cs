@@ -14,41 +14,58 @@ internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenPro
 {
     private readonly AccessOptions _jwtOptions = jwtOptions.Value.AccessToken;
 
-    public string GenrateJwtToken(User user)
+    public string GenerateJwtToken(User user)
     {
-        string secretKey = _jwtOptions.Secret ?? throw new InvalidOperationException("Secret key is not configured in JWT options.");
+        if (string.IsNullOrEmpty(_jwtOptions.PrivateKey))
+            throw new InvalidOperationException("Private key is not configured in JWT options.");
 
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        if (string.IsNullOrEmpty(_jwtOptions.Issuer))
+            throw new InvalidOperationException("Issuer is not configured in JWT options.");
 
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        if (string.IsNullOrEmpty(_jwtOptions.Audience))
+            throw new InvalidOperationException("Audience is not configured in JWT options.");
 
-        var tokenDescriptor = new SecurityTokenDescriptor
+        var rsa = RSA.Create(); 
+
+        try
         {
-            Subject = new ClaimsIdentity(
-            [
-                // dont add too claims 
-                // because it will increase the size of the token
-                // && 
-                // should be safe (not sensitive data)
-                // && 
-                // if one claims changes frequently , 
-                // the client would only get the updated information when the token is refreshed
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            ]),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
-            SigningCredentials = credentials,
-            Issuer = _jwtOptions.Issuer ?? throw new InvalidOperationException("Issuer is not configuterd in JWT "),
-            Audience = _jwtOptions.Audience ?? throw new InvalidOperationException("Audience is not configuterd in JWT "),
-        };
+            var privateKey = _jwtOptions.PrivateKey
+                .Replace("\\n", "\n")
+                .Trim();             
 
-        var handler = new JsonWebTokenHandler();
+            rsa.ImportFromPem(privateKey.ToCharArray());
 
-        string token = handler.CreateToken(tokenDescriptor);
+            var securityKey = new RsaSecurityKey(rsa);
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
 
-        return token;
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                [
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                ]),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
+                SigningCredentials = credentials,
+                Issuer = _jwtOptions.Issuer,
+                Audience = _jwtOptions.Audience,
+                NotBefore = DateTime.UtcNow,
+                IssuedAt = DateTime.UtcNow,
+
+            };
+
+            var handler = new JsonWebTokenHandler();
+            string token = handler.CreateToken(tokenDescriptor);
+            return token;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error generating JWT token: {e.Message}");
+
+        }
+        return String.Empty; 
     }
-
-
 
     public string GenerateRefreshToken()
     {

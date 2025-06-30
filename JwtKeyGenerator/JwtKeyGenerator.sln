@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36127.28 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JwtKeyGenerator", "JwtKeyGenerator.csproj", "{314C6CE3-3C7E-9EF6-45B1-37489C5E0EB0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{314C6CE3-3C7E-9EF6-45B1-37489C5E0EB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{314C6CE3-3C7E-9EF6-45B1-37489C5E0EB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{314C6CE3-3C7E-9EF6-45B1-37489C5E0EB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{314C6CE3-3C7E-9EF6-45B1-37489C5E0EB0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {53988487-AF54-4968-9D6A-E14C097E2FB2}
+	EndGlobalSection
+EndGlobal

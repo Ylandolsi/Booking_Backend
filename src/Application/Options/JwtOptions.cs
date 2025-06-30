@@ -14,10 +14,15 @@ public class JwtSettings
     public string Audience { get; set; }
     public int ExpirationInMinutes { get; set; }
 
+
+
 }
 public sealed class AccessOptions : JwtSettings
 {
     public int RefreshTokenExpirationDays { get; set; } = 7;
     public int MaxActiveTokensPerUser { get; set; } = 5;
+
+    public string PrivateKey { get; set; } = string.Empty;
+    public string PublicKey { get; set; } = string.Empty;
 }
 

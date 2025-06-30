@@ -36,6 +36,7 @@ using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 using SharedKernel;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Infrastructure;
@@ -136,7 +137,6 @@ public static class DependencyInjection
                 .UseNpgsql(connectionString, npgsqlOptions =>
                 {
                     npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default);
-                    // npgsqlOptions.EnableRetryOnFailure(5);
 
                 })
                 .UseSnakeCaseNamingConvention());
@@ -186,9 +186,24 @@ public static class DependencyInjection
             )
             .AddJwtBearer(o =>
             {
+
                 var jwtOptions = configuration.GetSection(JwtOptions.JwtOptionsKey)
                                               .Get<JwtOptions>()?.AccessToken ??
                                               throw new InvalidOperationException("JWT options are not configured.");
+
+
+                var rsa = RSA.Create();
+
+         
+                var publicKey = jwtOptions.PublicKey
+                                .Replace("\\n"  , "\n")
+                                .Trim();         
+
+                
+                rsa.ImportFromPem(publicKey.ToCharArray());
+                Console.WriteLine("Successfully imported using ImportRSAPublicKey");
+                        
+                    
 
 
                 o.RequireHttpsMetadata = false;
@@ -198,10 +213,12 @@ public static class DependencyInjection
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+                    IssuerSigningKey = new RsaSecurityKey(rsa),
+                    //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.FromSeconds(30)
+
                 };
 
                 o.Events = new JwtBearerEvents
@@ -210,9 +227,16 @@ public static class DependencyInjection
                     {
                         context.Token = context.Request.Cookies["access_token"] ?? context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
                         return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                        return Task.CompletedTask;
                     }
                 };
-            })
+                
+            }    
+            )
             
             .AddGoogle(options =>
             {
@@ -237,6 +261,7 @@ public static class DependencyInjection
 
 
             });
+
 
 
         services.AddHttpContextAccessor();
