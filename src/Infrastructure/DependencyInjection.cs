@@ -76,6 +76,7 @@ public static class DependencyInjection
             options.AddPolicy("DefaultCors", builder =>
             {
                 builder.WithOrigins("http://localhost:3000",
+                                    "http://localhost:3000",
                                     "http://localhost:5000")
                        .AllowAnyMethod()
                        .AllowAnyHeader()

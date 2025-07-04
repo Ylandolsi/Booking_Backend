@@ -5,3 +5,6 @@ in integrations tests , background jobs needs to be triggered manually because t
 string encodedToken = Uri.EscapeDataString(emailVerificationToken);
 string verificationLink = $"{_frontEndOptions.BaseUrl}{_frontEndOptions.EmailVerificationPagePath}?token={encodedToken}&email={emailAdress}";
 return verificationLink ?? throw new InvalidOperationException("Failed to generate verification link.");
+
+
+dotnet ef migrations add SyncModelAndDb --project ../Infrastructure --startup-project .

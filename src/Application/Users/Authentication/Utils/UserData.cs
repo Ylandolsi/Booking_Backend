@@ -1,6 +1,6 @@
-namespace Application.Users.Login;
+namespace Application.Users.Authentication.Utils;
 
-public sealed record LoginResponse(
+public sealed record UserData(
     Guid UserId,
     string Firstname,
     string Lastname,

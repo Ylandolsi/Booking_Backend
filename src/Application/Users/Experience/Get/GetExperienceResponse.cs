@@ -26,7 +26,7 @@ internal sealed class ExperienceResponseMapper
                 experience.StartDate,
                 experience.EndDate,
                 experience.Description,
-                experience.IsCurrent
+                experience.ToPresent
             );
         }
     }

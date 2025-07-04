@@ -1,5 +1,5 @@
 ﻿using Application.Abstractions.BackgroundJobs;
-using Application.Users.Login;
+using Application.Users.Authentication.Utils;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
@@ -22,7 +22,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         await outboxProcessor.ExecuteAsync(null);
     }
 
-    protected async Task<LoginResponse> LoginUser(string email, string password)
+    protected async Task<UserData> LoginUser(string email, string password)
     {
         var loginPayload = new
         {
@@ -33,7 +33,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         var response = await _client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
         response.EnsureSuccessStatusCode();
 
-        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResponse = await response.Content.ReadFromJsonAsync<UserData>();
         Assert.NotNull(loginResponse);
         return loginResponse;
     }

@@ -1,6 +1,6 @@
 
 using Application.Abstractions.Messaging;
-using Application.Users.Login;
+using Application.Users.Authentication.Utils;
 using Domain.Users.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,16 +14,16 @@ internal sealed class CreateOrLoginCommandHandler(
     UserManager<User> userManager,
     IHttpContextAccessor httpContextAccessor,
     TokenHelper tokenHelper,
-    ILogger<CreateOrLoginCommandHandler> logger) : ICommandHandler<CreateOrLoginCommand, LoginResponse>
+    ILogger<CreateOrLoginCommandHandler> logger) : ICommandHandler<CreateOrLoginCommand, UserData>
 {
 
-    public async Task<Result<LoginResponse>> Handle(CreateOrLoginCommand command, CancellationToken cancellationToken)
+    public async Task<Result<UserData>> Handle(CreateOrLoginCommand command, CancellationToken cancellationToken)
     {
         ClaimsGoogle? claims = ExtractClaims(command.principal);
 
         if (claims is null)
         {
-            return Result.Failure<LoginResponse>(CreateOrLoginErrors.UserRegistrationFailed("Invalid claims from external provider."));
+            return Result.Failure<UserData>(CreateOrLoginErrors.UserRegistrationFailed("Invalid claims from external provider."));
         }
 
         var loginInfo = new UserLoginInfo("Google", claims.Id, "Google");
@@ -47,7 +47,7 @@ internal sealed class CreateOrLoginCommandHandler(
                 if (!createResult.Succeeded)
                 {
                     logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", claims.Email, createResult.Errors);
-                    return Result.Failure<LoginResponse>(CreateOrLoginErrors.UserRegistrationFailed(string.Join(", ", createResult.Errors.Select(e => e.Description))));
+                    return Result.Failure<UserData>(CreateOrLoginErrors.UserRegistrationFailed(string.Join(", ", createResult.Errors.Select(e => e.Description))));
                 }
                 logger.LogInformation("User registered successfully with email: {Email}", claims.Email);
             }
@@ -57,7 +57,7 @@ internal sealed class CreateOrLoginCommandHandler(
             if (!addLoginResult.Succeeded)
             {
                 logger.LogWarning("Failed to add Google login to user with email: {Email}. Errors: {Errors}", claims.Email, addLoginResult.Errors);
-                return Result.Failure<LoginResponse>(CreateOrLoginErrors.UserRegistrationFailed("Could not link Google account."));
+                return Result.Failure<UserData>(CreateOrLoginErrors.UserRegistrationFailed("Could not link Google account."));
             }
         }
         else
@@ -74,12 +74,12 @@ internal sealed class CreateOrLoginCommandHandler(
         Result result = await tokenHelper.GenerateTokens(user, currentIp, currentUserAgent, cancellationToken);
         if (result.IsFailure)
         {
-            return Result.Failure<LoginResponse>(result.Error);
+            return Result.Failure<UserData>(result.Error);
         }
 
         logger.LogInformation("User {Email} logged in successfully.!", user.Email);
 
-        var response = new LoginResponse
+        var response = new UserData
         (
             UserId: user.Id,
             Firstname: user.Name.FirstName,

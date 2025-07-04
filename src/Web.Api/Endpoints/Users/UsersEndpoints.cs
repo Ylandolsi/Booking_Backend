@@ -17,6 +17,7 @@ public static class UsersEndpoints
 
     // User Management
     public const string GetUser = "users/{id}";
+    public const string GetCurrentUser = "users/me";
 
     // Experience 
 

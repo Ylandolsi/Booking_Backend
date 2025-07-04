@@ -1,6 +1,6 @@
 ﻿using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Google;
-using Application.Users.Login;
+using Application.Users.Authentication.Utils;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using SharedKernel;
@@ -13,9 +13,10 @@ internal sealed class LoginGoogleCallback : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet(UsersEndpoints.GoogleLoginCallback, async ([FromQuery] string returnUrl,
-                                                              ICommandHandler<CreateOrLoginCommand, LoginResponse> createOrLoginCommandHandler,
-                                                              IHttpContextAccessor httpContextAccessor) =>
+        app.MapGet(UsersEndpoints.GoogleLoginCallback, async (
+            [FromQuery] string returnUrl,
+            ICommandHandler<CreateOrLoginCommand, UserData> createOrLoginCommandHandler,
+            IHttpContextAccessor httpContextAccessor) =>
         {
 
             // exchange the code with tokens 
@@ -36,7 +37,7 @@ internal sealed class LoginGoogleCallback : IEndpoint
 
 
             var command = new CreateOrLoginCommand(result.Principal!);
-            Result<LoginResponse> loginResponseResult = await createOrLoginCommandHandler.Handle(command, default);
+            Result<UserData> loginResponseResult = await createOrLoginCommandHandler.Handle(command, default);
 
             if (!loginResponseResult.IsSuccess)
             {

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Application.Users.Login;
+using Application.Users.Authentication.Utils;
 using IntegrationsTests.Abstractions;
 
 namespace IntegrationsTests.Tests;
@@ -25,12 +25,28 @@ public class UserLoginTests : AuthenticationTestBase
 
         // Assert
         loginResponse.EnsureSuccessStatusCode();
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<UserData>();
         Assert.NotNull(loginResult);
        
     }
-
     [Fact]
+    public async Task GetCurrentUser_ShouldReturnValidAnswer_WhenTheUserIsAuthenticated()
+    {
+        // Arrange
+        var userEmail = Fake.Internet.Email();
+        var userPassword = "Password123!";
+        await RegisterAndVerifyUser(userEmail, userPassword);
+
+        var userData = await LoginUser(userEmail, userPassword);
+        Assert.NotNull(userData);
+
+        var currentUserResponse = await _client.GetAsync(UsersEndpoints.GetCurrentUser);
+        Assert.NotNull(currentUserResponse);
+        Assert.Equal(HttpStatusCode.OK, currentUserResponse.StatusCode);
+        Assert.Equal(userEmail, userData.Email);
+    }
+
+        [Fact]
     public async Task Login_ShouldReturnBadRequest_WhenPasswordIsIncorrect()
     {
         // Arrange

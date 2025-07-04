@@ -1,12 +1,12 @@
 ﻿
 using Application.Abstractions.Messaging;
-using Application.Users.Login;
+using Application.Users.Authentication.Utils;
 using SharedKernel;
 using System.Security.Claims;
 
 namespace Application.Users.Authentication.Google;
 
-public record CreateOrLoginCommand(ClaimsPrincipal principal) : ICommand<LoginResponse>;
+public record CreateOrLoginCommand(ClaimsPrincipal principal) : ICommand<UserData>;
 
 public static class CreateOrLoginErrors
 {

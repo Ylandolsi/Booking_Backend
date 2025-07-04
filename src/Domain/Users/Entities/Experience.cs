@@ -11,7 +11,7 @@ public class Experience : Entity
     public DateTime StartDate { get; private set; }
     public DateTime? EndDate { get; private set; }
     public string CompanyName { get; private set; } = string.Empty;
-    public bool IsCurrent { get; private set; }
+    public bool ToPresent { get; private set; }
     
     public Guid UserId { get; private set; }
     public User User { get; set; } = default!;
@@ -33,7 +33,7 @@ public class Experience : Entity
         EndDate = endDate;
         CompanyName = companyName?.Trim() ?? string.Empty ;
         UserId = userId;
-        IsCurrent = !endDate.HasValue;
+        ToPresent = !endDate.HasValue;
     }
 
     public void Update(string title,
@@ -47,7 +47,7 @@ public class Experience : Entity
         StartDate = startDate;
         EndDate = endDate;
         Description = description?.Trim() ?? string.Empty;
-        IsCurrent = !endDate.HasValue;
+        ToPresent = !endDate.HasValue;
         
     }
 
@@ -57,7 +57,7 @@ public class Experience : Entity
             return Result.Failure(ExperienceErrors.InvalidEndDate);
 
         EndDate = endDate;
-        IsCurrent = false;
+        ToPresent = false;
         return Result.Success();
     }
 
