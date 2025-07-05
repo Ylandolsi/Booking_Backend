@@ -58,11 +58,10 @@ if (app.Environment.IsDevelopment())
     {
         await userManager.DeleteAsync(user);
     }
-    var testUser = User.Create(
-    "Test",
-    "User",
-    "yesslandolsi@gmail.com",
-    "");
+    var testUser = User.Create("Test",
+                               "User",
+                               "yesslandolsi@gmail.com",
+                               "");
 
     var result = await userManager.CreateAsync(testUser, "Password123!");
 

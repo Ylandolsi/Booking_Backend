@@ -82,8 +82,8 @@ internal sealed class CreateOrLoginCommandHandler(
         var response = new UserData
         (
             UserId: user.Id,
-            Firstname: user.Name.FirstName,
-            Lastname: user.Name.LastName,
+            FirstName: user.Name.FirstName,
+            LastName: user.Name.LastName,
             Email: user.Email!,
             ProfilePictureUrl: user.ProfilePictureUrl.ProfilePictureLink,
             IsMentor: user.Status.IsMentor,

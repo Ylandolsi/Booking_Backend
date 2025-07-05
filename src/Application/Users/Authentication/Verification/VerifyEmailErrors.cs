@@ -24,6 +24,10 @@ public static class VerifyEmailErrors
     public static Error FailedToSaveToken => Error.Failure("Email.VerificationToken.Save.Failed", "Failed to save email verification token.");
 
 
+    public static Error EmailOrTokenInvalid = Error.Problem("Email.Token.Invalid", "Email or token is invalid");
+
+
+
 
 }
 

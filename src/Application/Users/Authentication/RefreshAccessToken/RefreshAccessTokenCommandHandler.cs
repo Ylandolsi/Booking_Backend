@@ -41,14 +41,16 @@ public sealed class RefreshAccessTokenCommandHandler(IApplicationDbContext appli
 
     public async Task<Result> Handle(RefreshAccessTokenCommand command, CancellationToken cancellationToken)
     {
-        var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken, cancellationToken);
+        
+       var refreshToken = await applicationDbContext.RefreshTokens.Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == command.RefreshToken, cancellationToken);
         if (refreshToken == null)
         {
             return Result.Failure<string>(RefreshTokenErrors.Unauthorized);
         }
 
+
         var activeTokenCount = await applicationDbContext.RefreshTokens
-            .CountAsync(rt => rt.UserId == refreshToken.UserId && rt.IsActive, cancellationToken);
+            .CountAsync(rt => rt.UserId == refreshToken.UserId && rt.RevokedOnUtc == null  && rt.ExpiresOnUtc > DateTime.UtcNow, cancellationToken);
 
         if (activeTokenCount >= _jwtOptions.MaxActiveTokensPerUser)
         {

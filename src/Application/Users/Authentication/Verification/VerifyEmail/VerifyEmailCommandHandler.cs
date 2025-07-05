@@ -9,6 +9,7 @@ using System.Web;
 
 namespace Application.Users.Authentication.Verification.VerifyEmail;
 
+
 public class VerifyEmailCommandHandler(UserManager<User> userManager,
                                        ILogger<VerifyEmailCommandHandler> logger) : ICommandHandler<VerifyEmailCommand>
 {
@@ -22,7 +23,7 @@ public class VerifyEmailCommandHandler(UserManager<User> userManager,
         if (user is null)
         {
             logger.LogWarning("User with email {Email} not found", command.Email) ;
-            return Result.Failure(UserErrors.NotFoundByEmail(command.Email) );
+            return Result.Failure(VerifyEmailErrors.EmailOrTokenInvalid);
         }
         if (user.EmailConfirmed)
         {
