@@ -1,12 +1,7 @@
-﻿using Application.Abstractions.Data;
-using Application.Abstractions.Messaging;
-using Domain.Users.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using SharedKernel;
+﻿using Application.Abstractions.Messaging;
 
 namespace Application.Users.Experience.Delete;
 
-public sealed record DeleteExperienceCommand (Guid ExperienceId , Guid UserId ) : ICommand<Guid>;
+public sealed record DeleteExperienceCommand(Guid ExperienceId, Guid UserId) : ICommand<Guid>;
 
 

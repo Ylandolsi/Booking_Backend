@@ -150,6 +150,30 @@ namespace Infrastructure.Database.Migrations
                     b.ToTable("experiences", "public");
                 });
 
+            modelBuilder.Entity("Domain.Users.Entities.Expertise", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_skills");
+
+                    b.ToTable("skills", "public");
+                });
+
             modelBuilder.Entity("Domain.Users.Entities.Language", b =>
                 {
                     b.Property<Guid>("Id")
@@ -220,35 +244,6 @@ namespace Infrastructure.Database.Migrations
                     b.ToTable("refresh_tokens", "public");
                 });
 
-            modelBuilder.Entity("Domain.Users.Entities.Skill", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("category");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("pk_skills");
-
-                    b.ToTable("skills", "public");
-                });
-
             modelBuilder.Entity("Domain.Users.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -259,6 +254,11 @@ namespace Infrastructure.Database.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("bio");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -273,6 +273,10 @@ namespace Infrastructure.Database.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
+
+                    b.Property<int>("Gender")
+                        .HasColumnType("integer")
+                        .HasColumnName("gender");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean")
@@ -394,6 +398,25 @@ namespace Infrastructure.Database.Migrations
                     b.ToTable("user_mentors", "public");
                 });
 
+            modelBuilder.Entity("Domain.Users.JoinTables.UserExpertise", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<Guid>("ExpertiseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("expertise_id");
+
+                    b.HasKey("UserId", "ExpertiseId")
+                        .HasName("pk_user_expertises");
+
+                    b.HasIndex("ExpertiseId")
+                        .HasDatabaseName("ix_user_expertises_expertise_id");
+
+                    b.ToTable("user_expertises", "public");
+                });
+
             modelBuilder.Entity("Domain.Users.JoinTables.UserLanguage", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -411,29 +434,6 @@ namespace Infrastructure.Database.Migrations
                         .HasDatabaseName("ix_user_languages_language_id");
 
                     b.ToTable("user_languages", "public");
-                });
-
-            modelBuilder.Entity("Domain.Users.JoinTables.UserSkill", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<Guid>("SkillId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("skill_id");
-
-                    b.Property<int>("ProficiencyLevel")
-                        .HasColumnType("integer")
-                        .HasColumnName("proficiency_level");
-
-                    b.HasKey("UserId", "SkillId")
-                        .HasName("pk_user_skills");
-
-                    b.HasIndex("SkillId")
-                        .HasDatabaseName("ix_user_skills_skill_id");
-
-                    b.ToTable("user_skills", "public");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -705,6 +705,27 @@ namespace Infrastructure.Database.Migrations
                     b.Navigation("Mentor");
                 });
 
+            modelBuilder.Entity("Domain.Users.JoinTables.UserExpertise", b =>
+                {
+                    b.HasOne("Domain.Users.Entities.Expertise", "Expertise")
+                        .WithMany("UserExpertises")
+                        .HasForeignKey("ExpertiseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_expertises_skills_expertise_id");
+
+                    b.HasOne("Domain.Users.Entities.User", "User")
+                        .WithMany("UserExpertises")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_expertises_user_user_id");
+
+                    b.Navigation("Expertise");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Users.JoinTables.UserLanguage", b =>
                 {
                     b.HasOne("Domain.Users.Entities.Language", "Language")
@@ -722,27 +743,6 @@ namespace Infrastructure.Database.Migrations
                         .HasConstraintName("fk_user_languages_user_user_id");
 
                     b.Navigation("Language");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Users.JoinTables.UserSkill", b =>
-                {
-                    b.HasOne("Domain.Users.Entities.Skill", "Skill")
-                        .WithMany("UserSkills")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_skills_skills_skill_id");
-
-                    b.HasOne("Domain.Users.Entities.User", "User")
-                        .WithMany("UserSkills")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_user_skills_user_user_id");
-
-                    b.Navigation("Skill");
 
                     b.Navigation("User");
                 });
@@ -804,14 +804,14 @@ namespace Infrastructure.Database.Migrations
                         .HasConstraintName("fk_asp_net_user_tokens_asp_net_users_user_id");
                 });
 
+            modelBuilder.Entity("Domain.Users.Entities.Expertise", b =>
+                {
+                    b.Navigation("UserExpertises");
+                });
+
             modelBuilder.Entity("Domain.Users.Entities.Language", b =>
                 {
                     b.Navigation("UserLanguages");
-                });
-
-            modelBuilder.Entity("Domain.Users.Entities.Skill", b =>
-                {
-                    b.Navigation("UserSkills");
                 });
 
             modelBuilder.Entity("Domain.Users.Entities.User", b =>
@@ -820,13 +820,13 @@ namespace Infrastructure.Database.Migrations
 
                     b.Navigation("Experiences");
 
+                    b.Navigation("UserExpertises");
+
                     b.Navigation("UserLanguages");
 
                     b.Navigation("UserMentees");
 
                     b.Navigation("UserMentors");
-
-                    b.Navigation("UserSkills");
                 });
 #pragma warning restore 612, 618
         }

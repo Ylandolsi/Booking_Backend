@@ -5,12 +5,21 @@ using SharedKernel;
 
 namespace Domain.Users.Entities;
 
+public enum Genders
+{
+    Male,
+    Female,
+}
+
 public sealed class User : IdentityUser<Guid>, IEntity
 {
     public Name Name { get; private set; } = default!;
     public Status Status { get; private set; } = default!;
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
 
+    public String Bio { get; private set; } = string.Empty;
+
+    public Genders Gender { get; private set; }
 
     private User() { }
 
@@ -33,7 +42,29 @@ public sealed class User : IdentityUser<Guid>, IEntity
         return user;
     }
 
+    public void UpdateSocialLinks(SocialLinks links)
+    {
+        SocialLinks = links;
+    }
+    public void UpdateBio(string bio)
+    {
+        Bio = bio?.Trim() ?? string.Empty;
+    }
 
+    public void UpdateGender(Genders gender)
+    {
+        Gender = gender;
+    }
+
+    public void UpdateName(string firstName, string lastName)
+    {
+        Name = new Name(firstName, lastName);
+    }
+
+
+
+
+    public SocialLinks? SocialLinks { get; private set; }
     public ICollection<Experience> Experiences { get; private set; } = new List<Experience>();
     public ICollection<Education> Educations { get; private set; } = new List<Education>();
 
@@ -41,8 +72,9 @@ public sealed class User : IdentityUser<Guid>, IEntity
     public ICollection<MentorMentee> UserMentors { get; private set; } = new List<MentorMentee>();
 
     public ICollection<MentorMentee> UserMentees { get; private set; } = new List<MentorMentee>();
-
-    public ICollection<UserSkill> UserSkills { get; private set; } = new HashSet<UserSkill>();
+    // MAX 4
+    public ICollection<UserExpertise> UserExpertises { get; private set; } = new HashSet<UserExpertise>();
+    // MAX 4 
     public ICollection<UserLanguage> UserLanguages { get; private set; } = new List<UserLanguage>();
 
 

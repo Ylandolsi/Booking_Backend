@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
+    <PackageReference Include="AWSSDK.S3" />
     <PackageReference Include="AWSSDK.SimpleEmail" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Hangfire.AspNetCore" />
@@ -24,6 +25,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <PackageReference Include="Polly" />
+    <PackageReference Include="SixLabors.ImageSharp" />
   </ItemGroup>
 
   <ItemGroup>

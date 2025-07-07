@@ -4,6 +4,7 @@ namespace Domain.Users.Entities;
 
 public class Language : Entity
 {
+    // it will be hardc
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;
 

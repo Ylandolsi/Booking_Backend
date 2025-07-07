@@ -4,20 +4,20 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Database.Configurations.Users.JoinTables;
 
-internal sealed class UserSkillConfiguration : IEntityTypeConfiguration<UserSkill>
+internal sealed class UserExpertiseConfiguration : IEntityTypeConfiguration<UserExpertise>
 {
-    public void Configure(EntityTypeBuilder<UserSkill> builder)
+    public void Configure(EntityTypeBuilder<UserExpertise> builder)
     {
-        builder.HasKey(ul => new { ul.UserId, ul.SkillId });
+        builder.HasKey(ul => new { ul.UserId, ul.ExpertiseId });
 
         builder.HasOne(ul => ul.User)
-            .WithMany(u => u.UserSkills)
+            .WithMany(u => u.UserExpertises)
             .HasForeignKey(ul => ul.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(ul => ul.Skill)
-            .WithMany(s => s.UserSkills)
-            .HasForeignKey(ul => ul.SkillId)
+        builder.HasOne(ul => ul.Expertise)
+            .WithMany(s => s.UserExpertises)
+            .HasForeignKey(ul => ul.ExpertiseId)
             .OnDelete(DeleteBehavior.Cascade);
 
     }

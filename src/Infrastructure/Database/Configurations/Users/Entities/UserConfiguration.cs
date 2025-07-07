@@ -9,6 +9,8 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
+        // complex properties are stored in the same table as the entity
+        // has one , create a separate table for the property
         builder.HasKey(u => u.Id);
 
         builder.ComplexProperty(u => u.Name, name =>
@@ -28,16 +30,23 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.ComplexProperty(u => u.Status, status => { });
 
+        builder.ComplexProperty(u => u.SocialLinks, social =>
+        {
+            social.Property(s => s.LinkedIn).HasMaxLength(256).IsRequired(false);
+            social.Property(s => s.Twitter).HasMaxLength(256).IsRequired(false);
+            social.Property(s => s.Github).HasMaxLength(256).IsRequired(false);
+            social.Property(s => s.Youtube).HasMaxLength(256).IsRequired(false);
+            social.Property(s => s.Facebook).HasMaxLength(256).IsRequired(false);
+            social.Property(s => s.Instagram).HasMaxLength(256).IsRequired(false);
+            social.Property(s => s.Portfolio).HasMaxLength(256).IsRequired(false);
+        });
 
-        builder.HasMany(u => u.UserLanguages)
-            .WithOne(ul => ul.User)
-            .HasForeignKey(ul => ul.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Property(u => u.Bio)
+            .HasMaxLength(500)
+            .IsRequired(false);
 
-        builder.HasMany(u => u.UserSkills)
-            .WithOne(us => us.User)
-            .HasForeignKey(us => us.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+
+
 
         // List of mentors that the user is dealt with 
         builder.HasMany(u => u.UserMentors)
@@ -61,6 +70,17 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasMany(u => u.Educations)
             .WithOne(e => e.User)
             .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        
+        builder.HasMany(u => u.UserLanguages)
+            .WithOne(ul => ul.User)
+            .HasForeignKey(ul => ul.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.UserExpertises)
+            .WithOne(us => us.User)
+            .HasForeignKey(us => us.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
 

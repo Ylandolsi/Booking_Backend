@@ -13,12 +13,12 @@ public class Status : ValueObject
     {
 
         IsMentor = isMentor;
-        IsActive = isMentor; 
+        IsActive = isMentor;
     }
 
     public void BecomeMentor()
     {
-        IsMentor = true; 
+        IsMentor = true;
     }
 
 

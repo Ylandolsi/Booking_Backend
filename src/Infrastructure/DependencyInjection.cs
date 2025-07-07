@@ -1,5 +1,6 @@
 ﻿using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
+using Amazon.S3;
 using Amazon.SimpleEmail;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.BackgroundJobs;
@@ -8,8 +9,10 @@ using Application.Abstractions.BackgroundJobs.SendingVerificationEmail;
 using Application.Abstractions.BackgroundJobs.TokenCleanup;
 using Application.Abstractions.Data;
 using Application.Abstractions.Email;
+using Application.Abstractions.Uploads;
 using Application.Options;
 using Domain.Users.Entities;
+using Infrastructure;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.BackgroundJobs;
@@ -21,8 +24,8 @@ using Infrastructure.Database;
 using Infrastructure.DomainEvents;
 using Infrastructure.Email;
 using Infrastructure.Time;
+using Infrastructure.Uploads;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,14 +33,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 using SharedKernel;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Infrastructure;
 
@@ -52,7 +53,7 @@ public static class DependencyInjection
             .AddCache()
             .AddResielenecPipelines(configuration)
             .AddOptions(configuration)
-            .AddSESAWS(configuration)
+            .AddAWS(configuration)
             .AddDatabase(configuration)
             .AddHealthChecks(configuration)
             .AddAuthenticationInternal(configuration)
@@ -65,6 +66,9 @@ public static class DependencyInjection
         services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
         services.AddScoped<IEmailService, AwsSesEmailService>();
         services.AddSingleton<IEmailTemplateProvider, EmailTemplateProvider>();
+        // AWS UPLOAD
+        // services.AddScoped<IS3ImageProcessingService , S3ImageProcessingService>();
+        services.AddScoped<IS3ImageProcessingService, LocalFileImageProcessingService>();
 
         return services;
     }
@@ -195,16 +199,16 @@ public static class DependencyInjection
 
                 var rsa = RSA.Create();
 
-         
-                var publicKey = jwtOptions.PublicKey
-                                .Replace("\\n"  , "\n")
-                                .Trim();         
 
-                
+                var publicKey = jwtOptions.PublicKey
+                                .Replace("\\n", "\n")
+                                .Trim();
+
+
                 rsa.ImportFromPem(publicKey.ToCharArray());
                 Console.WriteLine("Successfully imported using ImportRSAPublicKey");
-                        
-                    
+
+
 
 
                 o.RequireHttpsMetadata = false;
@@ -235,10 +239,10 @@ public static class DependencyInjection
                         return Task.CompletedTask;
                     }
                 };
-                
-            }    
+
+            }
             )
-            
+
             .AddGoogle(options =>
             {
                 var googleOptions = configuration.GetSection(GoogleOAuthOptions.GoogleOptionsKey)
@@ -274,7 +278,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddSESAWS(this IServiceCollection services,
+    private static IServiceCollection AddAWS(this IServiceCollection services,
                                                 IConfiguration configuration)
     {
         // TODO : use environment variables or secrets manager for sensitive data
@@ -290,9 +294,15 @@ public static class DependencyInjection
         });
         // have its own polling and retry policies
         // TODO : recheck it 
+        // SES 
         services.AddAWSService<IAmazonSimpleEmailService>();
+
+        // S3 
+        services.AddAWSService<IAmazonS3>();
+
         return services;
     }
+
 
 
 

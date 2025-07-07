@@ -1,7 +1,6 @@
 using System.Reflection;
 using Application;
 using HealthChecks.UI.Client;
-using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
 using Serilog;
@@ -12,6 +11,7 @@ using Web.Api.RecurringJobs;
 using Microsoft.AspNetCore.Identity;
 using Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -83,9 +83,8 @@ app.MapHealthChecks("health", new HealthCheckOptions
     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
 });
 
-// TODO  : app.useStaticfiles ? 
-
-app.UseCors("DefaultCors"); 
+app.UseStaticFiles(); // Serves files from wwwroot by default : http://localhost:5000/logo.png.
+app.UseCors("DefaultCors");
 app.UseHangfireDashboard();
 
 app.UseRequestContextLogging();

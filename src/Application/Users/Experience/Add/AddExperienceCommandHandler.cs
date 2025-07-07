@@ -1,36 +1,40 @@
-﻿//using Application.Abstractions.Data;
-//using Application.Abstractions.Messaging;
-//using Application.Users.Register;
-//using Domain.Users.Entities;
-//using Microsoft.Extensions.Logging;
-//using SharedKernel;
+﻿using Application.Abstractions.Data;
+using Application.Abstractions.Messaging;
+using Domain.Users.Entities;
+using Microsoft.Extensions.Logging;
+using SharedKernel;
 
-//namespace Application.Users.Experience.Add;
+namespace Application.Users.Experience.Add;
 
-//internal sealed class AddExperienceCommandHandler(
-//    IApplicationDbContext context,
-//    ILogger<AddExperienceCommandHandler> logger) : ICommandHandler<AddExperienceCommand, Guid>
-//{
-//    public async Task<Result<Guid>> Handle(AddExperienceCommand command, CancellationToken cancellationToken = default)
-//    {
-//        logger.LogInformation("Handling AddExperienceCommand for UserId: {UserId}", command.UserId);
-//        var ExperienceRes = Domain.Users.Entities.Experience.Create(command.Title,
-//                                                  command.UserId,
-//                                                  command.Company,
-//                                                  command.StartDate,
-//                                                  command.EndDate,
-//                                                  command.Description);
-//        if (ExperienceRes.IsFailure)
-//        {
-//            logger.LogWarning("Failed to create experience for UserId: {UserId}. Error: {Error}", command.UserId, ExperienceRes.Error);
-//            return Result.Failure<Guid>(ExperienceRes.Error);
-//        }
+internal sealed class AddExperienceCommandHandler(IApplicationDbContext context,
+                                                  ILogger<AddExperienceCommandHandler> logger) : ICommandHandler<AddExperienceCommand, Guid>
+{
+    public async Task<Result<Guid>> Handle(AddExperienceCommand command, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Adding experience for user {UserId}", command.UserId);
 
-//        await context.Experiences.AddAsync(ExperienceRes.Value);
-//        await context.SaveChangesAsync(cancellationToaken);
-//        logger.LogInformation("Successfully added experience for UserId: {UserId}, ExperienceId: {ExperienceId}", command.UserId, ExperienceRes.Value.Id);
-//        return ExperienceRes.Value.Id;
+        var experience = new Domain.Users.Entities.Experience(
+            command.Title,
+            command.Description ?? string.Empty,
+            command.Company,
+            command.UserId,
+            command.StartDate,
+            command.EndDate
+        );
 
-//    }
+        try
+        {
+            await context.Experiences.AddAsync(experience, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add experience for user {UserId}", command.UserId);
+            return Result.Failure<Guid>(Error.Problem("Experience.AddFailed", "Failed to add experience"));
+        }
 
-//}
+        logger.LogInformation("Successfully added experience {ExperienceId} for user {UserId}",
+            experience.Id, command.UserId);
+        return Result.Success(experience.Id);
+    }
+}

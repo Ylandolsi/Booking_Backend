@@ -11,13 +11,13 @@ public interface IApplicationDbContext
     // Users Modules : 
     public DbSet<User> Users { get; set; }
     public DbSet<Language> Languages { get; set; }
-    public DbSet<Skill> Skills { get; set; }
+    public DbSet<Expertise> Skills { get; set; }
     public DbSet<Education> Educations { get; set; }
     public DbSet<Experience> Experiences { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     // join tables 
     public DbSet<UserLanguage> UserLanguages { get; set; }
-    public DbSet<UserSkill> UserSkills { get; set; }
+    public DbSet<UserExpertise> UserExpertises { get; set; }
     public DbSet<MentorMentee> UserMentors { get; set; }
 
     // outbox messages

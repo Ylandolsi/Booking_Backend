@@ -29,4 +29,10 @@
     <InternalsVisibleTo Include="ArchitectureTests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ImageProcessor\Delete\" />
+    <Folder Include="ImageProcessor\CheckExistance\" />
+    <Folder Include="Users\Profile\" />
+  </ItemGroup>
+
 </Project>
