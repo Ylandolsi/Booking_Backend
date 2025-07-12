@@ -42,6 +42,13 @@ services:
     ports:
       - 8081:80
 
+  booking.redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+  
+
 
   # for local development : papercut sumulates an SMTP server ( without sending emails )
   # we can view whats happening on port 8080

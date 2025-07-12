@@ -50,7 +50,7 @@ public static class DependencyInjection
         services
             .AddCors()
             .AddServices()
-            .AddCache()
+            .AddCache(configuration)
             .AddResielenecPipelines(configuration)
             .AddOptions(configuration)
             .AddAWS(configuration)
@@ -96,9 +96,13 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddCache(this IServiceCollection services)
+    private static IServiceCollection AddCache(this IServiceCollection services , IConfiguration config )
     {
         services.AddMemoryCache();
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = config.GetConnectionString("Cache") ?? throw new InvalidOperationException("Redis connection string is not configured.");
+        });
         return services;
     }
 
