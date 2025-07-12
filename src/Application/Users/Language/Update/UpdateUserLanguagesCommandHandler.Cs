@@ -1,5 +1,7 @@
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
+using Domain.Users;
+using Domain.Users.Entities;
 using Domain.Users.JoinTables;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,9 +19,29 @@ internal sealed class UpdateUserLanguagesCommandHandler(
 
         try
         {
+            User? user = await context.Users
+                .FirstOrDefaultAsync(u => u.Id == command.UserId, cancellationToken);
+
+            if (user == null)
+            {
+                logger.LogWarning("User with ID {UserId} not found", command.UserId);
+                return Result.Failure(UserErrors.NotFoundById(command.UserId));
+            }
+
+            // Remove existing user languages
+            var existingLanguages = await context.UserLanguages
+            .Where(ul => ul.UserId == command.UserId)
+            .ToListAsync(cancellationToken);
+
+            if (existingLanguages.Any())
+            {
+                context.UserLanguages.RemoveRange(existingLanguages);
+                logger.LogInformation("Deleting existing languages for user {UserId}", command.UserId);
+            }
             if (command.LanguageIds.Any())
             {
                 var validLanguageIds = await context.Languages
+                    .AsNoTracking()
                     .Where(l => command.LanguageIds.Contains(l.Id))
                     .Select(l => l.Id)
                     .ToListAsync(cancellationToken);
@@ -36,13 +58,18 @@ internal sealed class UpdateUserLanguagesCommandHandler(
                     LanguageId = languageId
                 }).ToList();
 
+
+
                 await context.UserLanguages.AddRangeAsync(userLanguages, cancellationToken);
+                user.ProfileCompletionStatus.UpdateCompletionStatus(user);
+                await context.SaveChangesAsync(cancellationToken);
+
+                logger.LogInformation("Successfully updated {Count} languages for user {UserId}",
+                    command.LanguageIds.Count, command.UserId);
+
             }
 
-            await context.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("Successfully updated {Count} languages for user {UserId}",
-                command.LanguageIds.Count, command.UserId);
             return Result.Success();
         }
         catch (Exception ex)

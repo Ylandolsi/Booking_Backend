@@ -15,10 +15,11 @@ internal sealed class GetUserLanguagesQueryHandler(
         logger.LogInformation("Handling GetUserLanguagesQuery for UserId: {UserId}", query.UserId);
 
         var userLanguages = await context.UserLanguages
-             .Where(ul => ul.UserId == query.UserId)
-             .Select(ul => ul.Language)
-             .ToListAsync(cancellationToken);
-        
+            .AsNoTracking()
+            .Where(ul => ul.UserId == query.UserId)
+            .Select(ul => ul.Language)
+            .ToListAsync(cancellationToken);
+
         return userLanguages;
     }
 }

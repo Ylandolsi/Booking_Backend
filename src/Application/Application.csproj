@@ -32,6 +32,8 @@
   <ItemGroup>
     <Folder Include="ImageProcessor\Delete\" />
     <Folder Include="ImageProcessor\CheckExistance\" />
+    <Folder Include="Users\Expertise\All\" />
+    <Folder Include="Users\Expertise\Get\" />
     <Folder Include="Users\Profile\" />
   </ItemGroup>
 

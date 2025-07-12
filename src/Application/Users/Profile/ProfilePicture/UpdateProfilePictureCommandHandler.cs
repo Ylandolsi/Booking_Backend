@@ -28,6 +28,8 @@ internal sealed class UpdateProfilePictureCommandHandler(UserManager<User> userM
 
         user.ProfilePictureUrl.UpdateProfilePicture(imageResult.OriginalUrl, imageResult.ThumbnailUrl);
 
+        user.ProfileCompletionStatus.UpdateCompletionStatus(user);
+
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {

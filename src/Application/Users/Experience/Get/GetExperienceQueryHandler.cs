@@ -1,5 +1,7 @@
 ﻿using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
+using Domain.Users;
+using Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
@@ -13,11 +15,12 @@ internal sealed class GetExperienceQueryHandler(
 {
 
 
-    public async Task<Result<List<GetExperienceResponse>>> Handle(GetExperienceQuery query, CancellationToken cancellationToken = default)
+    public async Task<Result<List<GetExperienceResponse>>> Handle(GetExperienceQuery query, CancellationToken cancellationToken )
     {
         logger.LogInformation("Handling GetExperienceQuery for UserId: {UserId}", query.UserId);
 
         var experiences = await context.Experiences
+            .AsNoTracking()
             .Where(x => x.UserId == query.UserId)
             .Select(x => new GetExperienceResponse(
                 x.Id,
@@ -29,6 +32,7 @@ internal sealed class GetExperienceQueryHandler(
                 x.ToPresent)
             )
             .ToListAsync(cancellationToken);
+
 
 
         if (experiences == null || !experiences.Any())

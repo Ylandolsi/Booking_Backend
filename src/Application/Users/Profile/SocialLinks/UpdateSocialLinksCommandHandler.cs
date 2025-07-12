@@ -35,6 +35,8 @@ internal sealed class UpdateSocialLinksCommandHandler(
 
         user.UpdateSocialLinks(socialLinks);
 
+        user.ProfileCompletionStatus.UpdateCompletionStatus(user);
+
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)
         {

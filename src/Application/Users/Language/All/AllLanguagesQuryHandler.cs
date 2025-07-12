@@ -12,10 +12,11 @@ internal sealed class AllLanguagesQuryHandler(IApplicationDbContext applicationD
     public async Task<Result<List<Domain.Users.Entities.Language>>> Handle(AllLanguagesQuery query, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling AllLanguagesQuery");
-        
+
         var languages = await applicationDbContext.Languages
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
-        
+
         if (languages == null || !languages.Any())
         {
             logger.LogWarning("No languages found in the database");

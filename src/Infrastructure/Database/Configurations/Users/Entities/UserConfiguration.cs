@@ -13,24 +13,28 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         // has one , create a separate table for the property
         builder.HasKey(u => u.Id);
 
-        builder.ComplexProperty(u => u.Name, name =>
+        // builder.ComplexProperty(u => u.Name, name =>
+        // {
+        //     name.Property(n => n.FirstName).HasMaxLength(50).IsRequired();
+        //     name.Property(n => n.LastName).HasMaxLength(50).IsRequired();
+
+        // });
+        builder.OwnsOne(u => u.Name, name =>
         {
             name.Property(n => n.FirstName).HasMaxLength(50).IsRequired();
             name.Property(n => n.LastName).HasMaxLength(50).IsRequired();
-
         });
-
-
-        builder.ComplexProperty(u => u.ProfilePictureUrl, profilePicture =>
+        builder.OwnsOne(u => u.ProfilePictureUrl, profilePicture =>
         {
             profilePicture.Property(p => p.ProfilePictureLink)
                 .HasMaxLength(256)
                 .IsRequired();
         });
 
-        builder.ComplexProperty(u => u.Status, status => { });
 
-        builder.ComplexProperty(u => u.SocialLinks, social =>
+        builder.OwnsOne(u => u.Status, status => { });
+
+        builder.OwnsOne(u => u.SocialLinks, social =>
         {
             social.Property(s => s.LinkedIn).HasMaxLength(256).IsRequired(false);
             social.Property(s => s.Twitter).HasMaxLength(256).IsRequired(false);
@@ -39,6 +43,19 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             social.Property(s => s.Facebook).HasMaxLength(256).IsRequired(false);
             social.Property(s => s.Instagram).HasMaxLength(256).IsRequired(false);
             social.Property(s => s.Portfolio).HasMaxLength(256).IsRequired(false);
+        });
+
+        builder.OwnsOne(u => u.ProfileCompletionStatus, profileCompletion =>
+        {
+            profileCompletion.Property(p => p.HasName);
+            profileCompletion.Property(p => p.HasEmail);
+            profileCompletion.Property(p => p.HasProfilePicture);
+            profileCompletion.Property(p => p.HasBio);
+            profileCompletion.Property(p => p.HasGender);
+            profileCompletion.Property(p => p.HasSocialLinks);
+            profileCompletion.Property(p => p.HasEducation);
+            profileCompletion.Property(p => p.HasLanguages);
+            profileCompletion.Property(p => p.HasExpertise);
         });
 
         builder.Property(u => u.Bio)
@@ -72,7 +89,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        
+        // Many to many relationship 
         builder.HasMany(u => u.UserLanguages)
             .WithOne(ul => ul.User)
             .HasForeignKey(ul => ul.UserId)

@@ -8,3 +8,6 @@ return verificationLink ?? throw new InvalidOperationException("Failed to genera
 
 
 dotnet ef migrations add SyncModelAndDb --project ../Infrastructure --startup-project .
+
+
+System.Text.Json is case-insensitive by default, but Newtonsoft.Json is case-sensitive.

@@ -9,7 +9,7 @@ public sealed record GetExperienceResponse(
     DateTime StartDate,
     DateTime? EndDate,
     string? Description,
-    bool IsCurrent
+    bool ToPresent
 );
 
 

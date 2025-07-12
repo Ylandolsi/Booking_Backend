@@ -1,10 +1,12 @@
 ﻿using Application.Abstractions.Data;
 using Domain.Users.Entities;
 using Domain.Users.JoinTables;
+using Infrastructure.Database.Seed.Users;
 using Infrastructure.DomainEvents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Newtonsoft.Json;
 using SharedKernel;
 
@@ -24,7 +26,7 @@ public sealed class ApplicationDbContext
     // Users Modules : 
     public DbSet<User> Users { get; set; }
     public DbSet<Language> Languages { get; set; }
-    public DbSet<Expertise> Skills { get; set; }
+    public DbSet<Expertise> Expertises { get; set; }
     public DbSet<Education> Educations { get; set; }
     public DbSet<Experience> Experiences { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
@@ -39,13 +41,30 @@ public sealed class ApplicationDbContext
 
 
     // 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        // to avoid the warning about DateTime && GUID for seeding data  
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        ;
 
         modelBuilder.HasDefaultSchema(Schemas.Default);
+        SeedData.Seed(modelBuilder);
     }
+    // protected override void Up(MigrationBuilder migrationBuilder)
+    // {
+    // benefit : migration depends only on database schemas ( dont get affected when the model get changed (adding new require property wont break the migration ))
+    //     migrationBuilder.SqlFile("InsertLanguages.sql", true);
+    //     migrationBuilder.SqlFile("InsertExpertise.sql", true);
+    // }
+
+
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

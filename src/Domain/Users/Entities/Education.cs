@@ -5,12 +5,12 @@ namespace Domain.Users.Entities;
 public class Education : Entity
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
-    public string Title { get; private set; } = string.Empty;
+    public string Field { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public DateTime StartDate { get; private set; }
     public DateTime? EndDate { get; private set; }
     public string University { get; private set; } = string.Empty;
-    public bool IsCurrent { get; private set; }
+    public bool ToPresent { get; private set; }
 
     public Guid UserId { get; set; }
     public User User { get; set; } = default!;
@@ -18,21 +18,36 @@ public class Education : Entity
     private Education() { }
 
 
-    public Education(string title,
+    public Education(string field,
                      string description,
-                     DateTime startDate,
                      string university,
                      Guid userId,
+                     DateTime startDate,
                      DateTime? endDate = null)
     {
 
-        Title = title?.Trim() ?? string.Empty;
+        Field = field?.Trim() ?? string.Empty;
         Description = description?.Trim() ?? string.Empty;
         StartDate = startDate;
         EndDate = endDate;
         University = university?.Trim() ?? string.Empty;
         UserId = userId;
-        IsCurrent = !endDate.HasValue;
+        ToPresent = !endDate.HasValue;
+    }
+
+    public void Update(string field,
+                   string university,
+                   DateTime startDate,
+                   DateTime? endDate,
+                   string? description)
+    {
+        Field = field.Trim();
+        University = university.Trim();
+        StartDate = startDate;
+        EndDate = endDate;
+        Description = description?.Trim() ?? string.Empty;
+        ToPresent = !endDate.HasValue;
+
     }
 
     public Result Complete(DateTime endDate)
@@ -41,7 +56,7 @@ public class Education : Entity
             return Result.Failure(EducationErrors.InvalidEndDate);
 
         EndDate = endDate;
-        IsCurrent = false;
+        ToPresent = false;
         return Result.Success();
     }
 

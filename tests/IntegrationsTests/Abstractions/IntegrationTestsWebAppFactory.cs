@@ -79,6 +79,7 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
                 d => d.ServiceType ==
                     typeof(DbContextOptions<ApplicationDbContext>));
 
+
             if (descriptor != null)
             {
                 services.Remove(descriptor);
@@ -88,11 +89,6 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
             {
                 options.UseNpgsql(_connectionString);
             });
-
-            //services.AddAuthentication(TestAuthHandler.AuthenticationScheme)
-            //    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-            //        TestAuthHandler.AuthenticationScheme, options => { });
-
 
             descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IAmazonSimpleEmailService));
             if (descriptor != null)
@@ -112,25 +108,6 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
 
     }
 
-
-    //public HttpClient CreateAuthenticatedClient(Guid? userId = null, string? email = null, bool isEmailVerified = true)
-    //{
-    //    var client = CreateClient();
-
-    //    var claims = new List<object>
-    //    {
-    //        new { Type = JwtRegisteredClaimNames.Sub, Value = (userId ?? Guid.NewGuid()).ToString() },
-    //    };
-
-    //    client.DefaultRequestHeaders.Add(
-    //        TestAuthHandler.TestUserClaimsHeader,
-    //        JsonSerializer.Serialize(claims));
-
-    //    return client;
-    //}
-
-
-
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
@@ -138,6 +115,7 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             await dbContext.Database.MigrateAsync();
+            await SeedData.Initialize(dbContext);
         }
         await InitializeDbRespawner();
     }
@@ -163,9 +141,14 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
     {
 
         await _respawner.ResetAsync(_dbConnection);
+        using (var scope = Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await SeedData.Initialize(dbContext);
+        }
     }
 
-
+    // respawner : library used to reset db between tests 
     private async Task InitializeDbRespawner()
     {
         _connectionString = _dbContainer.GetConnectionString();
@@ -174,6 +157,8 @@ public class IntegrationTestsWebAppFactory : WebApplicationFactory<Program>, IAs
 
         _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
         {
+            // specify that the db is a postgres db
+            // and the schema to be reset is public 
             DbAdapter = DbAdapter.Postgres,
             SchemasToInclude = new[] { "public" }
         });

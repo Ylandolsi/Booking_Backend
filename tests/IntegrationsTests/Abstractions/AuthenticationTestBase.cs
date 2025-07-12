@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions.BackgroundJobs;
 using Application.Users.Authentication.Utils;
+using Bogus;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
@@ -69,6 +70,13 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
 
         //verifyResponse.EnsureSuccessStatusCode();
         CheckSuccess(verifyResponse);
+    }
+    protected async Task<UserData> CreateUserAndLogin()
+    {
+        string? email = Fake.Internet.Email();
+        await RegisterAndVerifyUser(email, DefaultPassword, true);
+        return await LoginUser(email, DefaultPassword);
+
     }
 
     protected (string? Token, string? Email) ExtractTokenAndEmailFromEmail(string userEmail)

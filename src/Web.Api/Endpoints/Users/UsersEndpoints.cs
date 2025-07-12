@@ -20,7 +20,29 @@ public static class UsersEndpoints
     public const string GetCurrentUser = "users/me";
 
     // Experience 
+    public const string GetUserExperiences = "users/experiences";
+    public const string AddExperience = "users/experiences";
+    public const string UpdateExperience = "users/experiences/{experienceId:guid}";
+    public const string DeleteExperience = "users/experiences/{experienceId:guid}";
 
     // Education 
+    public const string GetUserEducations = "users/educations";
+    public const string AddEducation = "users/educations";
+    public const string UpdateEducation = "users/education/{educationId:guid}";
+    public const string DeleteEducation = "users/education/{educationId:guid}";
 
+    // Expertise
+    public const string GetUserExpertises = "users/expertises/{userId:guid}";
+    public const string GetAllExpertises = "expertises";
+    public const string UpdateUserExpertise = "users/expertises";
+
+    // Language
+    public const string GetUserLanguages = "users/{userId:guid}/languages";
+    public const string GetAllLanguages = "languages";
+    public const string UpdateUserLanguages = "users/languages";
+
+    // Profile
+    public const string UpdateBasicInfo = "users/profile/basic-info";
+    public const string UpdateProfilePicture = "users/profile/picture";
+    public const string UpdateSocialLinks = "users/profile/social-links";
 }

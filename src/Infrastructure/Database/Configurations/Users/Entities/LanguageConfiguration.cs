@@ -8,6 +8,8 @@ internal sealed class LanguageConfiguration : IEntityTypeConfiguration<Language>
     public void Configure(EntityTypeBuilder<Language> builder)
     {
         builder.HasKey(l => l.Id);
+        builder.Property(l => l.Id)
+            .ValueGeneratedOnAdd();
 
         builder.Property(l => l.Name)
             .IsRequired()

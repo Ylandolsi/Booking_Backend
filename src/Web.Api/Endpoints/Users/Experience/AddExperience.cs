@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Application.Abstractions.Authentication;
+using Application.Users.Education.Add;
 
 namespace Web.Api.Endpoints.Users.Experience;
 
@@ -21,13 +22,13 @@ internal sealed class AddExperience : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("users/experiences", async (
+        app.MapPost(UsersEndpoints.AddExperience, async (
             Request request,
             IUserContext userContext,
-            ICommandHandler<AddExperienceCommand, Guid> handler,
+            ICommandHandler<AddEducationCommand, Guid> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId ;
+            Guid userId;
             try
             {
                 userId = userContext.UserId;
@@ -36,7 +37,7 @@ internal sealed class AddExperience : IEndpoint
             {
                 return Results.Unauthorized();
             }
-            var command = new AddExperienceCommand(
+            var command = new AddEducationCommand(
                 request.Title,
                 userId,
                 request.Company,
@@ -47,7 +48,7 @@ internal sealed class AddExperience : IEndpoint
             Result<Guid> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(
-                id => Results.CreatedAtRoute("GetExperienceById", new { experienceId = id }, id), // Assuming a GetById endpoint exists or will be created
+                Results.Created,
                 CustomResults.Problem);
         })
         .RequireAuthorization()

@@ -16,10 +16,12 @@ public sealed class User : IdentityUser<Guid>, IEntity
     public Name Name { get; private set; } = default!;
     public Status Status { get; private set; } = default!;
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
+    public Genders Gender { get; private set; } = default!;
+    public SocialLinks SocialLinks { get; private set; } = default!;
+    public ProfileCompletionStatus ProfileCompletionStatus { get; private set; } = new ProfileCompletionStatus();
 
-    public String Bio { get; private set; } = string.Empty;
+    public string Bio { get; private set; } = string.Empty;
 
-    public Genders Gender { get; private set; }
 
     private User() { }
 
@@ -64,7 +66,6 @@ public sealed class User : IdentityUser<Guid>, IEntity
 
 
 
-    public SocialLinks? SocialLinks { get; private set; }
     public ICollection<Experience> Experiences { get; private set; } = new List<Experience>();
     public ICollection<Education> Educations { get; private set; } = new List<Education>();
 
@@ -72,6 +73,7 @@ public sealed class User : IdentityUser<Guid>, IEntity
     public ICollection<MentorMentee> UserMentors { get; private set; } = new List<MentorMentee>();
 
     public ICollection<MentorMentee> UserMentees { get; private set; } = new List<MentorMentee>();
+    // MANY TO MANY RELATIONSHIP
     // MAX 4
     public ICollection<UserExpertise> UserExpertises { get; private set; } = new HashSet<UserExpertise>();
     // MAX 4 

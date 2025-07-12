@@ -19,7 +19,7 @@ internal sealed class UpdateExperience : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("users/experiences/{experienceId:guid}", async (
+        app.MapPut(UsersEndpoints.UpdateExperience, async (
             Guid experienceId,
             Request request,
             IUserContext userContext,
@@ -28,8 +28,8 @@ internal sealed class UpdateExperience : IEndpoint
         {
             var command = new UpdateExperienceCommand(
                 experienceId,
-                request.Title,
                 userContext.UserId,
+                request.Title,
                 request.Company,
                 request.StartDate,
                 request.EndDate,
@@ -37,7 +37,7 @@ internal sealed class UpdateExperience : IEndpoint
 
             Result<Guid> result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(Results.Ok, CustomResults.Problem);
+            return result.Match(Results.NoContent, CustomResults.Problem);
         })
         .RequireAuthorization()
         .WithTags(Tags.Experience);

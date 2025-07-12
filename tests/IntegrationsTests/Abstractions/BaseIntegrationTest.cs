@@ -45,15 +45,15 @@ public abstract class BaseIntegrationTest : IDisposable, IAsyncLifetime
                statusCode == StatusCodes.Status201Created ||
                statusCode == StatusCodes.Status204NoContent;
     }
-    
-    protected void CheckSuccess( HttpResponseMessage response ) => Assert.True(IsSucceed((int)response.StatusCode), "The response status code does not indicate success.");
+
+    protected void CheckSuccess(HttpResponseMessage response) => Assert.True(IsSucceed((int)response.StatusCode), "The response status code does not indicate success.");
 
 
     public async Task InitializeAsync()
     {
         await _resetDatabase();
         EmailCapturer?.Clear();
-    } 
+    }
 
     public Task DisposeAsync() => Task.CompletedTask;
 

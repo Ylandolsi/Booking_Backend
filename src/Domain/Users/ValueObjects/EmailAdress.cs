@@ -21,7 +21,7 @@ public class EmailAdress : ValueObject
 
         Email = email;
         Verified = false;
-        
+
     }
     public bool IsVerified()
     {
@@ -37,9 +37,9 @@ public class EmailAdress : ValueObject
         yield return Verified;
     }
     public override string ToString() => $"Email: {Email}, Verified: {Verified}";
-    
-    
-    
+
+
+
 
 
 }

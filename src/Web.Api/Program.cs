@@ -37,8 +37,11 @@ builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 WebApplication app = builder.Build();
 app.MapEndpoints();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
+    //     need to handle seeding langugaes and expertise in a better way!
+    // and once only
+
     app.UseSwaggerWithUi();
     app.MapOpenApi();
     app.MapScalarApiReference(opt =>

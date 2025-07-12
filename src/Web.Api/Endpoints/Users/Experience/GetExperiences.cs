@@ -11,7 +11,7 @@ internal sealed class GetExperiences : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("users/{userId:guid}/experiences", async (
+        app.MapGet(UsersEndpoints.GetUserExperiences, async (
             Guid userId,
             IQueryHandler<GetExperienceQuery, List<GetExperienceResponse>> handler,
             CancellationToken cancellationToken) =>

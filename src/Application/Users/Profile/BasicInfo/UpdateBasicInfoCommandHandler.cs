@@ -7,6 +7,7 @@ using SharedKernel;
 
 namespace Application.Users.Profile.BasicInfo;
 
+
 internal sealed class UpdateBasicInfoCommandHandler(
     UserManager<User> userManager,
     ILogger<UpdateBasicInfoCommandHandler> logger) : ICommandHandler<UpdateBasicInfoCommand>
@@ -25,6 +26,8 @@ internal sealed class UpdateBasicInfoCommandHandler(
         user.UpdateName(command.FirstName, command.LastName);
         if (command.Bio != null) user.UpdateBio(command.Bio);
         user.UpdateGender(command.Gender);
+
+        user.ProfileCompletionStatus.UpdateCompletionStatus(user);
 
         var result = await userManager.UpdateAsync(user);
         if (!result.Succeeded)

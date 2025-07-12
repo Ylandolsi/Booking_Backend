@@ -12,12 +12,12 @@ public class Experience : Entity
     public DateTime? EndDate { get; private set; }
     public string CompanyName { get; private set; } = string.Empty;
     public bool ToPresent { get; private set; }
-    
+
     public Guid UserId { get; private set; }
     public User User { get; set; } = default!;
 
     private Experience() { }
-    
+
 
     public Experience(string title,
                       string description,
@@ -26,12 +26,12 @@ public class Experience : Entity
                       DateTime startDate,
                       DateTime? endDate = null)
     {
-   
-        Title = title?.Trim() ?? string.Empty ;
+
+        Title = title?.Trim() ?? string.Empty;
         Description = description?.Trim() ?? string.Empty;
         StartDate = startDate;
         EndDate = endDate;
-        CompanyName = companyName?.Trim() ?? string.Empty ;
+        CompanyName = companyName?.Trim() ?? string.Empty;
         UserId = userId;
         ToPresent = !endDate.HasValue;
     }
@@ -48,7 +48,7 @@ public class Experience : Entity
         EndDate = endDate;
         Description = description?.Trim() ?? string.Empty;
         ToPresent = !endDate.HasValue;
-        
+
     }
 
     public Result Complete(DateTime endDate)
