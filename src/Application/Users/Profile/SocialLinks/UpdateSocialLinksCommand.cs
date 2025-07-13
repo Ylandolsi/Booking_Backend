@@ -2,7 +2,7 @@ using Application.Abstractions.Messaging;
 
 namespace Application.Users.Profile.SocialLinks;
 
-public record UpdateSocialLinksCommand(Guid UserId,
+public record UpdateSocialLinksCommand(int UserId,
                                        string? LinkedIn,
                                        string? Twitter,
                                        string? Github,

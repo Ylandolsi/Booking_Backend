@@ -6,7 +6,7 @@ namespace Infrastructure.Authentication;
 internal static class ClaimsPrincipalExtensions
 {
 
-    public static Guid? GetUserId(this ClaimsPrincipal? principal)
+    public static int? GetUserId(this ClaimsPrincipal? principal)
     {
         // Try the standard JWT subject claim first
         // cuz it gets changed internally by jwt provider
@@ -20,7 +20,7 @@ internal static class ClaimsPrincipalExtensions
             return null;
         }
 
-        return Guid.TryParse(userId, out Guid parsedUserId) ?
+        return int.TryParse(userId, out int parsedUserId) ?
             parsedUserId :
             null;
     }

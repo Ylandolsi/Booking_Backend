@@ -9,7 +9,7 @@ internal sealed class ExperienceConfiguration : IEntityTypeConfiguration<Experie
     public void Configure(EntityTypeBuilder<Experience> builder)
     {
         builder.HasKey(e => e.Id);
-
+        
         builder.Property(e => e.Title)
             .IsRequired()
             .HasMaxLength(100);

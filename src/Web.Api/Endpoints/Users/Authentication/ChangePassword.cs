@@ -25,7 +25,7 @@ internal sealed class ChangePassword : IEndpoint
             ILogger<ChangePassword> logger,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;

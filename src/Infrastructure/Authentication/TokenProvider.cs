@@ -24,13 +24,13 @@ internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenPro
         if (string.IsNullOrEmpty(_jwtOptions.Audience))
             throw new InvalidOperationException("Audience is not configured in JWT options.");
 
-        var rsa = RSA.Create(); 
+        var rsa = RSA.Create();
 
         try
         {
             var privateKey = _jwtOptions.PrivateKey
                 .Replace("\\n", "\n")
-                .Trim();             
+                .Trim();
 
             rsa.ImportFromPem(privateKey.ToCharArray());
 
@@ -63,7 +63,7 @@ internal sealed class TokenProvider(IOptions<JwtOptions> jwtOptions) : ITokenPro
             Console.WriteLine($"Error generating JWT token: {e.Message}");
 
         }
-        return String.Empty; 
+        return String.Empty;
     }
 
     public string GenerateRefreshToken()

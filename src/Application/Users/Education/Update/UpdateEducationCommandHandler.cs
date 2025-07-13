@@ -10,9 +10,9 @@ namespace Application.Users.Education.Update;
 
 internal sealed class UpdateEducationCommandHandler(
     IApplicationDbContext context,
-    ILogger<UpdateEducationCommandHandler> logger) : ICommandHandler<UpdateEducationCommand, Guid>
+    ILogger<UpdateEducationCommandHandler> logger) : ICommandHandler<UpdateEducationCommand>
 {
-    public async Task<Result<Guid>> Handle(UpdateEducationCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateEducationCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Updating educaiton {EducationId} for user {UserId}", command.EducationId, command.UserId);
 
@@ -22,7 +22,7 @@ internal sealed class UpdateEducationCommandHandler(
         if (user == null)
         {
             logger.LogWarning("User with ID {UserId} not found", command.UserId);
-            return Result.Failure<Guid>(UserErrors.NotFoundById(command.UserId));
+            return Result.Failure(UserErrors.NotFoundById(command.UserId));
         }
 
         var educaiton = await context.Educations
@@ -32,7 +32,7 @@ internal sealed class UpdateEducationCommandHandler(
         if (educaiton == null)
         {
             logger.LogWarning("Education with ID {EducationId} not found for user {UserId}", command.EducationId, command.UserId);
-            return Result.Failure<Guid>(EducationErrors.EducationNotFound);
+            return Result.Failure(EducationErrors.EducationNotFound);
         }
 
         try
@@ -52,10 +52,10 @@ internal sealed class UpdateEducationCommandHandler(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to update educaiton {EducationId} for user {UserId}", command.EducationId, command.UserId);
-            return Result.Failure<Guid>(Error.Problem("Education.UpdateFailed", "Failed to update educaiton"));
+            return Result.Failure<int>(Error.Problem("Education.UpdateFailed", "Failed to update educaiton"));
         }
 
         logger.LogInformation("Successfully updated educaiton {EducationId} for user {UserId}", command.EducationId, command.UserId);
-        return Result.Success(educaiton.Id);
+        return Result.Success();
     }
 }

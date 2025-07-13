@@ -4,12 +4,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UpppdateSeedDb : Migration
+    public partial class SlugMigrate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,7 +20,8 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     normalized_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     concurrency_stamp = table.Column<string>(type: "text", nullable: true)
@@ -37,7 +36,9 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    slug = table.Column<string>(type: "text", nullable: false),
                     name_first_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     name_last_name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     status_is_mentor = table.Column<bool>(type: "boolean", nullable: false),
@@ -135,7 +136,7 @@ namespace Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    role_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    role_id = table.Column<int>(type: "integer", nullable: false),
                     claim_type = table.Column<string>(type: "text", nullable: true),
                     claim_value = table.Column<string>(type: "text", nullable: true)
                 },
@@ -158,7 +159,7 @@ namespace Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
                     claim_type = table.Column<string>(type: "text", nullable: true),
                     claim_value = table.Column<string>(type: "text", nullable: true)
                 },
@@ -182,7 +183,7 @@ namespace Infrastructure.Migrations
                     login_provider = table.Column<string>(type: "text", nullable: false),
                     provider_key = table.Column<string>(type: "text", nullable: false),
                     provider_display_name = table.Column<string>(type: "text", nullable: true),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -201,8 +202,8 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    role_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false),
+                    role_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -228,7 +229,7 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
                     login_provider = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
                     value = table.Column<string>(type: "text", nullable: true)
@@ -250,14 +251,15 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     field = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     university = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     to_present = table.Column<bool>(type: "boolean", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -276,10 +278,12 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    external_id = table.Column<Guid>(type: "uuid", nullable: false),
                     created_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     expires_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -298,14 +302,15 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     company_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     to_present = table.Column<bool>(type: "boolean", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false)
+                    user_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -324,9 +329,11 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    external_id = table.Column<Guid>(type: "uuid", nullable: false),
                     token = table.Column<string>(type: "text", nullable: false),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
                     expires_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     created_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     revoked_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -350,8 +357,8 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    mentor_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    mentee_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    mentor_id = table.Column<int>(type: "integer", nullable: false),
+                    mentee_id = table.Column<int>(type: "integer", nullable: false),
                     created_on_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -378,7 +385,7 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
                     expertise_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -405,7 +412,7 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 columns: table => new
                 {
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    user_id = table.Column<int>(type: "integer", nullable: false),
                     language_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -425,75 +432,6 @@ namespace Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                schema: "public",
-                table: "expertises",
-                columns: new[] { "id", "description", "name" },
-                values: new object[,]
-                {
-                    { 1, "Mentorship in web, backend, mobile, etc.", "Software Engineering" },
-                    { 2, "Mentorship in machines, manufacturing, CAD, etc.", "Mechanical Engineering" },
-                    { 3, "Mentorship in circuits, power systems, etc.", "Electrical Engineering" },
-                    { 4, "Mentorship in construction, infrastructure, etc.", "Civil Engineering" },
-                    { 5, "Mentorship in chemical processes, materials, etc.", "Chemical Engineering" },
-                    { 6, "Mentorship in aircraft, spacecraft, etc.", "Aerospace Engineering" },
-                    { 7, "Mentorship in sustainability, environment, etc.", "Environmental Engineering" },
-                    { 8, "Frontend, backend, and fullstack web mentoring.", "Web Development" },
-                    { 9, "Android, iOS, cross-platform app mentoring.", "Mobile Development" },
-                    { 10, "Mentorship in data analysis, ML, statistics.", "Data Science" },
-                    { 11, "Mentorship in ethical hacking, defense, etc.", "Cybersecurity" },
-                    { 12, "AWS, Azure, CI/CD, and infrastructure mentoring.", "Cloud & DevOps" },
-                    { 13, "Mentorship in ML models, AI theory, etc.", "AI & Machine Learning" },
-                    { 14, "Mentorship in user experience and interface design.", "UI/UX Design" },
-                    { 15, "Mentorship for startup founders and entrepreneurs.", "Startup Coaching" },
-                    { 16, "Mentorship in business models and scaling.", "Business Strategy" },
-                    { 17, "Mentorship in digital marketing, social media, etc.", "Marketing & Branding" },
-                    { 18, "Mentorship in B2B, B2C, pitching, etc.", "Sales" },
-                    { 19, "Mentorship in online business and marketplaces.", "E-commerce" },
-                    { 20, "Mentorship in product lifecycle, agile, etc.", "Product Management" },
-                    { 21, "Mentorship in managing teams and tasks.", "Project Management" },
-                    { 22, "Mentorship in stocks, real estate, etc.", "Investment" },
-                    { 23, "Budgeting, saving, financial planning.", "Personal Finance" },
-                    { 24, "Corporate and freelance financial help.", "Accounting & Auditing" },
-                    { 25, "Medical school and residency mentorship.", "General Medicine" },
-                    { 26, "Clinical mentorship and nursing school support.", "Nursing" },
-                    { 27, "Pharmaceutical career and education guidance.", "Pharmacy" },
-                    { 28, "Psychology, therapy, and emotional support.", "Mental Health" },
-                    { 29, "Mentorship in epidemiology, policy, etc.", "Public Health" },
-                    { 30, "Mentorship in contracts, companies, etc.", "Corporate Law" },
-                    { 31, "Legal career coaching in criminal justice.", "Criminal Law" },
-                    { 32, "Mentorship in visa and immigration processes.", "Immigration Law" },
-                    { 33, "Mentorship in patents, copyrights, etc.", "Intellectual Property Law" },
-                    { 34, "Mentorship in team building and leading.", "Leadership & Management" },
-                    { 35, "Mentorship in effective communication.", "Communication Skills" },
-                    { 36, "Coaching on personal productivity.", "Time Management" },
-                    { 37, "Confidence building and speech coaching.", "Public Speaking" },
-                    { 38, "Mock interviews and job prep.", "Job Interview Coaching" },
-                    { 39, "Profile and resume optimization.", "Resume & LinkedIn Review" },
-                    { 40, "Long-term goal mentorship.", "Career Planning" },
-                    { 41, "Mentorship in tools like Photoshop, Figma.", "Graphic Design" },
-                    { 42, "Camera use, editing, and career advice.", "Photography" },
-                    { 43, "Mentorship in composition, mixing, etc.", "Music Production" },
-                    { 44, "Mentorship in writing books or articles.", "Writing & Publishing" },
-                    { 45, "Mentorship in Premiere Pro, storytelling, etc.", "Video Editing" },
-                    { 46, "Unity, Unreal, and career mentorship.", "Game Development" },
-                    { 47, "Mentorship for language fluency.", "Language Learning" },
-                    { 48, "Mentorship for international students.", "Study Abroad Guidance" },
-                    { 49, "Mentorship in motivation, habits, etc.", "Life Coaching" },
-                    { 50, "System building, discipline, deep work.", "Productivity Coaching" }
-                });
-
-            migrationBuilder.InsertData(
-                schema: "public",
-                table: "languages",
-                columns: new[] { "id", "name" },
-                values: new object[,]
-                {
-                    { 1, "English" },
-                    { 2, "French" },
-                    { 3, "Arabic" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -534,6 +472,13 @@ namespace Infrastructure.Migrations
                 column: "normalized_email");
 
             migrationBuilder.CreateIndex(
+                name: "ix_asp_net_users_slug",
+                schema: "public",
+                table: "AspNetUsers",
+                column: "slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 schema: "public",
                 table: "AspNetUsers",
@@ -563,6 +508,13 @@ namespace Infrastructure.Migrations
                 schema: "public",
                 table: "outbox_messages",
                 column: "processed_on_utc");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_refresh_tokens_external_id",
+                schema: "public",
+                table: "refresh_tokens",
+                column: "external_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_refresh_tokens_token",

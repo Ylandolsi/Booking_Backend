@@ -2,6 +2,6 @@
 
 namespace Application.Users.Experience.Delete;
 
-public sealed record DeleteExperienceCommand(Guid ExperienceId, Guid UserId) : ICommand<Guid>;
+public sealed record DeleteExperienceCommand(int ExperienceId, int UserId) : ICommand;
 
 

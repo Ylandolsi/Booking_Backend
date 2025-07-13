@@ -3,7 +3,7 @@
 namespace Application.Users.Education.Get;
 
 public sealed record GetEducationResponse(
-    Guid Id,
+    int Id,
     string Field,
     string University,
     DateTime StartDate,

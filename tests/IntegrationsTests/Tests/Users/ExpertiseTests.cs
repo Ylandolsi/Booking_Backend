@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using IntegrationsTests.Abstractions;
-using ExpertiseE = Domain.Users.Entities.Expertise; 
-namespace IntegrationsTests.Tests.Users.Expertise;
+using ExpertiseE = Domain.Users.Entities.Expertise;
+namespace IntegrationsTests.Tests.Users;
 
 public class ExpertiseTests : AuthenticationTestBase
 {
@@ -26,7 +26,7 @@ public class ExpertiseTests : AuthenticationTestBase
     {
         var userData = await CreateUserAndLogin();
 
-        var response = await _client.GetAsync(UsersEndpoints.GetUserExpertises.Replace("{userId:guid}", userData.UserId.ToString()));
+        var response = await _client.GetAsync(UsersEndpoints.GetUserExpertises.Replace("{userSlug}", userData.UserSlug.ToString()));
 
         response.EnsureSuccessStatusCode();
         var expertises = await response.Content.ReadFromJsonAsync<List<ExpertiseE>>();
@@ -38,7 +38,7 @@ public class ExpertiseTests : AuthenticationTestBase
         var userData = await CreateUserAndLogin();
         var useData2 = await CreateUserAndLogin();
 
-        var response = await _client.GetAsync(UsersEndpoints.GetUserExpertises.Replace("{userId:guid}", userData.UserId.ToString()));
+        var response = await _client.GetAsync(UsersEndpoints.GetUserExpertises.Replace("{userSlug}", userData.UserSlug.ToString()));
 
         response.EnsureSuccessStatusCode();
         var expertises = await response.Content.ReadFromJsonAsync<List<ExpertiseE>>();
@@ -66,7 +66,7 @@ public class ExpertiseTests : AuthenticationTestBase
 
         response.EnsureSuccessStatusCode();
 
-        var userExpertisesResponse = await _client.GetAsync(UsersEndpoints.GetUserExpertises.Replace("{userId:guid}", userData.UserId.ToString()));
+        var userExpertisesResponse = await _client.GetAsync(UsersEndpoints.GetUserExpertises.Replace("{userSlug}", userData.UserSlug.ToString()));
 
         userExpertisesResponse.EnsureSuccessStatusCode();
         var userExpertises = await userExpertisesResponse.Content.ReadFromJsonAsync<List<ExpertiseE>>();

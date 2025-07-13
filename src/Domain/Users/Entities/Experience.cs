@@ -1,11 +1,13 @@
 using SharedKernel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Users.Entities;
 
 public class Experience : Entity
 {
     // TODO : Add industry to Experience 
-    public Guid Id { get; private set; } = Guid.NewGuid();
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
     public string Title { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public DateTime StartDate { get; private set; }
@@ -13,7 +15,7 @@ public class Experience : Entity
     public string CompanyName { get; private set; } = string.Empty;
     public bool ToPresent { get; private set; }
 
-    public Guid UserId { get; private set; }
+    public int UserId { get; private set; }
     public User User { get; set; } = default!;
 
     private Experience() { }
@@ -22,7 +24,7 @@ public class Experience : Entity
     public Experience(string title,
                       string description,
                       string companyName,
-                      Guid userId,
+                      int userId,
                       DateTime startDate,
                       DateTime? endDate = null)
     {

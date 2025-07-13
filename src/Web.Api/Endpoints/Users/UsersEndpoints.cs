@@ -16,28 +16,28 @@ public static class UsersEndpoints
     public const string ResetPassword = "/users/reset-password";
 
     // User Management
-    public const string GetUser = "users/{id}";
+    public const string GetUser = "users/{id}"; // TODO : implement this 
     public const string GetCurrentUser = "users/me";
 
     // Experience 
-    public const string GetUserExperiences = "users/experiences";
+    public const string GetUserExperiences = "users/experiences{userSlug}";
     public const string AddExperience = "users/experiences";
-    public const string UpdateExperience = "users/experiences/{experienceId:guid}";
-    public const string DeleteExperience = "users/experiences/{experienceId:guid}";
+    public const string UpdateExperience = "users/experiences/{experienceId:int}";
+    public const string DeleteExperience = "users/experiences/{experienceId:int}";
 
     // Education 
-    public const string GetUserEducations = "users/educations";
+    public const string GetUserEducations = "users/educations/{userSlug}";
     public const string AddEducation = "users/educations";
-    public const string UpdateEducation = "users/education/{educationId:guid}";
-    public const string DeleteEducation = "users/education/{educationId:guid}";
+    public const string UpdateEducation = "users/education/{educationId:int}";
+    public const string DeleteEducation = "users/education/{educationId:int}";
 
     // Expertise
-    public const string GetUserExpertises = "users/expertises/{userId:guid}";
+    public const string GetUserExpertises = "users/expertises/{userSlug}";
     public const string GetAllExpertises = "expertises";
     public const string UpdateUserExpertise = "users/expertises";
 
     // Language
-    public const string GetUserLanguages = "users/{userId:guid}/languages";
+    public const string GetUserLanguages = "users/languages/{userSlug}";
     public const string GetAllLanguages = "languages";
     public const string UpdateUserLanguages = "users/languages";
 

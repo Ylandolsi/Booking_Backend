@@ -10,6 +10,7 @@ internal sealed class EducationConfiguration : IEntityTypeConfiguration<Educatio
     {
         builder.HasKey(e => e.Id);
 
+
         builder.Property(e => e.Field)
             .IsRequired()
             .HasMaxLength(100);

@@ -1,6 +1,6 @@
 namespace Application.Users.Authentication.Utils;
 
-public sealed record UserData(Guid UserId,
+public sealed record UserData(string UserSlug,
                               string FirstName,
                               string LastName,
                               string Email,

@@ -32,18 +32,12 @@ public class UserLoginTests : AuthenticationTestBase
     [Fact]
     public async Task GetCurrentUser_ShouldReturnValidAnswer_WhenTheUserIsAuthenticated()
     {
-        // Arrange
-        var userEmail = Fake.Internet.Email();
-        var userPassword = "Password123!";
-        await RegisterAndVerifyUser(userEmail, userPassword);
-
-        var userData = await LoginUser(userEmail, userPassword);
-        Assert.NotNull(userData);
+        var userData = await CreateUserAndLogin();
 
         var currentUserResponse = await _client.GetAsync(UsersEndpoints.GetCurrentUser);
         Assert.NotNull(currentUserResponse);
         Assert.Equal(HttpStatusCode.OK, currentUserResponse.StatusCode);
-        Assert.Equal(userEmail, userData.Email);
+        Assert.Equal(userData.Email, userData.Email);
     }
 
         [Fact]

@@ -53,9 +53,9 @@ internal class TokenWriterCookies(IHttpContextAccessor httpContextAccessor,
         return new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
+            Secure = false, // TODO : change to true 
             Path = "/",
-            SameSite = SameSiteMode.Lax,
+            SameSite = SameSiteMode.Lax, // TODO : change to strict 
             Expires = DateTime.UtcNow.AddMinutes(jwtAuthOptions.ExpirationInMinutes)
         };
     }

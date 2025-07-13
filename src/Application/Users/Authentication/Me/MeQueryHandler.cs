@@ -18,7 +18,7 @@ public sealed class MeQueryHandler (UserManager<User> userManager,
     public async Task<Result<UserData>> Handle(MeQuery query, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling MeQuery for user ID: {UserId}", query.Id);
-        User? user = await userManager.FindByIdAsync(query.Id.ToString()); 
+        User? user = await userManager.FindByIdAsync(query.Id.ToString());
         
         if ( user is null)
         {
@@ -28,7 +28,7 @@ public sealed class MeQueryHandler (UserManager<User> userManager,
 
         var response = new UserData
         (
-            UserId: user.Id,
+            UserSlug: user.Slug,
             FirstName: user.Name.FirstName,
             LastName: user.Name.LastName,
             Email: user.Email!,

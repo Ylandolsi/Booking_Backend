@@ -15,29 +15,28 @@ internal sealed class DeleteEducation : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete(UsersEndpoints.DeleteEducation, async (
-            Guid educationId,
-            IUserContext userContext,
-            ICommandHandler<DeleteEducationCommand, Guid> handler,
-            CancellationToken cancellationToken) =>
-        {
-            Guid userId;
-            try
+                int educationId,
+                IUserContext userContext,
+                ICommandHandler<DeleteEducationCommand> handler,
+                CancellationToken cancellationToken) =>
             {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+                int userId;
+                try
+                {
+                    userId = userContext.UserId;
+                }
+                catch (Exception ex)
+                {
+                    return Results.Unauthorized();
+                }
 
-            var command = new DeleteEducationCommand(educationId, userId);
-            Result result = await handler.Handle(command, cancellationToken);
+                var command = new DeleteEducationCommand(educationId, userId);
+                Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(
-                () => Results.NoContent(),
-                CustomResults.Problem);
-        })
-        .RequireAuthorization()
-        .WithTags(Tags.Education);
+                return result.Match(Results.NoContent,
+                    CustomResults.Problem);
+            })
+            .RequireAuthorization()
+            .WithTags(Tags.Education);
     }
 }

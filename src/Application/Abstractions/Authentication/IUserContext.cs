@@ -2,6 +2,6 @@
 
 public interface IUserContext
 {
-    Guid UserId { get; }
+    int UserId { get; }
     string? RefreshToken { get; }
 }

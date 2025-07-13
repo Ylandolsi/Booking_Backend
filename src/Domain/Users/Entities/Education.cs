@@ -1,10 +1,13 @@
 using SharedKernel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Users.Entities;
 
 public class Education : Entity
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
+    public int Id { get; set; }
     public string Field { get; private set; } = string.Empty;
     public string Description { get; private set; } = string.Empty;
     public DateTime StartDate { get; private set; }
@@ -12,7 +15,7 @@ public class Education : Entity
     public string University { get; private set; } = string.Empty;
     public bool ToPresent { get; private set; }
 
-    public Guid UserId { get; set; }
+    public int UserId { get; set; }
     public User User { get; set; } = default!;
 
     private Education() { }
@@ -21,7 +24,7 @@ public class Education : Entity
     public Education(string field,
                      string description,
                      string university,
-                     Guid userId,
+                     int userId,
                      DateTime startDate,
                      DateTime? endDate = null)
     {

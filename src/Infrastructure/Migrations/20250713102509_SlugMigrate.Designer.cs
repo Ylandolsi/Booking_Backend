@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250710213955_UpppdateSeedDb")]
-    partial class UpppdateSeedDb
+    [Migration("20250713102509_SlugMigrate")]
+    partial class SlugMigrate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,10 +28,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Users.EmailVerificationToken", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedOnUtc")
                         .HasColumnType("timestamp with time zone")
@@ -41,8 +43,12 @@ namespace Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_on_utc");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("ExternalId")
                         .HasColumnType("uuid")
+                        .HasColumnName("external_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -56,10 +62,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Users.Entities.Education", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -90,8 +98,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("university");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -105,10 +113,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Users.Entities.Experience", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
@@ -139,8 +149,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("to_present");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -176,308 +186,6 @@ namespace Infrastructure.Migrations
                         .HasName("pk_expertises");
 
                     b.ToTable("expertises", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "Mentorship in web, backend, mobile, etc.",
-                            Name = "Software Engineering"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "Mentorship in machines, manufacturing, CAD, etc.",
-                            Name = "Mechanical Engineering"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "Mentorship in circuits, power systems, etc.",
-                            Name = "Electrical Engineering"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Mentorship in construction, infrastructure, etc.",
-                            Name = "Civil Engineering"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Mentorship in chemical processes, materials, etc.",
-                            Name = "Chemical Engineering"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "Mentorship in aircraft, spacecraft, etc.",
-                            Name = "Aerospace Engineering"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "Mentorship in sustainability, environment, etc.",
-                            Name = "Environmental Engineering"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Description = "Frontend, backend, and fullstack web mentoring.",
-                            Name = "Web Development"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Description = "Android, iOS, cross-platform app mentoring.",
-                            Name = "Mobile Development"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Description = "Mentorship in data analysis, ML, statistics.",
-                            Name = "Data Science"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Description = "Mentorship in ethical hacking, defense, etc.",
-                            Name = "Cybersecurity"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Description = "AWS, Azure, CI/CD, and infrastructure mentoring.",
-                            Name = "Cloud & DevOps"
-                        },
-                        new
-                        {
-                            Id = 13,
-                            Description = "Mentorship in ML models, AI theory, etc.",
-                            Name = "AI & Machine Learning"
-                        },
-                        new
-                        {
-                            Id = 14,
-                            Description = "Mentorship in user experience and interface design.",
-                            Name = "UI/UX Design"
-                        },
-                        new
-                        {
-                            Id = 15,
-                            Description = "Mentorship for startup founders and entrepreneurs.",
-                            Name = "Startup Coaching"
-                        },
-                        new
-                        {
-                            Id = 16,
-                            Description = "Mentorship in business models and scaling.",
-                            Name = "Business Strategy"
-                        },
-                        new
-                        {
-                            Id = 17,
-                            Description = "Mentorship in digital marketing, social media, etc.",
-                            Name = "Marketing & Branding"
-                        },
-                        new
-                        {
-                            Id = 18,
-                            Description = "Mentorship in B2B, B2C, pitching, etc.",
-                            Name = "Sales"
-                        },
-                        new
-                        {
-                            Id = 19,
-                            Description = "Mentorship in online business and marketplaces.",
-                            Name = "E-commerce"
-                        },
-                        new
-                        {
-                            Id = 20,
-                            Description = "Mentorship in product lifecycle, agile, etc.",
-                            Name = "Product Management"
-                        },
-                        new
-                        {
-                            Id = 21,
-                            Description = "Mentorship in managing teams and tasks.",
-                            Name = "Project Management"
-                        },
-                        new
-                        {
-                            Id = 22,
-                            Description = "Mentorship in stocks, real estate, etc.",
-                            Name = "Investment"
-                        },
-                        new
-                        {
-                            Id = 23,
-                            Description = "Budgeting, saving, financial planning.",
-                            Name = "Personal Finance"
-                        },
-                        new
-                        {
-                            Id = 24,
-                            Description = "Corporate and freelance financial help.",
-                            Name = "Accounting & Auditing"
-                        },
-                        new
-                        {
-                            Id = 25,
-                            Description = "Medical school and residency mentorship.",
-                            Name = "General Medicine"
-                        },
-                        new
-                        {
-                            Id = 26,
-                            Description = "Clinical mentorship and nursing school support.",
-                            Name = "Nursing"
-                        },
-                        new
-                        {
-                            Id = 27,
-                            Description = "Pharmaceutical career and education guidance.",
-                            Name = "Pharmacy"
-                        },
-                        new
-                        {
-                            Id = 28,
-                            Description = "Psychology, therapy, and emotional support.",
-                            Name = "Mental Health"
-                        },
-                        new
-                        {
-                            Id = 29,
-                            Description = "Mentorship in epidemiology, policy, etc.",
-                            Name = "Public Health"
-                        },
-                        new
-                        {
-                            Id = 30,
-                            Description = "Mentorship in contracts, companies, etc.",
-                            Name = "Corporate Law"
-                        },
-                        new
-                        {
-                            Id = 31,
-                            Description = "Legal career coaching in criminal justice.",
-                            Name = "Criminal Law"
-                        },
-                        new
-                        {
-                            Id = 32,
-                            Description = "Mentorship in visa and immigration processes.",
-                            Name = "Immigration Law"
-                        },
-                        new
-                        {
-                            Id = 33,
-                            Description = "Mentorship in patents, copyrights, etc.",
-                            Name = "Intellectual Property Law"
-                        },
-                        new
-                        {
-                            Id = 34,
-                            Description = "Mentorship in team building and leading.",
-                            Name = "Leadership & Management"
-                        },
-                        new
-                        {
-                            Id = 35,
-                            Description = "Mentorship in effective communication.",
-                            Name = "Communication Skills"
-                        },
-                        new
-                        {
-                            Id = 36,
-                            Description = "Coaching on personal productivity.",
-                            Name = "Time Management"
-                        },
-                        new
-                        {
-                            Id = 37,
-                            Description = "Confidence building and speech coaching.",
-                            Name = "Public Speaking"
-                        },
-                        new
-                        {
-                            Id = 38,
-                            Description = "Mock interviews and job prep.",
-                            Name = "Job Interview Coaching"
-                        },
-                        new
-                        {
-                            Id = 39,
-                            Description = "Profile and resume optimization.",
-                            Name = "Resume & LinkedIn Review"
-                        },
-                        new
-                        {
-                            Id = 40,
-                            Description = "Long-term goal mentorship.",
-                            Name = "Career Planning"
-                        },
-                        new
-                        {
-                            Id = 41,
-                            Description = "Mentorship in tools like Photoshop, Figma.",
-                            Name = "Graphic Design"
-                        },
-                        new
-                        {
-                            Id = 42,
-                            Description = "Camera use, editing, and career advice.",
-                            Name = "Photography"
-                        },
-                        new
-                        {
-                            Id = 43,
-                            Description = "Mentorship in composition, mixing, etc.",
-                            Name = "Music Production"
-                        },
-                        new
-                        {
-                            Id = 44,
-                            Description = "Mentorship in writing books or articles.",
-                            Name = "Writing & Publishing"
-                        },
-                        new
-                        {
-                            Id = 45,
-                            Description = "Mentorship in Premiere Pro, storytelling, etc.",
-                            Name = "Video Editing"
-                        },
-                        new
-                        {
-                            Id = 46,
-                            Description = "Unity, Unreal, and career mentorship.",
-                            Name = "Game Development"
-                        },
-                        new
-                        {
-                            Id = 47,
-                            Description = "Mentorship for language fluency.",
-                            Name = "Language Learning"
-                        },
-                        new
-                        {
-                            Id = 48,
-                            Description = "Mentorship for international students.",
-                            Name = "Study Abroad Guidance"
-                        },
-                        new
-                        {
-                            Id = 49,
-                            Description = "Mentorship in motivation, habits, etc.",
-                            Name = "Life Coaching"
-                        },
-                        new
-                        {
-                            Id = 50,
-                            Description = "System building, discipline, deep work.",
-                            Name = "Productivity Coaching"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Users.Entities.Language", b =>
@@ -499,31 +207,16 @@ namespace Infrastructure.Migrations
                         .HasName("pk_languages");
 
                     b.ToTable("languages", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "English"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "French"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Arabic"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Users.Entities.RefreshToken", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CreatedByIp")
                         .IsRequired()
@@ -537,6 +230,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ExpiresOnUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("expires_on_utc");
+
+                    b.Property<Guid>("ExternalId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("external_id");
 
                     b.Property<DateTime?>("RevokedOnUtc")
                         .HasColumnType("timestamp with time zone")
@@ -552,12 +249,16 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("user_agent");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
                         .HasName("pk_refresh_tokens");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_refresh_tokens_external_id");
 
                     b.HasIndex("Token")
                         .IsUnique()
@@ -571,10 +272,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Users.Entities.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer")
@@ -637,6 +340,11 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("security_stamp");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("two_factor_enabled");
@@ -656,17 +364,21 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_asp_net_users_slug");
+
                     b.ToTable("AspNetUsers", "public");
                 });
 
             modelBuilder.Entity("Domain.Users.JoinTables.MentorMentee", b =>
                 {
-                    b.Property<Guid>("MentorId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("MentorId")
+                        .HasColumnType("integer")
                         .HasColumnName("mentor_id");
 
-                    b.Property<Guid>("MenteeId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("MenteeId")
+                        .HasColumnType("integer")
                         .HasColumnName("mentee_id");
 
                     b.Property<DateTime>("CreatedOnUtc")
@@ -684,8 +396,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Users.JoinTables.UserExpertise", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.Property<int>("ExpertiseId")
@@ -703,8 +415,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Users.JoinTables.UserLanguage", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.Property<int>("LanguageId")
@@ -720,12 +432,14 @@ namespace Infrastructure.Migrations
                     b.ToTable("user_languages", "public");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -752,7 +466,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetRoles", "public");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -769,8 +483,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("claim_value");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
                         .HasColumnName("role_id");
 
                     b.HasKey("Id")
@@ -782,7 +496,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetRoleClaims", "public");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -799,8 +513,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("claim_value");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id")
@@ -812,7 +526,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserClaims", "public");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text")
@@ -826,8 +540,8 @@ namespace Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("provider_display_name");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.HasKey("LoginProvider", "ProviderKey")
@@ -839,14 +553,14 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserLogins", "public");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
                         .HasColumnName("role_id");
 
                     b.HasKey("UserId", "RoleId")
@@ -858,10 +572,10 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserRoles", "public");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
                         .HasColumnName("user_id");
 
                     b.Property<string>("LoginProvider")
@@ -972,8 +686,8 @@ namespace Infrastructure.Migrations
                 {
                     b.OwnsOne("Domain.Users.ValueObjects.Name", "Name", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid")
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer")
                                 .HasColumnName("id");
 
                             b1.Property<string>("FirstName")
@@ -999,8 +713,8 @@ namespace Infrastructure.Migrations
 
                     b.OwnsOne("Domain.Users.ValueObjects.ProfileCompletionStatus", "ProfileCompletionStatus", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid")
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer")
                                 .HasColumnName("id");
 
                             b1.Property<bool>("HasBio")
@@ -1050,8 +764,8 @@ namespace Infrastructure.Migrations
 
                     b.OwnsOne("Domain.Users.ValueObjects.ProfilePicture", "ProfilePictureUrl", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid")
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer")
                                 .HasColumnName("id");
 
                             b1.Property<string>("ProfilePictureLink")
@@ -1076,8 +790,8 @@ namespace Infrastructure.Migrations
 
                     b.OwnsOne("Domain.Users.ValueObjects.SocialLinks", "SocialLinks", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid")
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer")
                                 .HasColumnName("id");
 
                             b1.Property<string>("Facebook")
@@ -1126,8 +840,8 @@ namespace Infrastructure.Migrations
 
                     b.OwnsOne("Domain.Users.ValueObjects.Status", "Status", b1 =>
                         {
-                            b1.Property<Guid>("UserId")
-                                .HasColumnType("uuid")
+                            b1.Property<int>("UserId")
+                                .HasColumnType("integer")
                                 .HasColumnName("id");
 
                             b1.Property<bool>("IsActive")
@@ -1226,9 +940,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1236,7 +950,7 @@ namespace Infrastructure.Migrations
                         .HasConstraintName("fk_asp_net_role_claims_asp_net_roles_role_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.HasOne("Domain.Users.Entities.User", null)
                         .WithMany()
@@ -1246,7 +960,7 @@ namespace Infrastructure.Migrations
                         .HasConstraintName("fk_asp_net_user_claims_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.HasOne("Domain.Users.Entities.User", null)
                         .WithMany()
@@ -1256,9 +970,9 @@ namespace Infrastructure.Migrations
                         .HasConstraintName("fk_asp_net_user_logins_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1273,7 +987,7 @@ namespace Infrastructure.Migrations
                         .HasConstraintName("fk_asp_net_user_roles_asp_net_users_user_id");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
                     b.HasOne("Domain.Users.Entities.User", null)
                         .WithMany()

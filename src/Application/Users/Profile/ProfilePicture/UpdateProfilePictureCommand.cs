@@ -3,4 +3,4 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Users.Profile.ProfilePicture;
 
-public record UpdateProfilePictureCommand(Guid UserId, IFormFile File) : ICommand<string>;
+public record UpdateProfilePictureCommand(int UserId, IFormFile File) : ICommand<string>;

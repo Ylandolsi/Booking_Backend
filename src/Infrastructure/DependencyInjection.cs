@@ -69,6 +69,8 @@ public static class DependencyInjection
         // AWS UPLOAD
         // services.AddScoped<IS3ImageProcessingService , S3ImageProcessingService>();
         services.AddScoped<IS3ImageProcessingService, LocalFileImageProcessingService>();
+        
+        services.AddScoped<ISlugGenerator , SlugGenerator.SlugGenerator>();
 
         return services;
     }
@@ -105,7 +107,7 @@ public static class DependencyInjection
 
     public static IServiceCollection AddIdentityCore(this IServiceCollection services)
     {
-        services.AddIdentity<User, IdentityRole<Guid>>(
+        services.AddIdentity<User, IdentityRole<int>>(
             o =>
             {
                 o.User.RequireUniqueEmail = true;

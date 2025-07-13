@@ -13,7 +13,7 @@ using SharedKernel;
 namespace Infrastructure.Database;
 
 public sealed class ApplicationDbContext
-    : IdentityDbContext<User, IdentityRole<Guid>, Guid>, IApplicationDbContext
+    : IdentityDbContext<User, IdentityRole<int>, int>, IApplicationDbContext
 {
     private readonly IDomainEventsDispatcher _domainEventsDispatcher;
 

@@ -11,8 +11,9 @@ public enum Genders
     Female,
 }
 
-public sealed class User : IdentityUser<Guid>, IEntity
+public sealed class User : IdentityUser<int>, IEntity
 {
+    public string Slug { get; set; } = string.Empty;
     public Name Name { get; private set; } = default!;
     public Status Status { get; private set; } = default!;
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
@@ -27,10 +28,11 @@ public sealed class User : IdentityUser<Guid>, IEntity
 
 
     public static User Create(
+        string slug , 
         string firstName,
         string lastName,
         string emailAddress,
-        string profilePictureSource)
+        string profilePictureSource )
     {
         var user = new User
         {
@@ -38,7 +40,9 @@ public sealed class User : IdentityUser<Guid>, IEntity
             Status = new Status(false),
             Email = emailAddress,
             UserName = emailAddress,
-            ProfilePictureUrl = new ProfilePicture(profilePictureSource)
+            ProfilePictureUrl = new ProfilePicture(profilePictureSource),
+            Slug = slug , 
+
         };
 
         return user;

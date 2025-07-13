@@ -15,6 +15,9 @@ internal class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken
     {
         builder.HasKey(rt => rt.Id);
 
+        builder.HasIndex(rt => rt.ExternalId).IsUnique();
+
+
         builder.Property(rt => rt.Token)
             .IsRequired();
 

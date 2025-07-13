@@ -3,7 +3,7 @@ using Domain.Users.Entities;
 
 namespace Application.Users.Profile.BasicInfo;
 
-public record UpdateBasicInfoCommand(Guid UserId,
+public record UpdateBasicInfoCommand(int UserId,
                                      string FirstName,
                                      string LastName,
                                      Genders Gender,

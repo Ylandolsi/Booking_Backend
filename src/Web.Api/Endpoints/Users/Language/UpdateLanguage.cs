@@ -19,7 +19,7 @@ internal sealed class UpdateLanguage : IEndpoint
             ICommandHandler<UpdateUserLanguagesCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;

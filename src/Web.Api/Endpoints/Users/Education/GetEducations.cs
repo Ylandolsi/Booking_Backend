@@ -15,28 +15,17 @@ internal sealed class GetEducations : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(UsersEndpoints.GetUserEducations, async (
-            IUserContext userContext,
+            string userSlug ,
             IQueryHandler<GetEducationQuery, List<GetEducationResponse>> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
-
-            var query = new GetEducationQuery(userId);
+            var query = new GetEducationQuery(userSlug);
             Result<List<GetEducationResponse>> result = await handler.Handle(query, cancellationToken);
 
             return result.Match(
                 educations => Results.Ok(educations),
                 CustomResults.Problem);
         })
-        .RequireAuthorization()
         .WithTags(Tags.Education);
     }
 }

@@ -24,7 +24,7 @@ internal sealed class UpdateBasicInfo : IEndpoint
             ICommandHandler<UpdateBasicInfoCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;
