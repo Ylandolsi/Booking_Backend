@@ -88,7 +88,7 @@ public class EducationTests : AuthenticationTestBase
 
         // Act
         var response = await _client.PutAsJsonAsync(
-            UsersEndpoints.UpdateEducation.Replace("{educationId:int}", educationId.ToString()), 
+            UsersEndpoints.UpdateEducation.Replace("{educationId}", educationId.ToString()), 
             updatePayload);
 
         // Assert
@@ -116,7 +116,7 @@ public class EducationTests : AuthenticationTestBase
 
         // Act
         var response = await _client.DeleteAsync(
-            UsersEndpoints.DeleteEducation.Replace("{educationId:int}", educationId.ToString()));
+            UsersEndpoints.DeleteEducation.Replace("{educationId}", educationId.ToString()));
 
         // Assert
         response.EnsureSuccessStatusCode();

@@ -92,7 +92,7 @@ public class ExperienceTests : AuthenticationTestBase
 
         // Act
         var response = await _client.PutAsJsonAsync(
-            UsersEndpoints.UpdateExperience.Replace("{experienceId:int}", experienceId.ToString()),
+            UsersEndpoints.UpdateExperience.Replace("{experienceId}", experienceId.ToString()),
             updatePayload);
 
         // Assert
@@ -122,7 +122,7 @@ public class ExperienceTests : AuthenticationTestBase
 
         // Act
         var response = await _client.DeleteAsync(
-            UsersEndpoints.DeleteExperience.Replace("{experienceId:int}", experienceId.ToString()));
+            UsersEndpoints.DeleteExperience.Replace("{experienceId}", experienceId.ToString()));
 
         // Assert
         response.EnsureSuccessStatusCode();

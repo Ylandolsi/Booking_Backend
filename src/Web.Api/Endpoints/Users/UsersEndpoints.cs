@@ -22,14 +22,14 @@ public static class UsersEndpoints
     // Experience 
     public const string GetUserExperiences = "users/experiences{userSlug}";
     public const string AddExperience = "users/experiences";
-    public const string UpdateExperience = "users/experiences/{experienceId:int}";
-    public const string DeleteExperience = "users/experiences/{experienceId:int}";
+    public const string UpdateExperience = "users/experiences/{experienceId}";
+    public const string DeleteExperience = "users/experiences/{experienceId}";
 
     // Education 
     public const string GetUserEducations = "users/educations/{userSlug}";
     public const string AddEducation = "users/educations";
-    public const string UpdateEducation = "users/education/{educationId:int}";
-    public const string DeleteEducation = "users/education/{educationId:int}";
+    public const string UpdateEducation = "users/education/{educationId}";
+    public const string DeleteEducation = "users/education/{educationId}";
 
     // Expertise
     public const string GetUserExpertises = "users/expertises/{userSlug}";
