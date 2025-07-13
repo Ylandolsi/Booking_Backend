@@ -45,7 +45,7 @@ internal sealed class AddEducation : IEndpoint
             Result<int> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(
-                Results.Created,
+                (result)  => Results.Ok(result),
                 CustomResults.Problem);
         })
         .RequireAuthorization()

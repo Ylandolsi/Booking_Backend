@@ -25,7 +25,7 @@ internal sealed class AddExperience : IEndpoint
         app.MapPost(UsersEndpoints.AddExperience, async (
             Request request,
             IUserContext userContext,
-            ICommandHandler<AddEducationCommand, int> handler,
+            ICommandHandler<AddExperienceCommand, int> handler,
             CancellationToken cancellationToken) =>
         {
             int userId;
@@ -37,7 +37,7 @@ internal sealed class AddExperience : IEndpoint
             {
                 return Results.Unauthorized();
             }
-            var command = new AddEducationCommand(
+            var command = new AddExperienceCommand(
                 request.Title,
                 userId,
                 request.Company,
@@ -48,7 +48,7 @@ internal sealed class AddExperience : IEndpoint
             Result<int> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(
-                Results.Created,
+                (result) => Results.Ok(result),
                 CustomResults.Problem);
         })
         .RequireAuthorization()
