@@ -11,11 +11,11 @@ internal sealed class GetUserExpertise : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapGet(UsersEndpoints.GetUserExpertises, async (
-            Guid userId,
+            string userSlug,
             IQueryHandler<GetUserExpertisesQuery, List<Domain.Users.Entities.Expertise>> handler,
             CancellationToken cancellationToken) =>
         {
-            var query = new GetUserExpertisesQuery(userId);
+            var query = new GetUserExpertisesQuery(userSlug);
             Result<List<Domain.Users.Entities.Expertise>> result = await handler.Handle(query, cancellationToken);
 
             return result.Match(Results.Ok, CustomResults.Problem);

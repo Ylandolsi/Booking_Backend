@@ -37,14 +37,7 @@ public class ChangePasswordTests : AuthenticationTestBase
     public async Task ChangePassword_Should_ReturnBadRequest_WhenNewPasswordsDoNotMatch()
     {
         // Arrange
-        await RegisterAndVerifyUser(DefaultEmail, DefaultPassword, true);
-        await LoginUser(DefaultEmail, DefaultPassword);
-
-        var client = Factory.CreateClient();
-
-        var loginPayload = new { Email = DefaultEmail, Password = DefaultPassword };
-        var loginResult = await client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
-        loginResult.EnsureSuccessStatusCode();
+        var userData = await CreateUserAndLogin();
 
         var request = new
         {
@@ -54,7 +47,7 @@ public class ChangePasswordTests : AuthenticationTestBase
         };
         // cookies are sent automatically
 
-        var response = await client.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
+        var response = await _client.PutAsJsonAsync(UsersEndpoints.ChangePassword, request);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

@@ -8,6 +8,7 @@ using Domain.Users;
 using Domain.Users.Entities;
 using FluentEmail.Core;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 using System.Numerics;
@@ -15,27 +16,17 @@ using System.Security.Principal;
 
 namespace Application.Users.Register;
 
-
-public static class RegisterErrors
-{
-    public static readonly Error EmailNotUnique = Error.Conflict(
-        "Users.EmailNotUnique",
-        "The provided email is not unique");
-
-    public static Error UserRegistrationFailed(string message) => Error.Failure(
-        "Users.UserRegistrationFailed",
-        message);
-}
-internal sealed class RegisterCommandHandler(UserManager<User> userManager,
-                                             IUnitOfWork unitOfWork,
-                                             ILogger<RegisterCommandHandler> logger)
+internal sealed class RegisterCommandHandler(
+    UserManager<User> userManager,
+    IApplicationDbContext context,
+    IUnitOfWork unitOfWork,
+    ISlugGenerator slugGenerator,
+    ILogger<RegisterCommandHandler> logger)
     : ICommandHandler<RegisterCommand>
 {
-
     public async Task<Result> Handle(RegisterCommand command,
-                                     CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
-
         logger.LogInformation("Handling RegisterCommand for email: {Email}", command.Email);
 
         await unitOfWork.BeginTransactionAsync(cancellationToken);
@@ -55,25 +46,33 @@ internal sealed class RegisterCommandHandler(UserManager<User> userManager,
 
         logger.LogInformation("Registering user with email: {Email}", command.Email);
 
+        string uniqueSlug = await slugGenerator.GenerateUniqueSlug(
+            async (slug) => await context.Users.AsNoTracking().AnyAsync(u => u.Slug == slug, cancellationToken),
+            command.FirstName,
+            command.LastName
+        );
 
         User user = User.Create(
+            uniqueSlug,
             command.FirstName,
             command.LastName,
             command.Email,
-            command.ProfilePictureSource
-        );
+            command.ProfilePictureSource ?? string.Empty);
+
 
         try
         {
-
             IdentityResult result = await userManager.CreateAsync(user, command.Password);
 
             if (!result.Succeeded)
             {
-                logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", command.Email, result.Errors);
+                logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", command.Email,
+                    result.Errors);
                 await unitOfWork.RollbackTransactionAsync(cancellationToken);
-                return Result.Failure(RegisterErrors.UserRegistrationFailed(string.Join(", ", result.Errors.Select(e => e.Description))));
+                return Result.Failure(
+                    RegisterErrors.UserRegistrationFailed(string.Join(", ", result.Errors.Select(e => e.Description))));
             }
+
             logger.LogInformation("User registered successfully with email: {Email}", command.Email);
 
 
@@ -85,10 +84,10 @@ internal sealed class RegisterCommandHandler(UserManager<User> userManager,
         }
         catch (Exception ex)
         {
-
             logger.LogError(ex, "An error occurred while registering user with email: {Email}", command.Email);
             await unitOfWork.RollbackTransactionAsync(cancellationToken);
-            return Result.Failure(RegisterErrors.UserRegistrationFailed("An unexpected error occurred during registration."));
+            return Result.Failure(
+                RegisterErrors.UserRegistrationFailed("An unexpected error occurred during registration."));
         }
 
 
@@ -97,6 +96,4 @@ internal sealed class RegisterCommandHandler(UserManager<User> userManager,
         // TODO : in front end : 
         // Welcome! Please confirm your email to complete registration
     }
-
-
 }

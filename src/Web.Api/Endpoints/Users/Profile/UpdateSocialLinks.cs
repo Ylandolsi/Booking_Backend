@@ -26,7 +26,7 @@ internal sealed class UpdateSocialLinks : IEndpoint
             ICommandHandler<UpdateSocialLinksCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;

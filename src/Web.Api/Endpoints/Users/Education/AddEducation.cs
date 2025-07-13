@@ -21,10 +21,10 @@ internal sealed class AddEducation : IEndpoint
         app.MapPost(UsersEndpoints.AddEducation, async (
             Request request,
             IUserContext userContext,
-            ICommandHandler<AddEducationCommand, Guid> handler,
+            ICommandHandler<AddEducationCommand, int> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;
@@ -42,7 +42,7 @@ internal sealed class AddEducation : IEndpoint
                 request.EndDate,
                 request.Description);
 
-            Result<Guid> result = await handler.Handle(command, cancellationToken);
+            Result<int> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(
                 Results.Created,

@@ -2,6 +2,6 @@
 
 namespace Application.Users.Education.Delete;
 
-public sealed record DeleteEducationCommand(Guid EducationId, Guid UserId) : ICommand<Guid>;
+public sealed record DeleteEducationCommand(int EducationId, int UserId) : ICommand; 
 
 

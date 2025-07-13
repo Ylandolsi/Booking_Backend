@@ -5,13 +5,17 @@ namespace Domain.Users;
 
 public static class UserErrors
 {
-    public static Error NotFoundById(Guid userId) => Error.NotFound(
+    public static Error NotFoundById(int userId) => Error.NotFound(
         "Users.NotFound",
         $"The user with the Id = '{userId}' was not found");
 
     public static Error NotFoundByEmail(string email) => Error.NotFound(
         "Users.NotFoundByEmail",
         $"The user with the email = '{email}' was not found");
+    
+    public static Error NotFoundBySlug(string slug) => Error.NotFound(
+        "Users.NotFoundBySlug",
+        $"The user with the slug = '{slug}' was not found");
 
 
     public static readonly Error EmailIsNotVerified = Error.Problem(

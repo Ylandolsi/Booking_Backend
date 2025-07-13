@@ -15,12 +15,12 @@ internal sealed class DeleteExperience : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapDelete(UsersEndpoints.DeleteExperience, async (
-            Guid experienceId,
+            int experienceId,
             IUserContext userContext,
-            ICommandHandler<DeleteExperienceCommand, Guid> handler,
+            ICommandHandler<DeleteExperienceCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;
@@ -31,7 +31,7 @@ internal sealed class DeleteExperience : IEndpoint
             }
 
             var command = new DeleteExperienceCommand(experienceId, userId);
-            Result<Guid> result = await handler.Handle(command, cancellationToken);
+            Result result = await handler.Handle(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

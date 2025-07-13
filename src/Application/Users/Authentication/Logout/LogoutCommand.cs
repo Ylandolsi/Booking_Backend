@@ -4,5 +4,5 @@ using SharedKernel;
 namespace Application.Users.Authentication.Logout;
 
 
-public sealed record LogoutCommand(Guid UserId) : ICommand<bool>;
+public sealed record LogoutCommand(int UserId) : ICommand<bool>;
 

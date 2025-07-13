@@ -10,9 +10,9 @@ namespace Application.Users.Experience.Delete;
 
 internal sealed class DeleteExperienceCommandHandler(
    IApplicationDbContext context,
-   ILogger<DeleteExperienceCommandHandler> logger) : ICommandHandler<DeleteExperienceCommand, Guid>
+   ILogger<DeleteExperienceCommandHandler> logger) : ICommandHandler<DeleteExperienceCommand>
 {
-    public async Task<Result<Guid>> Handle(DeleteExperienceCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteExperienceCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling DeleteExperienceCommand for ExperienceId: {ExperienceId}", command.ExperienceId);
 
@@ -23,13 +23,13 @@ internal sealed class DeleteExperienceCommandHandler(
         if (experience == null)
         {
             logger.LogWarning("Experience with ID: {ExperienceId} not found for user {UserId}", command.ExperienceId, command.UserId);
-            return Result.Failure<Guid>(ExperienceErrors.ExperienceNotFound);
+            return Result.Failure(ExperienceErrors.ExperienceNotFound);
         }
 
         context.Experiences.Remove(experience);
         await context.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Successfully deleted experience with ID: {ExperienceId}", experience.Id);
-        return experience.Id;
+        return Result.Success();
     }
 }

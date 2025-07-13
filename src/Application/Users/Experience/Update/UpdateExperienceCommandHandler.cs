@@ -10,9 +10,9 @@ namespace Application.Users.Experience.Update;
 
 internal sealed class UpdateExperienceCommandHandler(
     IApplicationDbContext context,
-    ILogger<UpdateExperienceCommandHandler> logger) : ICommandHandler<UpdateExperienceCommand, Guid>
+    ILogger<UpdateExperienceCommandHandler> logger) : ICommandHandler<UpdateExperienceCommand>
 {
-    public async Task<Result<Guid>> Handle(UpdateExperienceCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateExperienceCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Updating experience {ExperienceId} for user {UserId}", command.ExperienceId, command.UserId);
 
@@ -22,7 +22,7 @@ internal sealed class UpdateExperienceCommandHandler(
         if (user == null)
         {
             logger.LogWarning("User with ID {UserId} not found", command.UserId);
-            return Result.Failure<Guid>(UserErrors.NotFoundById(command.UserId));
+            return Result.Failure(UserErrors.NotFoundById(command.UserId));
         }
 
         var experience = await context.Experiences
@@ -32,7 +32,7 @@ internal sealed class UpdateExperienceCommandHandler(
         if (experience == null)
         {
             logger.LogWarning("Experience with ID {ExperienceId} not found for user {UserId}", command.ExperienceId, command.UserId);
-            return Result.Failure<Guid>(ExperienceErrors.ExperienceNotFound);
+            return Result.Failure(ExperienceErrors.ExperienceNotFound);
         }
 
         try
@@ -52,10 +52,10 @@ internal sealed class UpdateExperienceCommandHandler(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to update experience {ExperienceId} for user {UserId}", command.ExperienceId, command.UserId);
-            return Result.Failure<Guid>(Error.Problem("Experience.UpdateFailed", "Failed to update experience"));
+            return Result.Failure(Error.Problem("Experience.UpdateFailed", "Failed to update experience"));
         }
 
         logger.LogInformation("Successfully updated experience {ExperienceId} for user {UserId}", command.ExperienceId, command.UserId);
-        return Result.Success(experience.Id);
+        return Result.Success();
     }
 }

@@ -17,7 +17,7 @@ internal sealed class Me : IEndpoint
             IQueryHandler<MeQuery, UserData> handler,
             CancellationToken cancellationToken = default) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;

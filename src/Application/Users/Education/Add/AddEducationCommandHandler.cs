@@ -9,9 +9,9 @@ using SharedKernel;
 namespace Application.Users.Education.Add;
 
 internal sealed class AddEducationCommandHandler(IApplicationDbContext context,
-                                                  ILogger<AddEducationCommandHandler> logger) : ICommandHandler<AddEducationCommand, Guid>
+                                                  ILogger<AddEducationCommandHandler> logger) : ICommandHandler<AddEducationCommand, int>
 {
-    public async Task<Result<Guid>> Handle(AddEducationCommand command, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(AddEducationCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Adding education for user {UserId}", command.UserId);
 
@@ -21,7 +21,7 @@ internal sealed class AddEducationCommandHandler(IApplicationDbContext context,
         if (user == null)
         {
             logger.LogWarning("User with ID {UserId} not found", command.UserId);
-            return Result.Failure<Guid>(UserErrors.NotFoundById(command.UserId));
+            return Result.Failure<int>(UserErrors.NotFoundById(command.UserId));
         }
 
         var education = new Domain.Users.Entities.Education(
@@ -43,7 +43,7 @@ internal sealed class AddEducationCommandHandler(IApplicationDbContext context,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to add education for user {UserId}", command.UserId);
-            return Result.Failure<Guid>(Error.Problem("Education.AddFailed", "Failed to add education"));
+            return Result.Failure<int>(Error.Problem("Education.AddFailed", "Failed to add education"));
         }
 
         logger.LogInformation("Successfully added education {EducationId} for user {UserId}",

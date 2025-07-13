@@ -3,8 +3,8 @@
 namespace Application.Users.Experience.Add;
 
 public sealed record AddExperienceCommand(string Title,
-                                          Guid UserId,
+                                          int UserId,
                                           string Company,
                                           DateTime StartDate,
                                           DateTime? EndDate,
-                                          string? Description) : ICommand<Guid>;
+                                          string? Description) : ICommand<int>;

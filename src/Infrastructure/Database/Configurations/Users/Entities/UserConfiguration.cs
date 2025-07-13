@@ -13,6 +13,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         // has one , create a separate table for the property
         builder.HasKey(u => u.Id);
 
+        builder.HasIndex(u => u.Slug).IsUnique();
+
+
         // builder.ComplexProperty(u => u.Name, name =>
         // {
         //     name.Property(n => n.FirstName).HasMaxLength(50).IsRequired();

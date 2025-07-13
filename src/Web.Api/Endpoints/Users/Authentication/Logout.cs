@@ -16,7 +16,7 @@ internal sealed class Logout : IEndpoint
             ICommandHandler<LogoutCommand, bool> handler,
             CancellationToken cancellationToken = default ) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;

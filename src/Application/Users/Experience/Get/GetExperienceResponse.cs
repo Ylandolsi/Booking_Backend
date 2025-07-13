@@ -3,7 +3,7 @@
 namespace Application.Users.Experience.Get;
 
 public sealed record GetExperienceResponse(
-    Guid Id,
+    int Id,
     string Title,
     string Company,
     DateTime StartDate,

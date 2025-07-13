@@ -1,4 +1,3 @@
-
 using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Utils;
 using Domain.Users.Entities;
@@ -7,6 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using SharedKernel;
 using System.Security.Claims;
+using Application.Abstractions.Authentication;
+using Application.Abstractions.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Users.Authentication.Google;
 
@@ -14,16 +16,18 @@ internal sealed class CreateOrLoginCommandHandler(
     UserManager<User> userManager,
     IHttpContextAccessor httpContextAccessor,
     TokenHelper tokenHelper,
+    ISlugGenerator slugGenerator,
+    IApplicationDbContext context,
     ILogger<CreateOrLoginCommandHandler> logger) : ICommandHandler<CreateOrLoginCommand, UserData>
 {
-
     public async Task<Result<UserData>> Handle(CreateOrLoginCommand command, CancellationToken cancellationToken)
     {
         ClaimsGoogle? claims = ExtractClaims(command.principal);
 
         if (claims is null)
         {
-            return Result.Failure<UserData>(CreateOrLoginErrors.UserRegistrationFailed("Invalid claims from external provider."));
+            return Result.Failure<UserData>(
+                CreateOrLoginErrors.UserRegistrationFailed("Invalid claims from external provider."));
         }
 
         var loginInfo = new UserLoginInfo("Google", claims.Id, "Google");
@@ -40,15 +44,31 @@ internal sealed class CreateOrLoginCommandHandler(
             {
                 // If user doesn't exist at all, create a new one
                 logger.LogInformation("Creating new user with email {Email}.", claims.Email);
-                user = User.Create(claims.FirstName, claims.LastName, claims.Email, claims.Picture);
+
+                string uniqueSlug = await slugGenerator.GenerateUniqueSlug(
+                        async (slug) => await context.Users.AsNoTracking().AnyAsync(u => u.Slug == slug, cancellationToken),
+                        claims.FirstName,
+                        claims.LastName
+                    );
+
+                user = User.Create(
+                    uniqueSlug,
+                    claims.FirstName,
+                    claims.LastName,
+                    claims.Email,
+                    claims.Picture ?? string.Empty);
                 user.EmailConfirmed = true;
 
                 IdentityResult createResult = await userManager.CreateAsync(user);
                 if (!createResult.Succeeded)
                 {
-                    logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", claims.Email, createResult.Errors);
-                    return Result.Failure<UserData>(CreateOrLoginErrors.UserRegistrationFailed(string.Join(", ", createResult.Errors.Select(e => e.Description))));
+                    logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", claims.Email,
+                        createResult.Errors);
+                    return Result.Failure<UserData>(
+                        CreateOrLoginErrors.UserRegistrationFailed(string.Join(", ",
+                            createResult.Errors.Select(e => e.Description))));
                 }
+
                 logger.LogInformation("User registered successfully with email: {Email}", claims.Email);
             }
 
@@ -56,8 +76,10 @@ internal sealed class CreateOrLoginCommandHandler(
             IdentityResult addLoginResult = await userManager.AddLoginAsync(user, loginInfo);
             if (!addLoginResult.Succeeded)
             {
-                logger.LogWarning("Failed to add Google login to user with email: {Email}. Errors: {Errors}", claims.Email, addLoginResult.Errors);
-                return Result.Failure<UserData>(CreateOrLoginErrors.UserRegistrationFailed("Could not link Google account."));
+                logger.LogWarning("Failed to add Google login to user with email: {Email}. Errors: {Errors}",
+                    claims.Email, addLoginResult.Errors);
+                return Result.Failure<UserData>(
+                    CreateOrLoginErrors.UserRegistrationFailed("Could not link Google account."));
             }
         }
         else
@@ -81,14 +103,14 @@ internal sealed class CreateOrLoginCommandHandler(
 
         var response = new UserData
         (
-            UserId: user.Id,
+            UserSlug: user.Slug,
             FirstName: user.Name.FirstName,
             LastName: user.Name.LastName,
             Email: user.Email!,
             ProfilePictureUrl: user.ProfilePictureUrl.ProfilePictureLink,
             IsMentor: user.Status.IsMentor,
             MentorActive: user.Status.IsMentor && user.Status.IsActive
-            );
+        );
 
         return Result.Success(response);
     }
@@ -116,4 +138,3 @@ internal sealed class CreateOrLoginCommandHandler(
 
     private record ClaimsGoogle(string Id, string Email, string FirstName, string LastName, string? Picture);
 }
-

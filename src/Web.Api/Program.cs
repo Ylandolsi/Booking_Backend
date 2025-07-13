@@ -31,7 +31,6 @@ builder.Services.AddEmailSender(builder.Configuration);
 builder.Services.UseHangFire(builder.Configuration);
 
 
-
 builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
 WebApplication app = builder.Build();
@@ -44,10 +43,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 
     app.UseSwaggerWithUi();
     app.MapOpenApi();
-    app.MapScalarApiReference(opt =>
-    {
-        opt.WithTitle("Booking API");
-    });
+    app.MapScalarApiReference(opt => { opt.WithTitle("Booking API"); });
     app.ApplyMigrations();
 
     using var scope = app.Services.CreateScope();
@@ -61,10 +57,12 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
         await userManager.DeleteAsync(user);
     }
-    var testUser = User.Create("Test",
-                               "User",
-                               "yesslandolsi@gmail.com",
-                               "");
+
+    var testUser = User.Create("test-user-slg",
+        "Test",
+        "User",
+        "yesslandolsi@gmail.com",
+        "");
 
     var result = await userManager.CreateAsync(testUser, "Password123!");
 

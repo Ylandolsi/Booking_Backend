@@ -73,7 +73,7 @@ public sealed class LoginCommandHandler
 
         var response = new UserData
         (
-            UserId: user.Id,
+            UserSlug: user.Slug,
             FirstName: user.Name.FirstName,
             LastName: user.Name.LastName,
             Email: user.Email!,

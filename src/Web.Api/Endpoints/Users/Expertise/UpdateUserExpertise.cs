@@ -19,7 +19,7 @@ internal sealed class UpdateUserExpertise : IEndpoint
             ICommandHandler<UpdateUserExpertiseCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;

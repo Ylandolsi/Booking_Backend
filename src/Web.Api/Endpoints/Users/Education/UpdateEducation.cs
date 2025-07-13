@@ -23,13 +23,13 @@ internal sealed class UpdateEducation : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut(UsersEndpoints.UpdateEducation, async (
-            Guid educationId,
+            int educationId,
             Request request,
             IUserContext userContext,
-            ICommandHandler<UpdateEducationCommand, Guid> handler,
+            ICommandHandler<UpdateEducationCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            Guid userId;
+            int userId;
             try
             {
                 userId = userContext.UserId;
@@ -50,9 +50,8 @@ internal sealed class UpdateEducation : IEndpoint
 
             Result result = await handler.Handle(command, cancellationToken);
 
-            return result.Match(
-                () => Results.NoContent(),
-                CustomResults.Problem);
+            return result.Match(Results.NoContent,
+                                CustomResults.Problem);
         })
         .RequireAuthorization()
         .WithTags(Tags.Education);

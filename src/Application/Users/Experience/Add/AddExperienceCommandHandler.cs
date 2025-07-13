@@ -9,9 +9,9 @@ using SharedKernel;
 namespace Application.Users.Experience.Add;
 
 internal sealed class AddExperienceCommandHandler(IApplicationDbContext context,
-                                                  ILogger<AddExperienceCommandHandler> logger) : ICommandHandler<AddExperienceCommand, Guid>
+                                                  ILogger<AddExperienceCommandHandler> logger) : ICommandHandler<AddExperienceCommand, int>
 {
-    public async Task<Result<Guid>> Handle(AddExperienceCommand command, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(AddExperienceCommand command, CancellationToken cancellationToken)
     {
         logger.LogInformation("Adding experience for user {UserId}", command.UserId);
 
@@ -20,7 +20,7 @@ internal sealed class AddExperienceCommandHandler(IApplicationDbContext context,
         if (user == null)
         {
             logger.LogWarning("User with ID {UserId} not found", command.UserId);
-            return Result.Failure<Guid>(UserErrors.NotFoundById(command.UserId));
+            return Result.Failure<int>(UserErrors.NotFoundById(command.UserId));
         }
 
         var experience = new Domain.Users.Entities.Experience(
@@ -42,7 +42,7 @@ internal sealed class AddExperienceCommandHandler(IApplicationDbContext context,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to add experience for user {UserId}", command.UserId);
-            return Result.Failure<Guid>(Error.Problem("Experience.AddFailed", "Failed to add experience"));
+            return Result.Failure<int>(Error.Problem("Experience.AddFailed", "Failed to add experience"));
         }
 
         logger.LogInformation("Successfully added experience {ExperienceId} for user {UserId}",
