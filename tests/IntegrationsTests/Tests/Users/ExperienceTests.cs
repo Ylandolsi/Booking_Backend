@@ -14,7 +14,7 @@ public class ExperienceTests : AuthenticationTestBase
     [Fact]
     public async Task AddExperience_ShouldCreateExperience_WhenUserIsAuthenticated()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
 
         var experiencePayload = new
         {
@@ -34,7 +34,7 @@ public class ExperienceTests : AuthenticationTestBase
     [Fact]
     public async Task GetExperiences_ShouldReturnExperiences()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
 
         // Add an experience first
         var experiencePayload = new
@@ -50,7 +50,7 @@ public class ExperienceTests : AuthenticationTestBase
         var otherUserData = await CreateUserAndLogin();
 
         // Act
-        var response = await _client.GetAsync(UsersEndpoints.GetUserExperiences.Replace("{userSlug}", userData.UserSlug));
+        var response = await _client.GetAsync(UsersEndpoints.GetUserExperiences.Replace("{userSlug}", loginResponse.UserSlug));
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -64,7 +64,7 @@ public class ExperienceTests : AuthenticationTestBase
     [Fact]
     public async Task UpdateExperience_ShouldUpdateExperience_WhenUserIsAuthenticated()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
 
         var experiencePayload = new
         {
@@ -102,7 +102,7 @@ public class ExperienceTests : AuthenticationTestBase
     [Fact]
     public async Task DeleteExperience_ShouldRemoveExperience_WhenUserIsAuthenticated()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
         
         // Add an experience first
         var experiencePayload = new
@@ -128,7 +128,7 @@ public class ExperienceTests : AuthenticationTestBase
         response.EnsureSuccessStatusCode();
 
         // Verify it's deleted
-        var getResponse = await _client.GetAsync(UsersEndpoints.GetUserExperiences.Replace("{userSlug}", userData.UserSlug));
+        var getResponse = await _client.GetAsync(UsersEndpoints.GetUserExperiences.Replace("{userSlug}", loginResponse.UserSlug));
         getResponse.EnsureSuccessStatusCode();
         var experiences = await getResponse.Content.ReadFromJsonAsync<List<object>>();
         Assert.Empty(experiences);

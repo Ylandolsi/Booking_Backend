@@ -23,7 +23,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         await outboxProcessor.ExecuteAsync(null);
     }
 
-    protected async Task<UserData> LoginUser(string email, string password)
+    protected async Task<LoginResponse> LoginUser(string email, string password)
     {
         var loginPayload = new
         {
@@ -34,7 +34,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         var response = await _client.PostAsJsonAsync(UsersEndpoints.Login, loginPayload);
         response.EnsureSuccessStatusCode();
 
-        var loginResponse = await response.Content.ReadFromJsonAsync<UserData>();
+        var loginResponse = await response.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull(loginResponse);
         return loginResponse;
     }
@@ -71,7 +71,7 @@ public abstract class AuthenticationTestBase : BaseIntegrationTest
         //verifyResponse.EnsureSuccessStatusCode();
         CheckSuccess(verifyResponse);
     }
-    protected async Task<UserData> CreateUserAndLogin()
+    protected async Task<LoginResponse> CreateUserAndLogin()
     {
         string? email = Fake.Internet.Email();
         await RegisterAndVerifyUser(email, DefaultPassword, true);

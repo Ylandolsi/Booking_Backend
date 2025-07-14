@@ -15,7 +15,7 @@ internal sealed class LoginGoogleCallback : IEndpoint
     {
         app.MapGet(UsersEndpoints.GoogleLoginCallback, async (
             [FromQuery] string returnUrl,
-            ICommandHandler<CreateOrLoginCommand, UserData> createOrLoginCommandHandler,
+            ICommandHandler<CreateOrLoginCommand, LoginResponse> createOrLoginCommandHandler,
             IHttpContextAccessor httpContextAccessor) =>
         {
 
@@ -37,7 +37,7 @@ internal sealed class LoginGoogleCallback : IEndpoint
 
 
             var command = new CreateOrLoginCommand(result.Principal!);
-            Result<UserData> loginResponseResult = await createOrLoginCommandHandler.Handle(command, default);
+            Result<LoginResponse> loginResponseResult = await createOrLoginCommandHandler.Handle(command, default);
 
             if (!loginResponseResult.IsSuccess)
             {

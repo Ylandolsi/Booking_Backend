@@ -16,7 +16,7 @@ public static class UsersEndpoints
     public const string ResetPassword = "/users/reset-password";
 
     // User Management
-    public const string GetUser = "users/{id}"; // TODO : implement this 
+    public const string GetUser = "users/{userSlug}"; // TODO : implement this 
     public const string GetCurrentUser = "users/me";
 
     // Experience 

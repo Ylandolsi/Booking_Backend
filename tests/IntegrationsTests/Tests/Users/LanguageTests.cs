@@ -31,9 +31,9 @@ public class LanguageTests : AuthenticationTestBase
     [Fact]
     public async Task GetUserLanguages_ShouldReturnUserLanguages_WhenUserIsAuthenticated()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
 
-        var response = await _client.GetAsync(UsersEndpoints.GetUserLanguages.Replace("{userSlug}", userData.UserSlug.ToString()));
+        var response = await _client.GetAsync(UsersEndpoints.GetUserLanguages.Replace("{userSlug}", loginResponse.UserSlug.ToString()));
 
         response.EnsureSuccessStatusCode();
         var languages = await response.Content.ReadFromJsonAsync<List<LanguageE>>();
@@ -42,10 +42,10 @@ public class LanguageTests : AuthenticationTestBase
     [Fact]
     public async Task GetOtherUserLanguages_ShouldReturnUserLanguages()
     {
-        UserData userData = await CreateUserAndLogin();
-        UserData otherUserrData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
+        LoginResponse otherUserrData = await CreateUserAndLogin();
 
-        var response = await _client.GetAsync(UsersEndpoints.GetUserLanguages.Replace("{userSlug}", userData.UserSlug.ToString()));
+        var response = await _client.GetAsync(UsersEndpoints.GetUserLanguages.Replace("{userSlug}", loginResponse.UserSlug.ToString()));
 
         response.EnsureSuccessStatusCode();
         var languages = await response.Content.ReadFromJsonAsync<List<LanguageE>>();
@@ -55,7 +55,7 @@ public class LanguageTests : AuthenticationTestBase
     [Fact]
     public async Task UpdateUserLanguages_ShouldUpdateLanguages_WhenUserIsAuthenticated()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
 
         var languagesResponse = await _client.GetAsync(UsersEndpoints.GetAllLanguages);
         languagesResponse.EnsureSuccessStatusCode();
@@ -73,7 +73,7 @@ public class LanguageTests : AuthenticationTestBase
         response.EnsureSuccessStatusCode();
 
         // Verify the user now has these languages
-        var userLanguagesResponse = await _client.GetAsync(UsersEndpoints.GetUserLanguages.Replace("{userSlug}", userData.UserSlug.ToString()));
+        var userLanguagesResponse = await _client.GetAsync(UsersEndpoints.GetUserLanguages.Replace("{userSlug}", loginResponse.UserSlug.ToString()));
 
         userLanguagesResponse.EnsureSuccessStatusCode();
         var userLanguages = await userLanguagesResponse.Content.ReadFromJsonAsync<List<LanguageE>>();

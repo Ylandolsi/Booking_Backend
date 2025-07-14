@@ -60,7 +60,7 @@ public class EducationTests : AuthenticationTestBase
     [Fact]
     public async Task UpdateEducation_ShouldUpdateEducation_WhenUserIsAuthenticated()
     {
-        UserData userData = await CreateUserAndLogin();
+        LoginResponse loginResponse = await CreateUserAndLogin();
 
         // Add an education first
         var educationPayload = new

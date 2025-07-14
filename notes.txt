@@ -11,3 +11,12 @@ dotnet ef migrations add SyncModelAndDb --project ../Infrastructure --startup-pr
 
 
 System.Text.Json is case-insensitive by default, but Newtonsoft.Json is case-sensitive.
+
+
+When you return your EF Core entities directly, System.Text.Json will serialize every public getter—mapped or not—so your DomainEvents list shows up even though it isn’t a database column.
+
+
+
+[NotMapped]                  // EF Core will ignore it (optional, since it’s already not mapped)
+[JsonIgnore]                 // JSON serializer will skip it
+public List<IDomainEvent> DomainEvents => _domainContainer.DomainEvents;

@@ -38,7 +38,7 @@ public class RefreshToken : Entity
         // TODO : uncomment the exceptions
         // the exception are removed for testing purposes ( cuz in memory there is no IP or User-Agent)
         CreatedByIp = createdByIp ?? string.Empty; //?? throw new ArgumentNullException(nameof(createdByIp));
-        UserAgent = userAgent ?? string.Empty ; //  ?? throw new ArgumentNullException(nameof(userAgent));
+        UserAgent = userAgent ?? string.Empty; //  ?? throw new ArgumentNullException(nameof(userAgent));
     }
 
     public void Revoke()

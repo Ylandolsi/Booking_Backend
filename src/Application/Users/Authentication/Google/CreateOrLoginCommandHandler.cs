@@ -18,15 +18,15 @@ internal sealed class CreateOrLoginCommandHandler(
     TokenHelper tokenHelper,
     ISlugGenerator slugGenerator,
     IApplicationDbContext context,
-    ILogger<CreateOrLoginCommandHandler> logger) : ICommandHandler<CreateOrLoginCommand, UserData>
+    ILogger<CreateOrLoginCommandHandler> logger) : ICommandHandler<CreateOrLoginCommand, LoginResponse>
 {
-    public async Task<Result<UserData>> Handle(CreateOrLoginCommand command, CancellationToken cancellationToken)
+    public async Task<Result<LoginResponse>> Handle(CreateOrLoginCommand command, CancellationToken cancellationToken)
     {
         ClaimsGoogle? claims = ExtractClaims(command.principal);
 
         if (claims is null)
         {
-            return Result.Failure<UserData>(
+            return Result.Failure<LoginResponse>(
                 CreateOrLoginErrors.UserRegistrationFailed("Invalid claims from external provider."));
         }
 
@@ -64,7 +64,7 @@ internal sealed class CreateOrLoginCommandHandler(
                 {
                     logger.LogWarning("Failed to register user with email: {Email}. Errors: {Errors}", claims.Email,
                         createResult.Errors);
-                    return Result.Failure<UserData>(
+                    return Result.Failure<LoginResponse>(
                         CreateOrLoginErrors.UserRegistrationFailed(string.Join(", ",
                             createResult.Errors.Select(e => e.Description))));
                 }
@@ -78,7 +78,7 @@ internal sealed class CreateOrLoginCommandHandler(
             {
                 logger.LogWarning("Failed to add Google login to user with email: {Email}. Errors: {Errors}",
                     claims.Email, addLoginResult.Errors);
-                return Result.Failure<UserData>(
+                return Result.Failure<LoginResponse>(
                     CreateOrLoginErrors.UserRegistrationFailed("Could not link Google account."));
             }
         }
@@ -96,12 +96,12 @@ internal sealed class CreateOrLoginCommandHandler(
         Result result = await tokenHelper.GenerateTokens(user, currentIp, currentUserAgent, cancellationToken);
         if (result.IsFailure)
         {
-            return Result.Failure<UserData>(result.Error);
+            return Result.Failure<LoginResponse>(result.Error);
         }
 
         logger.LogInformation("User {Email} logged in successfully.!", user.Email);
 
-        var response = new UserData
+        var response = new LoginResponse
         (
             UserSlug: user.Slug,
             FirstName: user.Name.FirstName,

@@ -86,7 +86,8 @@ public static class DependencyInjection
                                     "http://localhost:5000")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
-                       .AllowCredentials();
+                       .AllowCredentials()
+                       .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
                 // TODO 
                 // For production 
                 // .WithOrigins("https://yourproductiondomain.com")

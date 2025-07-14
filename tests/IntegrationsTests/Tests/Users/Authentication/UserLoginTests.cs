@@ -25,7 +25,7 @@ public class UserLoginTests : AuthenticationTestBase
 
         // Assert
         loginResponse.EnsureSuccessStatusCode();
-        var loginResult = await loginResponse.Content.ReadFromJsonAsync<UserData>();
+        var loginResult = await loginResponse.Content.ReadFromJsonAsync<LoginResponse>();
         Assert.NotNull(loginResult);
        
     }

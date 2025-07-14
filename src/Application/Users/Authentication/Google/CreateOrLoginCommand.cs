@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace Application.Users.Authentication.Google;
 
-public record CreateOrLoginCommand(ClaimsPrincipal principal) : ICommand<UserData>;
+public record CreateOrLoginCommand(ClaimsPrincipal principal) : ICommand<LoginResponse>;
 
 public static class CreateOrLoginErrors
 {

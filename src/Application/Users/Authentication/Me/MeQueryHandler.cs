@@ -1,4 +1,4 @@
-﻿
+﻿using System.Linq;
 using Application.Abstractions.Data;
 using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Utils;
@@ -12,34 +12,33 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.Users.Authentication.Me;
 
-public sealed class MeQueryHandler (UserManager<User> userManager,
-                                    ILogger<MeQueryHandler> logger ) : IQueryHandler<MeQuery, UserData>
+public sealed class MeQueryHandler(
+    IApplicationDbContext context,
+    ILogger<MeQueryHandler> logger) : IQueryHandler<MeQuery, MeData>
 {
-    public async Task<Result<UserData>> Handle(MeQuery query, CancellationToken cancellationToken)
+    public async Task<Result<MeData>> Handle(MeQuery query, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling MeQuery for user ID: {UserId}", query.Id);
-        User? user = await userManager.FindByIdAsync(query.Id.ToString());
-        
-        if ( user is null)
+        var user = await context.Users.AsNoTracking().Where(u => u.Id == query.Id).Include(u => u.Experiences)
+            .Include(u => u.Educations)
+            .Include(u => u.UserExpertises)
+            .Include(u => u.UserLanguages)
+            .Include(u => u.Experiences)
+            .Select(u =>
+                new MeData(
+                    u.Slug, u.Name.FirstName, u.Name.LastName, u.Status, u.ProfilePictureUrl, u.Gender, u.SocialLinks,
+                    u.Bio,
+                    u.Experiences.ToList(), u.Educations.ToList(), u.UserExpertises.Select(ue => ue.Expertise).ToList(),
+                    u.UserLanguages.Select(ul => ul.Language).ToList(),
+                    u.ProfileCompletionStatus
+                )).FirstOrDefaultAsync(cancellationToken);
+
+        if (user is null)
         {
             logger.LogWarning("User with ID {UserId} not found", query.Id);
-            return Result.Failure<UserData>(UserErrors.NotFoundById(query.Id));
+            return Result.Failure<MeData>(UserErrors.NotFoundById(query.Id));
         }
 
-        var response = new UserData
-        (
-            UserSlug: user.Slug,
-            FirstName: user.Name.FirstName,
-            LastName: user.Name.LastName,
-            Email: user.Email!,
-            ProfilePictureUrl: user.ProfilePictureUrl.ProfilePictureLink,
-            IsMentor: user.Status.IsMentor,
-            MentorActive: user.Status.IsMentor && user.Status.IsActive
-        );
-
-        return Result.Success(response);
-
-
-
+        return Result.Success(user);
     }
 }

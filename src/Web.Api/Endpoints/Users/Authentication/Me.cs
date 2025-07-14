@@ -2,6 +2,7 @@
 using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Me;
 using Application.Users.Authentication.Utils;
+using Domain.Users.Entities;
 using Web.Api.Extensions;
 using Web.Api.Infrastructure;
 
@@ -14,7 +15,7 @@ internal sealed class Me : IEndpoint
     {
         app.MapGet(UsersEndpoints.GetCurrentUser, async (
             IUserContext userContext,
-            IQueryHandler<MeQuery, UserData> handler,
+            IQueryHandler<MeQuery, MeData> handler,
             CancellationToken cancellationToken = default) =>
         {
             int userId;
