@@ -1,4 +1,5 @@
-﻿using Domain.Users.JoinTables;
+﻿using System.ComponentModel.DataAnnotations;
+using Domain.Users.JoinTables;
 using Microsoft.AspNetCore.Identity;
 using Domain.Users.ValueObjects;
 using SharedKernel;
@@ -7,19 +8,23 @@ using System.Text.Json.Serialization;
 
 namespace Domain.Users.Entities;
 
-public enum Genders
+public static class Genders
 {
-    Male,
-    Female,
+    public const string Male = "Male";
+    public const string Female = "Female";
+    
+    public static readonly HashSet<string> ValidGenders = new() { Male, Female };
+    public static bool IsValid(string gender) => ValidGenders.Contains(gender);
 }
 
 public sealed class User : IdentityUser<int>, IEntity
 {
-    public string Slug { get; set; } = string.Empty;
+    
+    public string Slug { get; private set; } = string.Empty;
     public Name Name { get; private set; } = default!;
     public Status Status { get; private set; } = default!;
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
-    public Genders Gender { get; private set; } = default!;
+    public string Gender { get; private set; } = "Male"; 
     public SocialLinks SocialLinks { get; private set; } = default!;
     public ProfileCompletionStatus ProfileCompletionStatus { get; private set; } = new ProfileCompletionStatus();
 
@@ -36,6 +41,12 @@ public sealed class User : IdentityUser<int>, IEntity
         string emailAddress,
         string profilePictureSource)
     {
+        if (string.IsNullOrWhiteSpace(slug))
+            throw new ArgumentException("Slug cannot be null or empty", nameof(slug));
+        
+        if (string.IsNullOrWhiteSpace(emailAddress))
+            throw new ArgumentException("Email cannot be null or empty", nameof(emailAddress));
+        
         var user = new User
         {
             Name = new Name(firstName, lastName),
@@ -44,7 +55,6 @@ public sealed class User : IdentityUser<int>, IEntity
             UserName = emailAddress,
             ProfilePictureUrl = new ProfilePicture(profilePictureSource),
             Slug = slug,
-
         };
 
         return user;
@@ -56,11 +66,15 @@ public sealed class User : IdentityUser<int>, IEntity
     }
     public void UpdateBio(string bio)
     {
+        if (bio?.Length > UserConstraints.BioMaxLength)
+                throw new ArgumentException($"Bio cannot exceed {UserConstraints.BioMaxLength} characters");
         Bio = bio?.Trim() ?? string.Empty;
     }
 
-    public void UpdateGender(Genders gender)
+    public void UpdateGender(string gender)
     {
+        if (!Genders.IsValid(gender))
+            throw new ArgumentException("Invalid gender");
         Gender = gender;
     }
 

@@ -100,6 +100,22 @@ public sealed class ApplicationDbContext
 
         domainEvents.AddRange(userDomainEvents);
 
+
+        // TODO : check this approach instead of jsonConvert : 
+        // var typeInfo = new Dictionary<string, string>
+        // {
+        //     ["Type"] = domainEvent.GetType().FullName!
+        // };
+        // var serializedData = JsonConvert.SerializeObject(domainEvent);
+        // var metadata = JsonConvert.SerializeObject(typeInfo);
+
+        // Store type info separately
+        // var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
+        // domainEvent.GetType().AssemblyQualifiedName!,
+        // JsonConvert.SerializeObject(domainEvent),
+        // DateTime.UtcNow
+        // )).ToList();
+
         var outboxMessages = domainEvents.Select(domainEvent => new OutboxMessage(
             domainEvent.GetType().FullName!,
             JsonConvert.SerializeObject(
@@ -114,57 +130,4 @@ public sealed class ApplicationDbContext
         await OutboxMessages.AddRangeAsync(outboxMessages);
     }
 
-
-    private async Task<List<IDomainEvent>> GetUsersDomainEvents()
-    {
-        var userEntitiesWithEvents = ChangeTracker
-            .Entries<User>()
-            .Select(entry => entry.Entity) // Get the User entity instances
-            .Where(user => user.DomainEvents.Any()) // Filter for users that have domain events
-            .ToList();
-
-        List<IDomainEvent> userDomainEventsToDispatch = new List<IDomainEvent>();
-
-        if (userEntitiesWithEvents.Any())
-        {
-            foreach (var userEntity in userEntitiesWithEvents)
-            {
-
-                userDomainEventsToDispatch.AddRange(userEntity.DomainEvents);
-                userEntity.ClearDomainEvents();
-            }
-        }
-
-        return userDomainEventsToDispatch;
-
-    }
-
-
-    private async Task PublishDomainEventsAsync()
-    {
-        // users events 
-        var usersDomainEvents = await GetUsersDomainEvents();
-
-        var domainEvents = ChangeTracker
-            .Entries<Entity>()
-            .Select(entry => entry.Entity)
-            .SelectMany(entity =>
-            {
-                List<IDomainEvent> domainEvents = entity.DomainEvents;
-                entity.ClearDomainEvents();
-                return domainEvents;
-            })
-            .ToList();
-
-        if (usersDomainEvents.Any())
-        {
-            domainEvents.AddRange(usersDomainEvents);
-        }
-
-        //if (domainEvents.Any())
-        //{
-        //    await _domainEventsDispatcher.DispatchAsync(domainEvents);
-        //}
-        // apply outbox messages 
-    }
 }

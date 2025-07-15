@@ -12,7 +12,7 @@ public static class UserErrors
     public static Error NotFoundByEmail(string email) => Error.NotFound(
         "Users.NotFoundByEmail",
         $"The user with the email = '{email}' was not found");
-    
+
     public static Error NotFoundBySlug(string slug) => Error.NotFound(
         "Users.NotFoundBySlug",
         $"The user with the slug = '{slug}' was not found");
@@ -34,6 +34,12 @@ public static class UserErrors
     "Users.Unauthorized",
     "You are not authorized to perform this action.");
 
+    public static readonly Error ExpertiseLimitExceeded =
+    Error.Problem("User.ExpertiseLimitExceeded",
+        $"User expertises should not exceed {UserConstraints.MaxExpertises}");
 
+    public static readonly Error LanguageLimitExceeded =
+    Error.Problem("User.LanguageLimitExceeded",
+        $"User Languages should not exceed {UserConstraints.MaxLanguages}");
 
 }

@@ -20,16 +20,9 @@ internal sealed class DeleteExperience : IEndpoint
             ICommandHandler<DeleteExperienceCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
-
+            int userId = userContext.UserId;
+            
+    
             var command = new DeleteExperienceCommand(experienceId, userId);
             Result result = await handler.Handle(command, cancellationToken);
 

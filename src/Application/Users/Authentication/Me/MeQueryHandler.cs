@@ -30,7 +30,7 @@ public sealed class MeQueryHandler(
                     u.Bio,
                     u.Experiences.ToList(), u.Educations.ToList(), u.UserExpertises.Select(ue => ue.Expertise).ToList(),
                     u.UserLanguages.Select(ul => ul.Language).ToList(),
-                    u.ProfileCompletionStatus
+                    (int)u.ProfileCompletionStatus.GetCompletionPercentage()
                 )).FirstOrDefaultAsync(cancellationToken);
 
         if (user is null)

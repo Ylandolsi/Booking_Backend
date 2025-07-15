@@ -18,15 +18,8 @@ internal sealed class Me : IEndpoint
             IQueryHandler<MeQuery, MeData> handler,
             CancellationToken cancellationToken = default) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+            int userId = userContext.UserId;
+
             var query = new MeQuery(userId);
             var result = await handler.Handle(query, cancellationToken);
             return result.Match((result) => Results.Ok(result), (result) => CustomResults.Problem(result));

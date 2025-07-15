@@ -29,6 +29,7 @@ internal sealed class GetUserQueryHandler(
            .Include(u => u.UserExpertises)
            .Include(u => u.UserLanguages)
            .Include(u => u.Experiences)
+           .AsSplitQuery()
            .Select(u =>
                new UserResponse(
                    u.Slug, u.Name.FirstName, u.Name.LastName, u.Status, u.ProfilePictureUrl, u.Gender, u.SocialLinks,

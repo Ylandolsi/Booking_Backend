@@ -53,6 +53,11 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     var testUsers = await userManager.Users
         .ToListAsync();
 
+    // using var scope = app.Services.CreateScope();
+    // var seedService = scope.ServiceProvider.GetRequiredService<IDevelopmentDataSeeder>();
+    // await seedService.SeedTestUserAsync();
+
+
     foreach (var user in testUsers)
     {
         await userManager.DeleteAsync(user);
@@ -85,6 +90,7 @@ app.MapHealthChecks("health", new HealthCheckOptions
 });
 
 app.UseStaticFiles(); // Serves files from wwwroot by default : http://localhost:5000/logo.png.
+app.UseGlobalExceptionHandler();
 app.UseCors("DefaultCors");
 app.UseHangfireDashboard();
 

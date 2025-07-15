@@ -26,15 +26,8 @@ internal sealed class UpdateSocialLinks : IEndpoint
             ICommandHandler<UpdateSocialLinksCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+            int userId = userContext.UserId;
+
 
             var command = new UpdateSocialLinksCommand(
                 userId,

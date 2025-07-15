@@ -1,6 +1,7 @@
 using Application.Abstractions.Authentication;
 using Application.Abstractions.Messaging;
 using Application.Users.Authentication.Logout;
+using SharedKernel.Exceptions;
 using Web.Api.Extensions;
 using Web.Api.Infrastructure;
 
@@ -14,18 +15,9 @@ internal sealed class Logout : IEndpoint
         app.MapPost(UsersEndpoints.Logout, async (
             IUserContext userContext,
             ICommandHandler<LogoutCommand, bool> handler,
-            CancellationToken cancellationToken = default ) =>
+            CancellationToken cancellationToken = default) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
-
+            int userId = userContext.UserId;
             var command = new LogoutCommand(userId);
 
             var result = await handler.Handle(command, cancellationToken);

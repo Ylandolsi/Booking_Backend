@@ -29,15 +29,8 @@ internal sealed class UpdateEducation : IEndpoint
             ICommandHandler<UpdateEducationCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+            int  userId = userContext.UserId;
+            
 
             var command = new UpdateEducationCommand(
                 educationId,

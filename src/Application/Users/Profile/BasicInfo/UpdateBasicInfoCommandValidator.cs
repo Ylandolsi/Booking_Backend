@@ -10,6 +10,9 @@ internal sealed class UpdateBasicInfoCommandValidator : AbstractValidator<Update
         RuleFor(c => c.FirstName).NotEmpty().MaximumLength(50);
         RuleFor(c => c.LastName).NotEmpty().MaximumLength(50);
         RuleFor(c => c.Bio).MaximumLength(500);
-        RuleFor(c => c.Gender).IsInEnum();
+        RuleFor(c => c.Gender)
+            .NotEmpty()
+            .Must(g => g == "male" || g == "female")
+            .WithMessage("Gender must be 'male' or 'female'.");
     }
 }

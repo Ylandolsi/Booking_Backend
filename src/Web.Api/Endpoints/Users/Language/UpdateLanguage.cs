@@ -19,16 +19,8 @@ internal sealed class UpdateLanguage : IEndpoint
             ICommandHandler<UpdateUserLanguagesCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
-
+            int userId = userContext.UserId;
+            
             var command = new UpdateUserLanguagesCommand(userId, request.LanguageIds);
 
             Result result = await handler.Handle(command, cancellationToken);

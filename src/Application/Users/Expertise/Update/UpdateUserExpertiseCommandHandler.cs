@@ -11,6 +11,7 @@ namespace Application.Users.Expertise.Update;
 
 internal sealed class UpdateUserExpertiseCommandHandler(
     IApplicationDbContext context,
+    IUnitOfWork unitOfWork,
     ILogger<UpdateUserExpertiseCommandHandler> logger) : ICommandHandler<UpdateUserExpertiseCommand>
 {
     public async Task<Result> Handle(UpdateUserExpertiseCommand command, CancellationToken cancellationToken)
@@ -32,44 +33,62 @@ internal sealed class UpdateUserExpertiseCommandHandler(
                 .Where(ue => ue.UserId == command.UserId)
                 .ToListAsync(cancellationToken);
 
-
-            if (existingExpertise.Any())
+            await unitOfWork.BeginTransactionAsync(cancellationToken);
+            try
             {
-                context.UserExpertises.RemoveRange(existingExpertise);
-            }
 
-            // Validate and add new expertise
-            if (command.ExpertiseIds?.Count > 0)
-            {
-                var validExpertiseIds = await context.Expertises
-                    .AsNoTracking()
-                    .Where(e => command.ExpertiseIds.Contains(e.Id))
-                    .Select(e => e.Id)
-                    .ToListAsync(cancellationToken);
 
-                if (validExpertiseIds.Count != command.ExpertiseIds.Count)
+                if (existingExpertise.Any())
                 {
-                    logger.LogWarning("Some expertise IDs are invalid for user {UserId}", command.UserId);
-                    return Result.Failure(Error.Problem("Expertise.InvalidIds", "Some expertise IDs are invalid"));
+                    context.UserExpertises.RemoveRange(existingExpertise);
                 }
 
-                var userExpertises = command.ExpertiseIds.Select(expertiseId => new UserExpertise
+                // Validate and add new expertise
+                if (command.ExpertiseIds?.Count > 0)
                 {
-                    UserId = command.UserId,
-                    ExpertiseId = expertiseId
-                }).ToList();
+                    var validExpertiseIds = await context.Expertises
+                        .AsNoTracking()
+                        .Where(e => command.ExpertiseIds.Contains(e.Id))
+                        .Select(e => e.Id)
+                        .ToListAsync(cancellationToken);
 
-                await context.UserExpertises.AddRangeAsync(userExpertises, cancellationToken);
+                    if (validExpertiseIds?.Count > UserConstraints.MaxExpertises)
+                    {
+                        return Result.Failure(UserErrors.ExpertiseLimitExceeded);
+                    }
+
+                    if (validExpertiseIds?.Count != command.ExpertiseIds.Count)
+                    {
+                        logger.LogWarning("Some expertise IDs are invalid for user {UserId}", command.UserId);
+                        return Result.Failure(Error.Problem("Expertise.InvalidIds", "Some expertise IDs are invalid"));
+                    }
+
+                    var userExpertises = command.ExpertiseIds.Select(expertiseId => new UserExpertise
+                    {
+                        UserId = command.UserId,
+                        ExpertiseId = expertiseId
+                    }).ToList();
+
+                    await context.UserExpertises.AddRangeAsync(userExpertises, cancellationToken);
+                }
+
+                user.ProfileCompletionStatus.UpdateCompletionStatus(user);
+
+
+                await context.SaveChangesAsync(cancellationToken);
+                await unitOfWork.CommitTransactionAsync(cancellationToken);
+                logger.LogInformation("Successfully updated {Count} expertise for user {UserId}",
+                      command.ExpertiseIds?.Count ?? 0,
+                      command.UserId);
+
+            }
+            catch (Exception ex)
+            {
+                await unitOfWork.RollbackTransactionAsync(cancellationToken);
+                logger.LogError(ex, "Failed to update expertise for user {UserId}", command.UserId);
+                return Result.Failure(Error.Problem("Expertise.UpdateFailed", "Failed to update expertise"));
             }
 
-            user.ProfileCompletionStatus.UpdateCompletionStatus(user);
-
-
-            await context.SaveChangesAsync(cancellationToken);
-
-            logger.LogInformation("Successfully updated {Count} expertise for user {UserId}",
-                                  command.ExpertiseIds?.Count ?? 0,
-                                  command.UserId);
             return Result.Success();
         }
         catch (Exception ex)

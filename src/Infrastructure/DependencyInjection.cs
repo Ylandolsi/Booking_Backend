@@ -69,8 +69,8 @@ public static class DependencyInjection
         // AWS UPLOAD
         // services.AddScoped<IS3ImageProcessingService , S3ImageProcessingService>();
         services.AddScoped<IS3ImageProcessingService, LocalFileImageProcessingService>();
-        
-        services.AddScoped<ISlugGenerator , SlugGenerator.SlugGenerator>();
+
+        services.AddScoped<ISlugGenerator, SlugGenerator.SlugGenerator>();
 
         return services;
     }
@@ -99,7 +99,7 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddCache(this IServiceCollection services , IConfiguration config )
+    private static IServiceCollection AddCache(this IServiceCollection services, IConfiguration config)
     {
         services.AddMemoryCache();
         services.AddStackExchangeRedisCache(options =>

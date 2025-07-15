@@ -15,13 +15,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(u => u.Slug).IsUnique();
 
-
-        // builder.ComplexProperty(u => u.Name, name =>
-        // {
-        //     name.Property(n => n.FirstName).HasMaxLength(50).IsRequired();
-        //     name.Property(n => n.LastName).HasMaxLength(50).IsRequired();
-
-        // });
         builder.OwnsOne(u => u.Name, name =>
         {
             name.Property(n => n.FirstName).HasMaxLength(50).IsRequired();
@@ -64,6 +57,8 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Bio)
             .HasMaxLength(500)
             .IsRequired(false);
+        
+        builder.Property( u => u.Gender).HasMaxLength(10).IsRequired(false);
 
 
 

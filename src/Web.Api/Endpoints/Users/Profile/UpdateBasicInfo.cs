@@ -13,7 +13,7 @@ internal sealed class UpdateBasicInfo : IEndpoint
     public sealed record Request(
         string FirstName,
         string LastName,
-        Genders Gender,
+        string Gender,
         string? Bio);
 
     public void MapEndpoint(IEndpointRouteBuilder app)
@@ -24,15 +24,8 @@ internal sealed class UpdateBasicInfo : IEndpoint
             ICommandHandler<UpdateBasicInfoCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+            int userId = userContext.UserId;
+     
 
             var command = new UpdateBasicInfoCommand(
                 userId,

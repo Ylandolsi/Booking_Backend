@@ -18,15 +18,9 @@ internal sealed class UpdateProfilePicture : IEndpoint
             ICommandHandler<UpdateProfilePictureCommand, string> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+            int  userId = userContext.UserId;
+            
+
 
             var command = new UpdateProfilePictureCommand(userId, file);
 

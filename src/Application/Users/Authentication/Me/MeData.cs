@@ -10,11 +10,12 @@ public record MeData(
     string? LastName,
     Status Status,
     ProfilePicture ProfilePicture,
-    Domain.Users.Entities.Genders Gender,
+    string Gender,
     SocialLinks SocialLinks,
     string Bio,
     List<Domain.Users.Entities.Experience> Experiences,
     List<Domain.Users.Entities.Education> Educations,
     List<Domain.Users.Entities.Expertise> Expertises,
     List<Domain.Users.Entities.Language> Languages,
-    ProfileCompletionStatus ProfileCompletionStatus) ; 
+    int ProfileCompletionStatus);
+    

@@ -20,3 +20,11 @@ When you return your EF Core entities directly, System.Text.Json will serialize 
 [NotMapped]                  // EF Core will ignore it (optional, since it’s already not mapped)
 [JsonIgnore]                 // JSON serializer will skip it
 public List<IDomainEvent> DomainEvents => _domainContainer.DomainEvents;
+
+
+to retrieve services :
+
+var userContext = context.RequestServices.GetRequiredService<IUserContext>();
+or 
+using var scope = app.Services.CreateScope();
+var userContext = scope.ServiceProvider.GetRequiredService<IUserContext>();

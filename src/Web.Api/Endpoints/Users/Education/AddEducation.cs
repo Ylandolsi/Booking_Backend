@@ -24,15 +24,9 @@ internal sealed class AddEducation : IEndpoint
             ICommandHandler<AddEducationCommand, int> handler,
             CancellationToken cancellationToken) =>
         {
-            int userId;
-            try
-            {
-                userId = userContext.UserId;
-            }
-            catch (Exception ex)
-            {
-                return Results.Unauthorized();
-            }
+            int userId = userContext.UserId;
+
+
 
             var command = new AddEducationCommand(
                 request.Field,
@@ -45,7 +39,7 @@ internal sealed class AddEducation : IEndpoint
             Result<int> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(
-                (result)  => Results.Ok(result),
+                (result) => Results.Ok(result),
                 CustomResults.Problem);
         })
         .RequireAuthorization()

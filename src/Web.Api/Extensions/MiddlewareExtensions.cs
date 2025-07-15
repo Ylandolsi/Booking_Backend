@@ -1,4 +1,5 @@
-﻿using Web.Api.Middleware;
+﻿using Instagram_Backend.Middlewares;
+using Web.Api.Middleware;
 
 namespace Web.Api.Extensions;
 
@@ -15,5 +16,9 @@ public static class MiddlewareExtensions
         app.UseMiddleware<RequestContextLoggingMiddleware>();
 
         return app;
+    }
+    public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
+    {
+        return app.UseMiddleware<ExceptionMiddleware>();
     }
 }
