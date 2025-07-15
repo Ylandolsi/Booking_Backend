@@ -18,8 +18,8 @@ public class Experience : Entity
     public int UserId { get; private set; }
     public User User { get; set; } = default!;
 
-    private Experience() { }
 
+    private Experience() { }
 
     public Experience(string title,
                       string description,

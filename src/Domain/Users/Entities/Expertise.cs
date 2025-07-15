@@ -7,6 +7,8 @@ namespace Domain.Users.Entities;
 
 public class Expertise : Entity
 {
+    // add default color ? 
+    // bg-orange-100 text-orange-600 || bg-green-100 text-green-600
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; private set; }
     public string Name { get; private set; } = string.Empty;

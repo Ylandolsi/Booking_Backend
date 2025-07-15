@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure;
+using IntegrationsTests.Seed;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -53,9 +54,6 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     var testUsers = await userManager.Users
         .ToListAsync();
 
-    // using var scope = app.Services.CreateScope();
-    // var seedService = scope.ServiceProvider.GetRequiredService<IDevelopmentDataSeeder>();
-    // await seedService.SeedTestUserAsync();
 
 
     foreach (var user in testUsers)
@@ -68,6 +66,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
         "User",
         "yesslandolsi@gmail.com",
         "");
+    
+    var TestProfileSeeder = new TestProfileSeeder(app.Services);
+    await TestProfileSeeder.SeedComprehensiveUserProfilesAsync();
+
 
     var result = await userManager.CreateAsync(testUser, "Password123!");
 

@@ -28,3 +28,9 @@ var userContext = context.RequestServices.GetRequiredService<IUserContext>();
 or 
 using var scope = app.Services.CreateScope();
 var userContext = scope.ServiceProvider.GetRequiredService<IUserContext>();
+
+or 
+private readonly IServiceProvider _serviceProvider;
+using var scope = _serviceProvider.CreateScope();
+var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();

@@ -48,6 +48,7 @@ internal sealed class AwsSesEmailService : IEmailService
         };
         try
         {
+            // TODO : verify this is working correctly 
             await _sesClient.SendEmailAsync(request, cancellationToken);
         }
         catch (AmazonSimpleEmailServiceException sesEx)

@@ -12,19 +12,19 @@ public static class Genders
 {
     public const string Male = "Male";
     public const string Female = "Female";
-    
+
     public static readonly HashSet<string> ValidGenders = new() { Male, Female };
     public static bool IsValid(string gender) => ValidGenders.Contains(gender);
 }
 
 public sealed class User : IdentityUser<int>, IEntity
 {
-    
+
     public string Slug { get; private set; } = string.Empty;
     public Name Name { get; private set; } = default!;
     public Status Status { get; private set; } = default!;
     public ProfilePicture ProfilePictureUrl { get; private set; } = default!;
-    public string Gender { get; private set; } = "Male"; 
+    public string Gender { get; private set; } = "Male";
     public SocialLinks SocialLinks { get; private set; } = default!;
     public ProfileCompletionStatus ProfileCompletionStatus { get; private set; } = new ProfileCompletionStatus();
 
@@ -43,10 +43,10 @@ public sealed class User : IdentityUser<int>, IEntity
     {
         if (string.IsNullOrWhiteSpace(slug))
             throw new ArgumentException("Slug cannot be null or empty", nameof(slug));
-        
+
         if (string.IsNullOrWhiteSpace(emailAddress))
             throw new ArgumentException("Email cannot be null or empty", nameof(emailAddress));
-        
+
         var user = new User
         {
             Name = new Name(firstName, lastName),
@@ -66,8 +66,8 @@ public sealed class User : IdentityUser<int>, IEntity
     }
     public void UpdateBio(string bio)
     {
-        if (bio?.Length > UserConstraints.BioMaxLength)
-                throw new ArgumentException($"Bio cannot exceed {UserConstraints.BioMaxLength} characters");
+        if (bio?.Length > UserConstraints.MaxBioLength)
+            throw new ArgumentException($"Bio cannot exceed {UserConstraints.MaxBioLength} characters");
         Bio = bio?.Trim() ?? string.Empty;
     }
 
@@ -83,17 +83,20 @@ public sealed class User : IdentityUser<int>, IEntity
         Name = new Name(firstName, lastName);
     }
 
+    // TODO : configure these one to many as readonly 
+    //builder.Navigation(o => o.Items)
+    // .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-
-
+    // ONE TO MANY 
     public ICollection<Experience> Experiences { get; private set; } = new List<Experience>();
     public ICollection<Education> Educations { get; private set; } = new List<Education>();
 
 
+    // MANY TO MANY RELATIONSHIP
+
     public ICollection<MentorMentee> UserMentors { get; private set; } = new List<MentorMentee>();
 
     public ICollection<MentorMentee> UserMentees { get; private set; } = new List<MentorMentee>();
-    // MANY TO MANY RELATIONSHIP
     // MAX 4
     public ICollection<UserExpertise> UserExpertises { get; private set; } = new HashSet<UserExpertise>();
     // MAX 4 

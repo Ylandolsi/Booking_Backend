@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Database.Seed.Users;
 
-internal static class DataForSeeding
+internal static class LanguageExpertiseSeeder
 {
     public static List<Language> Languages()
     {
