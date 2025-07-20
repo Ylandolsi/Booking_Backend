@@ -1,3 +1,5 @@
+version: "2.4"
+
 services:
   web-api:
     image: ${DOCKER_REGISTRY-}webapi
@@ -6,16 +8,14 @@ services:
       context: .
       dockerfile: src/Web.Api/Dockerfile
     depends_on:
-      postgres : 
+      postgres:
         condition: service_healthy
-        restart: true
-      seq :
+      seq:
         condition: service_started
-        restart: true
+    restart: always
     ports:
       - 5000:8080
       - 5001:8081
-
 
   postgres:
     image: postgres:latest
@@ -33,6 +33,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: always
 
   seq:
     image: datalust/seq:2024.3
@@ -41,22 +42,19 @@ services:
       - ACCEPT_EULA=Y
     ports:
       - 8081:80
+    restart: always
 
   booking.redis:
     image: redis:latest
     restart: always
     ports:
       - '6379:6379'
-  
 
-
-  # for local development : papercut sumulates an SMTP server ( without sending emails )
-  # we can view whats happening on port 8080
-  # for production u have to specify the real smtp server
+  # For local development: Papercut simulates an SMTP server without sending real emails.
+  # View email inbox on port 8080. Commented out for now.
   # papercut:
   #   image: changemakerstudiosus/papercut-smtp:latest
   #   container_name: papercut
   #   ports:
   #     - 8080:80
   #     - 25:25
-  #     25 for local smtp server

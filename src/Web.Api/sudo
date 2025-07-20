@@ -1,0 +1,15 @@
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease
+Hit:5 http://security.ubuntu.com/ubuntu noble-security InRelease
+Hit:6 https://download.docker.com/linux/ubuntu noble InRelease
+Get:2 https://repository.spotify.com stable InRelease [3,316 B]
+Hit:7 https://packages.microsoft.com/repos/vscode stable InRelease
+Hit:8 https://packages.microsoft.com/repos/code stable InRelease
+Hit:9 https://dl.google.com/linux/chrome/deb stable InRelease
+Hit:10 https://ppa.launchpadcontent.net/apandada1/brightness-controller/ubuntu noble InRelease
+Ign:11 http://packages.linuxmint.com xia InRelease
+Hit:12 http://packages.linuxmint.com xia Release
+Err:2 https://repository.spotify.com stable InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY C85668DF69375001
+Reading package lists...
