@@ -11,7 +11,7 @@ namespace Application.Users.GetUser;
 internal sealed class GetUserQueryHandler(
     IApplicationDbContext context,
     ILogger<GetUserQueryHandler> logger
-) : IQueryHandler<GetUserQuery, UserResponse?>
+) : IQueryHandler<GetUserQuery, UserResponse>
 {
     public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {

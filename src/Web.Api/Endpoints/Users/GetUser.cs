@@ -4,6 +4,7 @@ using Application.Users.Authentication.Utils;
 using Application.Users.GetUser;
 using SharedKernel;
 using Web.Api.Extensions;
+using Web.Api.Infrastructure;
 
 namespace Web.Api.Endpoints.Users.Authentication;
 
@@ -17,22 +18,13 @@ internal sealed class GetUser : IEndpoint
                 IQueryHandler<GetUserQuery, UserResponse?> handler, IUserContext userContext,
                 CancellationToken cancellationToken) =>
             {
-                int userId;
-                try
-                {
-                    userId = userContext.UserId;
-                }
-                catch (Exception)
-                {
-                    return Results.Unauthorized();
-                }
-
+                int userId = userContext.UserId;
                 var query = new GetUserQuery(userSlug);
 
                 Result<UserResponse> result = await handler.Handle(query, cancellationToken);
 
-                return result.Match((result) => Results.Ok(result),
-                    (result) => Results.BadRequest(result));
+                return result.Match(Results.Ok,
+                                    CustomResults.Problem);
             });
     }
 }
