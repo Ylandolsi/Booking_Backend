@@ -12,7 +12,7 @@ public class Experience : Entity
     public string Description { get; private set; } = string.Empty;
     public DateTime StartDate { get; private set; }
     public DateTime? EndDate { get; private set; }
-    public string CompanyName { get; private set; } = string.Empty;
+    public string Company { get; private set; } = string.Empty;
     public bool ToPresent { get; private set; }
 
     public int UserId { get; private set; }
@@ -23,7 +23,7 @@ public class Experience : Entity
 
     public Experience(string title,
                       string description,
-                      string companyName,
+                      string company,
                       int userId,
                       DateTime startDate,
                       DateTime? endDate = null)
@@ -33,19 +33,19 @@ public class Experience : Entity
         Description = description?.Trim() ?? string.Empty;
         StartDate = startDate;
         EndDate = endDate;
-        CompanyName = companyName?.Trim() ?? string.Empty;
+        Company = company?.Trim() ?? string.Empty;
         UserId = userId;
         ToPresent = !endDate.HasValue;
     }
 
     public void Update(string title,
-                       string companyName,
+                       string company,
                        DateTime startDate,
                        DateTime? endDate,
                        string? description)
     {
         Title = title.Trim();
-        CompanyName = companyName.Trim();
+        Company = company.Trim();
         StartDate = startDate;
         EndDate = endDate;
         Description = description?.Trim() ?? string.Empty;

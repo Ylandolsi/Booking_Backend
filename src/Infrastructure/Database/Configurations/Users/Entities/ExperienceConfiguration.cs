@@ -24,7 +24,7 @@ internal sealed class ExperienceConfiguration : IEntityTypeConfiguration<Experie
         builder.Property(e => e.EndDate)
             .IsRequired(false);
 
-        builder.Property(e => e.CompanyName)
+        builder.Property(e => e.Company)
             .IsRequired()
             .HasMaxLength(100);
 

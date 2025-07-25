@@ -36,7 +36,7 @@ internal sealed class GetExperienceQueryHandler(
             .Select(x => new GetExperienceResponse(
                 x.Id,
                 x.Title,
-                x.CompanyName,
+                x.Company,
                 x.StartDate,
                 x.EndDate,
                 x.Description,

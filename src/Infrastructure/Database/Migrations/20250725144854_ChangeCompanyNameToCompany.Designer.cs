@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Infrastructure.Migrations
+namespace Infrastructure.Database.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250713121210_SeedDataLE")]
-    partial class SeedDataLE
+    [Migration("20250725144854_ChangeCompanyNameToCompany")]
+    partial class ChangeCompanyNameToCompany
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -124,7 +124,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
-                        .HasColumnName("company_name");
+                        .HasColumnName("company");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -621,8 +621,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("email_confirmed");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("integer")
+                    b.Property<string>("Gender")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
                         .HasColumnName("gender");
 
                     b.Property<bool>("LockoutEnabled")

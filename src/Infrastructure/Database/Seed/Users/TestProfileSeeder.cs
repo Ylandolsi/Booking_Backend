@@ -91,7 +91,7 @@ public class TestProfileSeeder
                 title: "Senior Software Engineer",
                 description: "Leading development of cloud-native applications using microservices architecture.",
                 userId: user.Id,
-                companyName: "Tech Solutions Inc.",
+                company: "Tech Solutions Inc.",
                 startDate: new DateTime(2018, 5, 15, 0, 0, 0, DateTimeKind.Utc),
                 endDate: null
             ),
@@ -99,7 +99,7 @@ public class TestProfileSeeder
                 title: "Software Developer",
                 description: "Developed and maintained web applications using React and ASP.NET Core.",
                 userId: user.Id,
-                companyName: "Digital Innovations",
+                company: "Digital Innovations",
                 startDate: new DateTime(2015, 3, 1, 0, 0, 0, DateTimeKind.Utc),
                 endDate: new DateTime(2018, 5, 1, 0, 0, 0, DateTimeKind.Utc)
             )
@@ -186,7 +186,7 @@ public class TestProfileSeeder
         {
             new Experience(
                 userId: user.Id,
-                companyName: "Marketing Wizards",
+                company: "Marketing Wizards",
                 title: "Senior Marketing Consultant",
                 startDate: new DateTime(2019, 2, 1, 0, 0, 0, DateTimeKind.Utc),
                 endDate: null, // Current job
@@ -194,7 +194,7 @@ public class TestProfileSeeder
             ),
             new Experience(
                 userId: user.Id,
-                companyName: "Global Brands Inc.",
+                company: "Global Brands Inc.",
                 title: "Marketing Manager",
                 startDate: new DateTime(2016, 6, 15, 0, 0, 0, DateTimeKind.Utc),
                 endDate: new DateTime(2019, 1, 15, 0, 0, 0, DateTimeKind.Utc),
@@ -202,7 +202,7 @@ public class TestProfileSeeder
             ),
             new Experience(
                 userId: user.Id,
-                companyName: "Creative Solutions Agency",
+                company: "Creative Solutions Agency",
                 title: "Marketing Associate",
                 startDate: new DateTime(2014, 3, 1, 0, 0, 0, DateTimeKind.Utc),
                 endDate: new DateTime(2016, 6, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -293,7 +293,7 @@ public class TestProfileSeeder
                 title: "Senior Financial Consultant",
                 description: "Providing comprehensive financial planning services to high net worth individuals.",
                 userId: user.Id,
-                companyName: "Wealth Advisors Group",
+                company: "Wealth Advisors Group",
                 startDate: new DateTime(2015, 8, 1, 0, 0, 0, DateTimeKind.Utc),
                 endDate: null
             ),
@@ -301,7 +301,7 @@ public class TestProfileSeeder
                 title: "Financial Advisor",
                 description: "Managed investment portfolios for clients with assets exceeding $10M.",
                 userId: user.Id,
-                companyName: "Investment Partners LLC",
+                company: "Investment Partners LLC",
                 startDate: new DateTime(2010, 3, 15, 0, 0, 0, DateTimeKind.Utc),
                 endDate: new DateTime(2015, 7, 15, 0, 0, 0, DateTimeKind.Utc)
             ),
@@ -309,7 +309,7 @@ public class TestProfileSeeder
                 title: "Junior Financial Analyst",
                 description: "Analyzed investment opportunities and market trends for the wealth management division.",
                 userId: user.Id,
-                companyName: "Global Bank",
+                company: "Global Bank",
                 startDate: new DateTime(2007, 6, 1, 0, 0, 0, DateTimeKind.Utc),
                 endDate: new DateTime(2010, 3, 1, 0, 0, 0, DateTimeKind.Utc)
             )

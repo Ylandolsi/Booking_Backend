@@ -27,6 +27,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web.Api", "src\Web.Api\Web.Api.csproj", "{86506D03-3746-41E7-A645-97D3633981DB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1EB88D85-BE1E-46DE-99A2-2F02363060AF}"
+	ProjectSection(SolutionItems) = preProject
+		tests\start.sh = tests\start.sh
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArchitectureTests", "tests\ArchitectureTests\ArchitectureTests.csproj", "{8D8E2A8A-D3FE-4230-BEF7-C427D6BD87DA}"
 EndProject
