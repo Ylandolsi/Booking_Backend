@@ -19,7 +19,7 @@ internal sealed class UpdateUserExpertise : IEndpoint
             ICommandHandler<UpdateUserExpertiseCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            int   userId = userContext.UserId;
+            int userId = userContext.UserId;
             
 
             var command = new UpdateUserExpertiseCommand(userId, request.ExpertiseIds);
